@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r1"
+PR_append = "+r2"
 
 IMAGE_FEATURES += " package-management "
 
