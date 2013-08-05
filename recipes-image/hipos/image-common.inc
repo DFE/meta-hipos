@@ -31,6 +31,7 @@ IMAGE_INSTALL += "  \
   mc                \
   nano              \
   screen            \
+  file              \
 "
 
 # system / plumbing level tools
