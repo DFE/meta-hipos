@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r3"
+PR_append = "+r4"
 
 IMAGE_FEATURES += " package-management "
 
@@ -17,6 +17,7 @@ IMAGE_INSTALL += "          \
   hipos-device-info         \
   hipos-network-setup       \
   hipos-time                \
+  python-netserver          \
 "
 
 # profiling
