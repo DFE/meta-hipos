@@ -6,5 +6,5 @@ PR_append = "+r1"
 FILES_${PN} += "/usr/sbin/connmanctl "
 
 do_install_append () {
-  install -m 0755 ${WORKDIR}/git/client/connmanctl ${D}${sbindir}
+  install -m 0755 ${WORKDIR}/connman-1.17/client/connmanctl ${D}${sbindir}
 }

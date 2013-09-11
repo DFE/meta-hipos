@@ -2,7 +2,7 @@
 
 inherit systemd
 
-PR_append = "+r3"
+PR_append = "+r4"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
@@ -30,9 +30,8 @@ SYSTEMD_SERVICE = "samba.service netbios.service "
 do_install_append () {
   install -d ${D}${base_libdir}/systemd/system
 
-  for service in $SYSTEMD_SERVICE; do
-    install -m 0644 ${WORKDIR}/$service ${D}${base_libdir}/systemd/system/
-  done
+  install -m 0644 ${WORKDIR}/samba.service ${D}${base_libdir}/systemd/system/
+  install -m 0644 ${WORKDIR}/netbios.service ${D}${base_libdir}/systemd/system/
 
 }
 

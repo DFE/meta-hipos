@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r4"
+PR_append = "+r5"
 
 IMAGE_FEATURES += " package-management "
 
@@ -53,10 +53,13 @@ IMAGE_INSTALL += "      \
     nfs-utils-doc       \
     nfs-utils-stats     \
     rpcbind             \
-    rpcbind-systemd     \
     quota               \
     quota-systemd       \
 "
+
+
+#    rpcbind-systemd     \
+#
 
 # smb support
 IMAGE_INSTALL += " samba-systemd "
