@@ -66,7 +66,7 @@ mkfs.ext4 -L "rootfs" ${DRIVE}2
 mkdir -p tmp_mnt
 mount ${1}2 tmp_mnt
 pushd tmp_mnt > /dev/null
-tar xjf ../$2-hipos-kirkwood.tar.bz2
+tar xjf ../$2-*.tar.bz2
 popd > /dev/null
 umount tmp_mnt
 rm -rf tmp_mnt
