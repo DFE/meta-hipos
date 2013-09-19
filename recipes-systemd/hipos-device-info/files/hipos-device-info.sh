@@ -46,10 +46,9 @@ fetch_info()
 		loggerANDstdoutError "No device identity info file available in BCTRL, drbcc resp: \'$resp\'"
 		if [ ! -e ${DEVID_FILE} ]; then
 			# create the minimal file to avoid later problems
-			echo "device=hipos" > ${DEVID_FILE}
+			touch ${DEVID_FILE}
 		fi
 	else
-		echo "device=hipos" >> ${TMP_DEVID_FILE}
 		if [ -e ${DEVID_FILE} ]; then 
 			. ${TMP_DEVID_FILE}
 			if ! serial_valid "${serial}"; then
