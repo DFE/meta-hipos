@@ -1,10 +1,8 @@
 DESCRIPTION = "make bootable usb stick for HIPOS"
 
-COMPATIBLE_MACHINE = "hipos-kirkwood"
-
 LICENSE = "MIT"
 
-PR = "r3"
+PR = "r4"
 
 PACKAGES = " ${PN} "
 
