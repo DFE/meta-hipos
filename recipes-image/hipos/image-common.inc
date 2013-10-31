@@ -10,7 +10,6 @@ IMAGE_INSTALL += "          \
   kernel-modules            \
   htop                      \
   bash                      \
-  bootconfig                \
   healthy                   \
   libdrbcc                  \
   u-boot-fw-utils           \
@@ -70,15 +69,6 @@ IMAGE_INSTALL += "         \
     lighttpd-module-webdav \
     lighttpd-module-alias  \
 "
-
-# iscsi support
-#IMAGE_INSTALL += "              \
-#    iscsi-target                \
-#    iscsi-target-systemd        \
-#    open-iscsi-kernel           \
-#    open-iscsi-user             \
-#    open-iscsi-user-systemd     \
-#"
 
 # file system tools
 IMAGE_INSTALL += "      \
