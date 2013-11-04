@@ -10,7 +10,6 @@ IMAGE_INSTALL += "          \
   kernel-modules            \
   htop                      \
   bash                      \
-  healthy                   \
   libdrbcc                  \
   u-boot-fw-utils           \
   hipos-device-info         \
