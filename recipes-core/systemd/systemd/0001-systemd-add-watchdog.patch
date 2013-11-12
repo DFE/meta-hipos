@@ -1,0 +1,30 @@
+From 49420d08cb69a2c8226b6f306a89609f795d7c4c Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Tue, 12 Nov 2013 16:59:30 +0100
+Subject: [PATCH] systemd: add watchdog
+
+now watchdog is used
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ src/core/system.conf | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/core/system.conf b/src/core/system.conf
+index f2817bc..7c798f7 100644
+--- a/src/core/system.conf
++++ b/src/core/system.conf
+@@ -21,8 +21,8 @@
+ #DefaultStandardOutput=journal
+ #DefaultStandardError=inherit
+ #JoinControllers=cpu,cpuacct,cpuset net_cls,net_prio
+-#RuntimeWatchdogSec=0
+-#ShutdownWatchdogSec=10min
++RuntimeWatchdogSec=10
++ShutdownWatchdogSec=60
+ #CapabilityBoundingSet=
+ #TimerSlackNSec=
+ #DefaultEnvironment=
+-- 
+1.8.1.4
+
