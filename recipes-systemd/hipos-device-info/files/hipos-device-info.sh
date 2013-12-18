@@ -13,7 +13,7 @@
 #set -x
 
 NAME="$0"
-BCTRL_DEV="/dev/serial/by-path/platform-orion-ehci.0-usb-0:1.4:1.1-port0"
+BCTRL_DEV="/dev/serial/by-path/platform-orion-ehci.0-usb-0:1.4:1.0-port0"
 DRBCC_BIN="/usr/bin/drbcc"
 DEVID_FILE="/etc/hipos/hipos-devid"
 TMP_DEVID_FILE="/tmp/hipos-devid"

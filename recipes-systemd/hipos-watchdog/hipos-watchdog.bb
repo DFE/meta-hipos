@@ -9,11 +9,12 @@ inherit systemd
 
 RDEPENDS_${PN} = " libdrbcc "
 
-PR = "r5"
+PR = "r6"
 
 FILESEXTRAPATHS := "${THISDIR}/files:"
 
-SRC_URI = " file://hipos-watchdog.service \
+SRC_URI = " \
+        file://hipos-watchdog.service \
 	    file://COPYING "
 
 # systemd
