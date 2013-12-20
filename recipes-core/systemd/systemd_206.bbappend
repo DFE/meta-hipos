@@ -1,5 +1,6 @@
 # do not generate rc-links
-PR_append = "+r6"
+
+PRINC := "${@int(PRINC) + 6}"
 DEPENDS += " grep "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
