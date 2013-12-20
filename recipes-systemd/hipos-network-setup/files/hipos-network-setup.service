@@ -2,8 +2,8 @@
 Description=hipos network setup service
 Requires=network.target
 After=network.target
-Requires=dev-serial-by\x2dpath-platform\x2dorion\x2dehci.0\x2dusb\x2d0:1.4:1.0\x2dport0.device
-After=dev-serial-by\x2dpath-platform\x2dorion\x2dehci.0\x2dusb\x2d0:1.4:1.0\x2dport0.device
+Requires=dev-ttydrbcc.device
+After=dev-ttydrbcc.device
 Before=hipos-time.service
 
 [Service]
