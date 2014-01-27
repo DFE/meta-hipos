@@ -1,5 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-PR_append = "+r3"
+
+PRINC := "${@int(PRINC) + 1}"
+
 #replaces files/lighttpd.conf automatically
 
 FILES_${PN} +=  "   ${sysconfdir}/default/lighttpd \

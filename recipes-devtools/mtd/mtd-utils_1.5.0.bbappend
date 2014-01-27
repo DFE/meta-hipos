@@ -1,4 +1,4 @@
-PR_append = "+r1"
+PRINC := "${@int(PRINC) + 1}"
 
 #
 # MTD dev package

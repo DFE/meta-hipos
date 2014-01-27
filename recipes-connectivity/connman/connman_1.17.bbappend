@@ -1,7 +1,7 @@
 # bbapped to openembedded-core/meta/recipes-connectivity/connman/connman_1.12.bb
 # install connmanctl
 
-PR_append = "+r1"
+PRINC := "${@int(PRINC) + 1}"
 
 FILES_${PN} += "/usr/sbin/connmanctl "
 
