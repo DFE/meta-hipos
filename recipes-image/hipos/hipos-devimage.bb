@@ -1,6 +1,6 @@
 require hipos-image.inc
 
-PR_append = ".2"
+PR_append = ".3"
 
 export IMAGE_BASENAME = "hipos-devimage"
 
@@ -30,8 +30,7 @@ IMAGE_INSTALL += " \
   live555 \
   opencv \
 "
-IMAGE_INSTALL_himx += " \
-  base-passwd \
+IMAGE_INSTALL_append_himx += " \
   gst-fsl-plugin \
   fsl-alsa-plugins \
 "
