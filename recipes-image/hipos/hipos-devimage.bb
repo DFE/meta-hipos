@@ -24,12 +24,14 @@ IMAGE_INSTALL += " \
 # multimedia
 IMAGE_INSTALL += " \
   gstreamer \
-  gst-plugins-base \
-  gst-plugins-good \
-  gst-plugins-ugly \
+  gst-plugins-base-meta \
+  gst-plugins-good-meta \
+  gst-plugins-ugly-meta \
   live555 \
   opencv \
+  i2c-tools \
 "
+
 IMAGE_INSTALL_append_himx += " \
   gst-fsl-plugin \
   fsl-alsa-plugins \
