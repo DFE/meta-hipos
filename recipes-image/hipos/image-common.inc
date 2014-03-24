@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r5"
+PR_append = "+r6"
 
 IMAGE_FEATURES += " package-management "
 
@@ -41,6 +41,7 @@ IMAGE_INSTALL += "  \
     pciutils        \
     tcpdump         \
     iperf           \
+    procps          \
 "
 
 # nfs support
