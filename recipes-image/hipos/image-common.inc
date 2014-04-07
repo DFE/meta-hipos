@@ -16,6 +16,7 @@ IMAGE_INSTALL += "          \
   hipos-network-setup       \
   hipos-time                \
   python-netserver          \
+  udev-extraconf            \
 "
 
 # profiling
