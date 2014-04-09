@@ -6,10 +6,10 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd
 
-RDEPENDS_${PN} = " libdrbcc \
+RDEPENDS_${PN} = " drbcc \
                    gawk "
 
-PR = "r11"
+PR = "r12"
 
 SRC_URI = " file://hipos-time.service \
             file://set-time.sh \

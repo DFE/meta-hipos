@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r6"
+PR_append = "+r7"
 
 IMAGE_FEATURES += " package-management "
 
@@ -11,6 +11,7 @@ IMAGE_INSTALL += "          \
   htop                      \
   bash                      \
   libdrbcc                  \
+  drbcc                     \
   u-boot-fw-utils           \
   hipos-device-info         \
   hipos-network-setup       \
