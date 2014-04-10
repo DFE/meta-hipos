@@ -24,4 +24,7 @@ SYSTEMD_SERVICE_${PN} = "hipos-time.service"
 do_install () {
   install -d ${D}${base_libdir}/systemd/system
   install -m 0644 ${WORKDIR}/hipos-time.service ${D}${base_libdir}/systemd/system/
+
+  install -d ${D}${sysconfdir}/hipos
+  install -m 0755 ${WORKDIR}/set-time.sh ${D}${sysconfdir}/hipos
 }
