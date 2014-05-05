@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r8"
+PR_append = "+r10"
 
 IMAGE_FEATURES += " package-management "
 
@@ -81,12 +81,4 @@ IMAGE_INSTALL += "      \
     hdparm		\
     smartmontools	\
 "
-
-ROOTFS_POSTPROCESS_COMMAND += "\
-    echo "tmpfs                /var/cache           tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; \
-    echo "tmpfs                /var/run             tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; \
-    echo "tmpfs                /var/log             tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; \
-    echo "tmpfs                /var/lock            tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; \
-    echo "tmpfs                /var/tmp             tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; \
-    echo "tmpfs                /var/volatile        tmpfs      defaults              0  1" >> ${IMAGE_ROOTFS}/etc/fstab; "
 
