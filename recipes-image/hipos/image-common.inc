@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r11"
+PR_append = "+r8"
 
 IMAGE_FEATURES += " package-management "
 
@@ -17,6 +17,7 @@ IMAGE_INSTALL += "          \
   hipos-network-setup       \
   hipos-time                \
   python-netserver          \
+  python-subprocess         \
   udev-extraconf            \
 "
 

@@ -1,8 +1,8 @@
-# bbapped to meta-openembedded/meta-oe/recipes-connectivity/samba/samba_3.5.6.bb
+# bbapped to meta-openembedded/meta-oe/recipes-connectivity/samba/samba_3.6.8.bb
 
 inherit systemd
 
-PRINC := "${@int(PRINC) + 1}"
+PRINC := "${@int(PRINC) + 2}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
@@ -35,24 +35,4 @@ do_install_append () {
 
 }
 
-pkg_postinst_${PN} () {
-
-if grep "\[pub\]" /etc/samba/smb.conf 2>&1 >/dev/null; then
-exit 0
-fi
-
-mkdir -p /mnt/pub
-chmod 777 /mnt/pub
-
-echo "
-
-[pub]
-comment = HIPOS public share
-path = /mnt/pub
-public = yes
-writable = yes
-
-" >>/etc/samba/smb.conf
-
-}
 
