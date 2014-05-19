@@ -25,6 +25,7 @@ IMAGE_INSTALL += " \
   bonnie++ \
   tiobench \
   imx-test \
+  sntp \
 "
 
 # multimedia
