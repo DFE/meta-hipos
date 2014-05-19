@@ -52,7 +52,7 @@ IMAGE_INSTALL += " \
   opencv-dev \
 "
 
-IMAGE_INSTALL_append_himx += " \
+IMAGE_INSTALL_append_himx0280 += " \
   gst-fsl-plugin \
   fsl-alsa-plugins \
 "
