@@ -8,7 +8,7 @@ inherit systemd
 
 RDEPENDS_${PN} = " libdrbcc "
 
-PR = "r13"
+PR = "r14"
 
 SRC_URI = " file://hipos-device-info.service  \
             file://hipos-device-info.sh \

@@ -17,6 +17,9 @@ BCTRL_DEV="/dev/ttydrbcc"
 DRBCC_BIN="/usr/bin/drbcc"
 DEVID_FILE="/etc/hipos/hipos-devid"
 TMP_DEVID_FILE="/tmp/hipos-devid"
+# existence of this is checked within systemd scripts to start services 
+# depending on device type e.g. hipos-device.nas or hipos-device.recorder
+DEVICE_FILE_START="/etc/hipos/hipos-device"
 
 loggerANDstdoutError()
 {
@@ -51,6 +54,16 @@ fetch_info()
 	else
 		if [ -e ${DEVID_FILE} ]; then 
 			. ${TMP_DEVID_FILE}
+			device_file=${DEVICE_FILE_START}.${device}
+			if [ ! -e "${device_file}" ]; then
+				touch "${device_file}"
+			fi
+			for iter_file in "${DEVICE_FILE_START}".* 
+			do
+				if [ "${device_file}" != "${iter_file}" ]; then
+					rm "${iter_file}"
+				fi
+			done
 			if ! serial_valid "${serial}"; then
 				test -e $DEVID_FILE  && . $DEVID_FILE 
 				if serial_valid "${serial}"; then

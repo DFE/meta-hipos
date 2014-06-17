@@ -2,7 +2,7 @@
 
 inherit systemd
 
-PRINC := "${@int(PRINC) + 2}"
+PRINC := "${@int(PRINC) + 4}"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
