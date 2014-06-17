@@ -3,7 +3,7 @@ PRINC := "${@int(PRINC) + 1}"
 do_compile() {
     mkdir -p ${S}/${sysconfdir}/opkg
 
-    URI="http://package-feed.dresearch-fe.de/hipos/yocto-1.5-dora"
+    URI="http://package-feed.dresearch-fe.de/hipos/yocto-1.6-daisy"
 
     for feed in all ${MACHINE} ${FEED_ARCH} ; do
         echo "src/gz ${feed} ${URI}/${feed}" > ${S}/${sysconfdir}/opkg/${feed}-feed.conf
