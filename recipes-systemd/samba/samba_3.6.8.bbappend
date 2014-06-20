@@ -2,8 +2,6 @@
 
 inherit systemd
 
-PRINC := "${@int(PRINC) + 4}"
-
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI_append = " file://samba.service \

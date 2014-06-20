@@ -1,5 +1,3 @@
-PRINC := "${@int(PRINC) + 1}"
-
 #
 # MTD dev package
 #

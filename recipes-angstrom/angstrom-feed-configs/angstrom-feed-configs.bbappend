@@ -1,5 +1,3 @@
-PRINC := "${@int(PRINC) + 1}"
-
 do_compile() {
     mkdir -p ${S}/${sysconfdir}/opkg
 

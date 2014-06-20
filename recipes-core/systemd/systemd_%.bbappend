@@ -1,6 +1,5 @@
 # do not generate rc-links
 
-PRINC := "${@int(PRINC) + 7}"
 DEPENDS += " grep "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"

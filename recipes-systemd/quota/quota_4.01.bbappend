@@ -2,8 +2,6 @@
 # do not generate rc-links
 inherit systemd
 
-PRINC := "${@int(PRINC) + 1}"
-
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI_append = " file://rpc.rquotad.service   \

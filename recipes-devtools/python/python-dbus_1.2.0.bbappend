@@ -6,5 +6,3 @@
 # disable API doc generation completely.
 
 EXTRA_OECONF += " --disable-api-docs "
-
-PRINC := "${@int(PRINC) + 1}"
