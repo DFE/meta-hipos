@@ -7,7 +7,7 @@ Before=hipos-network-setup.service
 [Service]
 Type=oneshot
 ExecStart=/etc/hipos/hipos-device-info.sh
-RemainAfterExit=no
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
