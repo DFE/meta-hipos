@@ -1,0 +1,11 @@
+[Unit]
+Description=hipos watchdog timer
+Requires=dev-ttydrbcc.device
+After=dev-ttydrbcc.device
+
+[Timer]
+OnUnitInactiveSec=120s
+Unit=hipos-watchdog.service
+
+[Install]
+WantedBy=multi-user.target

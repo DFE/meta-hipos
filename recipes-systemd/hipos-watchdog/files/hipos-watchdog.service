@@ -10,8 +10,6 @@ Type=oneshot
 Environment="DRBCC_CMD=heartbeat 400"
 ExecStart=/usr/bin/drbcc --dev /dev/ttydrbcc --cmd=${DRBCC_CMD}
 RemainAfterExit=no
-RestartSec=120
-Restart=always
 
 [Install]
 WantedBy=multi-user.target
