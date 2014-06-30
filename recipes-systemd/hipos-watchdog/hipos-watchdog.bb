@@ -18,7 +18,7 @@ SRC_URI = " \
 FILES_${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/systemd "
 
-SYSTEMD_SERVICE_${PN} = "hipos-watchdog.service "hipos-watchdog.timer"
+SYSTEMD_SERVICE_${PN} = "hipos-watchdog.service hipos-watchdog.timer"
 
 do_install () {
   install -d ${D}${base_libdir}/systemd/system
