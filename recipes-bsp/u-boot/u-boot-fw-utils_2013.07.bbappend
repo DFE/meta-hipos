@@ -5,3 +5,14 @@ SRC_URI_himx0280 =  "git://github.com/DFE/u-boot.git;protocol=http;branch=master
 SRC_URI_himx0280[md5sum] = "8c5e4dc994b7c65c8d4dcc365f8ee8a6"
 SRC_URI_himx0280[sha256sum] = "e93e2a2890188d6d8153ec4f16b80ee85d5e255485f46205e623de858cbf0ad4"
 SRCREV_himx0280 = "ea26efa27897ba6e238fb823a6d5d09433e07da6"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+SRC_URI_append_hikirk +=  " file://fw_env.config \
+	      file://hikirk-board-support.patch \
+	    "
+
+do_install_append_hikirk () {
+	install -d ${D}/etc
+	install -m 755 ${WORKDIR}/fw_env.config ${D}/etc/fw_env.config
+}
