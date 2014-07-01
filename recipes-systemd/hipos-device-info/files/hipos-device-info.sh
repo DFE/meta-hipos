@@ -15,7 +15,7 @@
 NAME="$0"
 BCTRL_DEV="/dev/ttydrbcc"
 DRBCC_BIN="/usr/bin/drbcc"
-DEVID_FILE="/etc/hipos/hipos-devid"
+DEVID_FILE="/etc/hydraip-devid"
 TMP_DEVID_FILE="/tmp/hipos-devid"
 HOSTNAME_FILE="/etc/hostname"
 # existence of this is checked within systemd scripts to start services 
@@ -128,5 +128,7 @@ fetch_info
 update_device_type
 update_hostname
 
-# check the link in /etc used by drunits
-if [ ! -f /etc/hydraip-devid ]; then ln -s $DEVID_FILE /etc/hydraip-devid; fi
+# 'real' file is /etc/hydraip-devid. if this isn't the case yet, make it so
+if [ -h ${DEVID_FILE} ]; then mv /etc/hipos/hipos-devid ${DEVID_FILE}; fi
+# check the link in /etc/hipos
+if [ ! -f /etc/hipos/hipos-devid ]; then ln -s ${DEVID_FILE} /etc/hipos/hipos-devid; fi
