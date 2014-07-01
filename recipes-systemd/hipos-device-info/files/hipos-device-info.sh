@@ -44,60 +44,89 @@ serial_valid()
 
 fetch_info()
 {
+	local ret=0
 	# fetch device info file from BCTRL
 	local resp=`${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1`
 	if [ ! -f ${TMP_DEVID_FILE} ]; then 
 		loggerANDstdoutError "No device identity info file available in BCTRL, drbcc resp: \'$resp\'"
+		ret=1
 		if [ ! -e ${DEVID_FILE} ]; then
 			# create the minimal file to avoid later problems
 			touch ${DEVID_FILE}
 		fi
 	else
+		. ${TMP_DEVID_FILE}
 		if [ -e ${DEVID_FILE} ]; then 
-			. ${TMP_DEVID_FILE}
-			device_file=${DEVICE_FILE_START}.${device}
-			if [ ! -e "${device_file}" ]; then
-				touch "${device_file}"
-			fi
-			for iter_file in "${DEVICE_FILE_START}".* 
-			do
-				if [ "${device_file}" != "${iter_file}" ]; then
-					rm "${iter_file}"
-				fi
-			done
 			if ! serial_valid "${serial}"; then
 				test -e $DEVID_FILE  && . $DEVID_FILE 
 				if serial_valid "${serial}"; then
 					loggerANDstdoutError "serial number from info file available in BCTRL is invalid (old is ${serial}, drbcc resp: \'${resp}\')"
-					return 1
+					ret=1
 				fi
 			fi
-			# move only if different to avoid massive flash writing 
-			diff -abq ${TMP_DEVID_FILE} ${DEVID_FILE} > /dev/null || mv -f ${TMP_DEVID_FILE} ${DEVID_FILE}
-		else    
+			if [ ${ret} -eq 0 ]; then
+				# move only if different to avoid massive flash writing 
+				diff -abq ${TMP_DEVID_FILE} ${DEVID_FILE} > /dev/null || mv -f ${TMP_DEVID_FILE} ${DEVID_FILE}
+			fi
+		else
+			if ! serial_valid "${serial}"; then
+				loggerANDstdoutError "serial number from info file available in BCTRL is invalid, but we will use it anyway (for lack of alternatives), drbcc resp: \'${resp}\')"
+				ret=1
+			fi
 			mv -f ${TMP_DEVID_FILE} ${DEVID_FILE}
 		fi      
 	fi
+	
+	return ${ret}
+}
+
+update_device_type()
+{
+	local ret=0
+	
+	if [ -z "${device}" ]; then
+		loggerANDstdoutError "no device set in device info file, using 'unknown' instead"
+		device=unknown
+		ret=1
+	fi
+	local device_file=${DEVICE_FILE_START}.${device}
+	if [ ! -e "${device_file}" ]; then
+		touch "${device_file}"
+	fi
+	local iter_file
+	for iter_file in "${DEVICE_FILE_START}".* 
+	do
+		if [ "${device_file}" != "${iter_file}" ]; then
+			rm "${iter_file}"
+		fi
+	done
+	
+	return ${ret}
 }
 
 update_hostname()
 {
-	local serial=`grep "serial=" ${DEVID_FILE} | cut -f2 -d=`
+	local ret=0
+	
 	if serial_valid "${serial}" ; then
-		if [ ! -f "${HOSTNAME_FILE}" -o "`cat ${HOSTNAME_FILE} 2> /dev/null`" == "hikirk" ]; then
-			# update only if hostname file does not exists or contains default "hikirk"
+		if [[ ! -f "${HOSTNAME_FILE}" || "`cat ${HOSTNAME_FILE}`" == "hikirk" ]]; then
+			# update only if hostname file does not exist or contains default "hikirk"
 			echo ${serial} > ${HOSTNAME_FILE}
 		fi
 	else
 		loggerANDstdoutError "No valid serial number found -> cannot update hostname"
+		ret=1
 	fi
+	
+	return ${ret}
 }
 
 # access the actual device config
 # and actualize...
 fetch_info
+. ${DEVID_FILE}
+update_device_type
 update_hostname
 
 # check the link in /etc used by drunits
 if [ ! -f /etc/hydraip-devid ]; then ln -s $DEVID_FILE /etc/hydraip-devid; fi
-
