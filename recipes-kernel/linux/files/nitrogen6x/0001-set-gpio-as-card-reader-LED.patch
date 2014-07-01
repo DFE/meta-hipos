@@ -1,0 +1,51 @@
+From 1987f411dac4cfcdf0f99bff1153df637f13813c Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <m.schuknecht@dresearch.de>
+Date: Tue, 5 Nov 2013 10:47:40 +0100
+Subject: [PATCH] set gpio as card reader LED
+
+Set GPIO2_IO03 as output. This is the ANDROID SEARCH button and is used as
+card reader LED.
+
+Signed-off-by: Mario Schuknecht <m.schuknecht@dresearch.de>
+---
+ arch/arm/mach-mx6/board-mx6_nitrogen6x.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-mx6/board-mx6_nitrogen6x.c b/arch/arm/mach-mx6/board-mx6_nitrogen6x.c
+index 5e47933..1cc8c10 100644
+--- a/arch/arm/mach-mx6/board-mx6_nitrogen6x.c
++++ b/arch/arm/mach-mx6/board-mx6_nitrogen6x.c
+@@ -93,7 +93,7 @@
+ #define GP_CAN1_ERR		IMX_GPIO_NR(1, 7)
+ #define GP_MENU_KEY		IMX_GPIO_NR(2, 1)
+ #define GP_BACK_KEY		IMX_GPIO_NR(2, 2)
+-#define GP_ONOFF_KEY		IMX_GPIO_NR(2, 3)
++#define GP_SEARCH_KEY		IMX_GPIO_NR(2, 3)
+ #define GP_HOME_KEY		IMX_GPIO_NR(2, 4)
+ #define GP_VOL_UP_KEY	IMX_GPIO_NR(7, 13)
+ #define GP_VOL_DOWN_KEY	IMX_GPIO_NR(4, 5)
+@@ -955,7 +955,6 @@ static const struct pm_platform_data pm_data __initconst = {
+ }
+ 
+ static struct gpio_keys_button buttons[] = {
+-	GPIO_BUTTON(GP_ONOFF_KEY, KEY_POWER, 1, "key-power", 1),
+ 	GPIO_BUTTON(GP_MENU_KEY, KEY_MENU, 1, "key-memu", 0),
+ 	GPIO_BUTTON(GP_HOME_KEY, KEY_HOME, 1, "key-home", 0),
+ 	GPIO_BUTTON(GP_BACK_KEY, KEY_BACK, 1, "key-back", 0),
+@@ -981,6 +980,13 @@ static struct platform_device button_device = {
+ static void __init add_device_buttons(void)
+ {
+ 	platform_device_register(&button_device);
++	if (0 != gpio_request(GP_SEARCH_KEY, "Card Reader LED")) {
++		printk(KERN_WARNING "gpio_request 'Card Reader LED' failed\n");
++	} else if (0 != gpio_direction_output(GP_SEARCH_KEY, 0)) {
++		printk(KERN_WARNING "gpio_direction_output 'Card Reader LED' failed\n");
++	} else if (0 != gpio_export(GP_SEARCH_KEY, 0)) {
++		printk(KERN_WARNING "gpio_export 'Card Reader LED' failed\n");
++	}
+ }
+ #else
+ static void __init add_device_buttons(void)
+-- 
+1.8.1.4
+
