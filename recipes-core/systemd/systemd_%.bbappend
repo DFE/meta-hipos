@@ -1,5 +1,3 @@
-# do not generate rc-links
-
 DEPENDS += " grep "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
@@ -11,6 +9,10 @@ SRC_URI_append = " \
 
 SRC_URI_append_nitrogen6x = " \
                file://0001-systemd-add-watchdog.patch \
+"
+
+SRC_URI_append_hikirk = " \
+               file://hipos.rules \
 "
 
 # tfm:_temporary workaround for libkmod (package kmod, openembedded-core) putting its .pc file to /lib/pkgconfig
@@ -25,4 +27,9 @@ do_install_append() {
 		echo "RestartSec= 1" >>${D}/lib/systemd/system/systemd-journald.service
 		echo "Restart= always" >>${D}/lib/systemd/system/systemd-journald.service
 	fi
+}
+
+# install hipos.rules for udev
+do_install_append_hikirk () {
+    install -m 0644 ${WORKDIR}/hipos.rules ${D}${sysconfdir}/udev/rules.d/hipos.rules
 }

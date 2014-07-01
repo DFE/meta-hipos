@@ -1,0 +1,41 @@
+From 1a0fa214127609b5b6817b3a2d8207ebbdac9cac Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Thu, 16 Jan 2014 09:45:03 +0100
+Subject: [PATCH] live555: remove SO_REUSEPORT
+
+remove SO_REUSEPORT from GroupsockHelper
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ groupsock/GroupsockHelper.cpp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/groupsock/GroupsockHelper.cpp b/groupsock/GroupsockHelper.cpp
+index 220e23f..3d6083b 100644
+--- a/groupsock/GroupsockHelper.cpp
++++ b/groupsock/GroupsockHelper.cpp
+@@ -68,8 +68,8 @@ int setupDatagramSocket(UsageEnvironment& env, Port port) {
+     return -1;
+   }
+ 
+-#if defined(__WIN32__) || defined(_WIN32)
+-  // Windoze doesn't properly handle SO_REUSEPORT or IP_MULTICAST_LOOP
++#if defined(__WIN32__) || defined(_WIN32) || 1
++  // Windoze and some Linuxes doesn't properly handle SO_REUSEPORT or IP_MULTICAST_LOOP
+ #else
+ #ifdef SO_REUSEPORT
+   if (setsockopt(newSocket, SOL_SOCKET, SO_REUSEPORT,
+@@ -178,8 +178,8 @@ int setupStreamSocket(UsageEnvironment& env,
+   // normally don't set them.  However, if you really want to do this
+   // #define REUSE_FOR_TCP
+ #ifdef REUSE_FOR_TCP
+-#if defined(__WIN32__) || defined(_WIN32)
+-  // Windoze doesn't properly handle SO_REUSEPORT
++#if defined(__WIN32__) || defined(_WIN32) || 1
++  // Windoze and some Linuxes doesn't properly handle SO_REUSEPORT
+ #else
+ #ifdef SO_REUSEPORT
+   if (setsockopt(newSocket, SOL_SOCKET, SO_REUSEPORT,
+-- 
+1.8.3.1
+
