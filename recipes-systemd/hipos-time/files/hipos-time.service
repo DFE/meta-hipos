@@ -2,12 +2,10 @@
 Description=hipos time service
 Requires=dev-ttydrbcc.device
 After=dev-ttydrbcc.device
-Before=hipos-watchdog.service
 
 [Service]
 Type=oneshot
 ExecStart=/etc/hipos/set-time.sh
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

@@ -2,12 +2,11 @@
 Description=hipos device info
 Requires=dev-ttydrbcc.device
 After=dev-ttydrbcc.device
-Before=hipos-network-setup.service
+After=hipos-time.service
 
 [Service]
 Type=oneshot
 ExecStart=/etc/hipos/hipos-device-info.sh
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

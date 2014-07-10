@@ -8,7 +8,7 @@ inherit systemd
 
 RDEPENDS_${PN} = " drbcc "
 
-PR = "r10"
+PR = "r11"
 
 SRC_URI = " \
         file://hipos-watchdog.service \

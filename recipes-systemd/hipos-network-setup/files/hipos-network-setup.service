@@ -2,14 +2,12 @@
 Description=hipos network setup service
 Requires=network.target
 After=network.target
-Requires=dev-ttydrbcc.device
-After=dev-ttydrbcc.device
-Before=hipos-time.service
+Requires=hipos-device-info.service
+After=hipos-device-info.service
 
 [Service]
 Type=oneshot
 ExecStart=/etc/hipos/hipos-network-setup.sh
-RemainAfterExit=no
 
 [Install]
 WantedBy=multi-user.target

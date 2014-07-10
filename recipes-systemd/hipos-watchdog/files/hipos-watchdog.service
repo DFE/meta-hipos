@@ -2,6 +2,7 @@
 Description=hipos watchdog service
 Requires=dev-ttydrbcc.device
 After=dev-ttydrbcc.device
+After=hipos-device-info.service
 
 [Service]
 Type=oneshot
@@ -9,7 +10,6 @@ Type=oneshot
 # simple use of "" within the ExecStart line did not work properly
 Environment="DRBCC_CMD=heartbeat 400"
 ExecStart=/usr/bin/drbcc --dev /dev/ttydrbcc --cmd=${DRBCC_CMD}
-RemainAfterExit=no
 
 [Install]
 WantedBy=multi-user.target

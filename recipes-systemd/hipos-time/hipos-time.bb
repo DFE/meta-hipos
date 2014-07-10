@@ -9,7 +9,7 @@ inherit systemd
 RDEPENDS_${PN} = " drbcc \
                    gawk "
 
-PR = "r12"
+PR = "r13"
 
 SRC_URI = " file://hipos-time.service \
             file://set-time.sh \

@@ -8,7 +8,7 @@ inherit systemd
 
 RDEPENDS_${PN} = " ethtool "
 
-PR = "r12"
+PR = "r13"
 
 SRC_URI = " file://hipos-network-setup.service  \
             file://hipos-network-setup.sh \
