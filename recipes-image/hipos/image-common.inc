@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r11"
+PR_append = "+r12"
 
 IMAGE_FEATURES += " package-management "
 
@@ -13,13 +13,16 @@ IMAGE_INSTALL += "          \
   bash                      \
   libdrbcc                  \
   drbcc                     \
-  u-boot-fw-utils           \
   hipos-device-info         \
   hipos-network-setup       \
   hipos-time                \
   python-netserver          \
   python-subprocess         \
   udev-extraconf            \
+"
+
+IMAGE_INSTALL_hikirk += "   \
+  u-boot-fw-utils           \
 "
 
 # profiling
