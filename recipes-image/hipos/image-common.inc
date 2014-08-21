@@ -21,7 +21,7 @@ IMAGE_INSTALL += "          \
   udev-extraconf            \
 "
 
-IMAGE_INSTALL_hikirk += "   \
+IMAGE_INSTALL_append_hikirk += "   \
   u-boot-fw-utils           \
 "
 
