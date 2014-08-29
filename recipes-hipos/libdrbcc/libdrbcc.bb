@@ -1,12 +1,12 @@
 DESCRIPTION = "HIPOS Boardcontroller communication tool"
 SECTION = "libs"
-DEPENDS = "readline"
+DEPENDS = "readline lockdev"
 
 LICENSE = "GPLv3 LGPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
 		    file://COPYING.LIB;md5=e6a600fd5e1d9cbde2d983680233ad02 "
 
-PR = "r2"
+PR = "r3"
 
 S = "${WORKDIR}/git"
 
