@@ -5,11 +5,15 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI_append_himx0280 =  " \
 	file://defconfig \
+	file://imx6qdl-himx0280.dtsi \
+	file://imx6q-himx0280.dts \
 	file://0001-add-himx0280-board.patch \
 "
 
 do_configure_prepend_himx0280() {
 	cp ${WORKDIR}/defconfig ${B}/arch/arm/configs/himx0280_defconfig
+	cp ${WORKDIR}/imx6qdl-himx0280.dtsi ${B}/arch/arm/boot/dts/imx6qdl-himx0280.dtsi
+	cp ${WORKDIR}/imx6q-himx0280.dts ${B}/arch/arm/boot/dts/imx6q-himx0280.dts
 }
 
 do_configure_prepend_nitrogen6x() {
