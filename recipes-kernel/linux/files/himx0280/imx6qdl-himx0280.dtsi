@@ -172,8 +172,20 @@
 		DOVDD-supply = <&reg_1p8v>;
 		AVDD-supply = <&reg_2p5v>;
 		DVDD-supply = <&reg_1p8v>;
-		pwn-gpios = <&gpio6 9 1>;
-		rst-gpios = <&gpio2 5 0>;
+
+		/* Power down ist nicht zur Prozessorplatine verdrahtet,
+		 * könnte an CSI0_DAT11 / GPIO5_IO29 (ALT5) ausgegeben werden (ist nicht benutzt).
+		 */
+		pwn-gpios = <&gpio4 29 1>; 
+
+		/* GPIO 158 = 4 * 32 + 30 aka CSI0_DAT12 / GPIO5_IO30 (ALT5) */
+		rst-gpios = <&gpio4 30 0>; 
+		
+		/* 
+		 * Außerdem gibt es noch einen Trigger Input,
+		 * der an CSI0_DAT13 GPIO5_IO31 (ALT5) liegt.
+		*/
+		
 		ipu_id = <0>;
 		csi_id = <1>;
 		mclk = <24000000>;
