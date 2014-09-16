@@ -15,6 +15,7 @@ SRC_URI_append_hikirk =  " \
 
 SRC_URI +=  " \
     file://PLX-Tech-3380-driver.patch \
+    file://Add-Telit-modem-support.patch \
     git://github.com/DFE/darmok.git;destsuffix=darmok;type=not-kmeta;tag="darmok_v0.10" \
 "
 
