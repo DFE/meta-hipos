@@ -1,0 +1,12 @@
+[Unit]
+Description=Modem AT
+
+BindsTo=dev-modem_at.device
+After=dev-modem_at.device
+
+[Service]
+ExecStart=/usr/bin/runmodem.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

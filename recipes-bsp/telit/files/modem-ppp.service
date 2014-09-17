@@ -1,0 +1,10 @@
+[Unit]
+Description=Modem PPP
+
+BindsTo=dev-modem_ppp.device
+After=dev-modem_ppp.device
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/pppd call dialup
+Restart=always
