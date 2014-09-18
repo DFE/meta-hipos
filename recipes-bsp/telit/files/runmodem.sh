@@ -677,14 +677,15 @@ set_pppd_parameter()
 	local KEY=$1
 	local VAL=$2
 
-	CURR_KEY=`grep "^$KEY " "$PPPD_CONFIG_FILE"`
+	CURR_KEY=`grep "^$KEY$\|^$KEY " "$PPPD_CONFIG_FILE"`
 	if [ $? -eq 0 ];
 	then
+		[ "$CURR_KEY" == "$KEY" ] && CURR_KEY=""
 		CURR_VAL=${CURR_KEY#* }
 
 		if [ "$VAL" != "$CURR_VAL" ];
 		then
-			sed -i "s/^$KEY .*/$KEY $VAL/" "$PPPD_CONFIG_FILE"
+			sed -i "s/^$KEY\( .*\|$\)/$KEY $VAL/" "$PPPD_CONFIG_FILE"
 		fi
 	else
 		echo "$KEY $VAL" >> $PPPD_CONFIG_FILE
