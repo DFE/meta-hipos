@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Init modem and start pppd. Called from udev rule on ACTION add modem primary USB device.
-# Works with Motorola H24 modem only.
+# Works with Telit LE910 modem only.
 
 SIM_PIN=""
 APN=""
@@ -11,10 +11,8 @@ PPPD_PASSWORD=""
 # default to always online
 DIALUP=always
 
-# read by pppd upon "ifup ppp0", set in /etc/network/interfaces
+# read by pppd
 PPPD_CONFIG_FILE=/etc/ppp/peers/dialup
-PPPD_DIALIN_SCRIPT=/etc/ppp/peers/dialup-chat-dialin
-PPPD_HANGUP_SCRIPT=/etc/ppp/peers/dialup-chat-hangup
 
 CHAT_DBG_OPT="-v"
 
@@ -650,6 +648,25 @@ function log_qos()
         echo "$REG_TYPE:$QUALITY" > $MODEM_DRANOR.new; mv $MODEM_DRANOR.new $MODEM_DRANOR
 }
 
+set_pppd_parameter()
+{
+	local KEY=$1
+	local VAL=$2
+
+	CURR_KEY=`grep "^$KEY " "$PPPD_CONFIG_FILE"`
+	if [ $? -eq 0 ];
+	then
+		CURR_VAL=${CURR_KEY#* }
+
+		if [ "$VAL" != "$CURR_VAL" ];
+		then
+			sed -i "s/^$KEY .*/$KEY $VAL/" "$PPPD_CONFIG_FILE"
+		fi
+	else
+		echo "$KEY $VAL" >> $PPPD_CONFIG_FILE
+	fi
+}
+
 #-------------------
 # THE MAIN FUNCTION
 main()
@@ -721,6 +738,9 @@ main()
 	echo "0" > "$MODEM_PRESENT_FILE"
 
 	wait_modem_registration $SECONDARY_PORT
+
+	set_pppd_parameter user "$PPPD_USER"
+	set_pppd_parameter password "$PPPD_PASSWORD"
 
 	if [ "$DIALUP" = "always" ];
 	then
