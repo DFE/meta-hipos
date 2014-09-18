@@ -17,7 +17,7 @@ PPPD_CONFIG_FILE=/etc/ppp/peers/dialup
 CHAT_DBG_OPT="-v"
 
 JSON_MODEM_CONFIG="/etc/drmodem/drmodem.json"
-JSON_HELPER="/usr/bin/jsonhelper"
+JSON_HELPER="/usr/bin/jq"
 
 DIALUP_CONFIG_FILE=/etc/default/hydraip-networking
 
@@ -398,24 +398,29 @@ wait_modem_registration()
 # check gps configuration
 check_gps_configuration()
 {
-	GPS_MODE=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s motorola-H24-gps/mode`
+	GPS_MODE=`$JSON_HELPER '."motorola-H24-gps".mode' $JSON_MODEM_CONFIG`
 	if [ $? -ne 0 ];
 	then
 		trace_func "Get motorola-H24-gps/mode failed. json configuration file: $JSON_MODEM_CONFIG"
 		return 2
 	fi
-	if [ "$GPS_MODE" == "" ];
+	# remove first and last double quite " from variable
+	GPS_MODE="${GPS_MODE%\"}"
+	GPS_MODE="${GPS_MODE#\"}"
+	if [ "$GPS_MODE" == "null" -o "$GPS_MODE" == "" ];
 	then
 		trace_func "motorola-H24-gps/mode is empty. json configuration file: $JSON_MODEM_CONFIG"
 		return 1
 	fi
 
-	GPS_VOLT=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s motorola-H24-gps/volt`
+	GPS_VOLT=`$JSON_HELPER '."motorola-H24-gps".volt' $JSON_MODEM_CONFIG`
 	if [ $? -ne 0 ];
 	then
 		trace_func "Get motorola-H24-gps/volt failed. json configuration file: $JSON_MODEM_CONFIG"
 	else
-		if [ "$GPS_VOLT" == "" ];
+		GPS_VOLT="${GPS_VOLT%\"}"
+		GPS_VOLT="${GPS_VOLT#\"}"
+		if [ "$GPS_VOLT" == "null" -o "$GPS_VOLT" == "" ];
 		then
 			trace_func "motorola-H24-gps/volt is empty. json configuration file: $JSON_MODEM_CONFIG"
 			return 0
@@ -429,25 +434,30 @@ check_gps_configuration()
 # check umts configuration
 check_umts_configuration()
 {
-	SIM_PIN=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s modems[0]/simpin`
+	SIM_PIN=`$JSON_HELPER .modems[0].simpin $JSON_MODEM_CONFIG`
 	if [ $? -ne 0 ];
 	then
 		trace_func "Get modems[0]/simpin failed. json configuration file: $JSON_MODEM_CONFIG"
 		return 2
 	fi
-	if [ "$SIM_PIN" == "" ];
+	# remove first and last double quite " from variable
+	SIM_PIN="${SIM_PIN%\"}"
+	SIM_PIN="${SIM_PIN#\"}"
+	if [ "$SIM_PIN" == "null" -o "$SIM_PIN" == "" ];
 	then
 		trace_func "SIM PIN modems[0]/simpin is empty. json configuration file: $JSON_MODEM_CONFIG"
 		return 1
 	fi
 
-	APN=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s modems[0]/apn`
+	APN=`$JSON_HELPER .modems[0].apn $JSON_MODEM_CONFIG `
 	if [ $? -ne 0 ];
 	then
 		trace_func "Get modems[0]/apn failed. json configuration file: $JSON_MODEM_CONFIG"
 		return 1
 	fi
-	if [ "$APN" == "" ];
+	APN="${APN%\"}"
+	APN="${APN#\"}"
+	if [ "$APN" == "null" -o "$APN" == "" ];
 	then
 		trace_func "APN modems[0]/apn is empty. json configuration file: $JSON_MODEM_CONFIG"
 		return 1
@@ -460,8 +470,22 @@ check_umts_configuration()
 		trace_func "Missing dialup config file $DIALUP_CONFIG_FILE. Using script defaults."
 	fi
 
-	PPPD_USER=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s modems[0]/user`
-	PPPD_PASSWORD=`$JSON_HELPER -f $JSON_MODEM_CONFIG -s modems[0]/password`
+	PPPD_USER=""
+	RES=`$JSON_HELPER '.modems[0] | has("user")' $JSON_MODEM_CONFIG`
+	if [ "$RES" == "true" ]
+	then
+		PPPD_USER=`$JSON_HELPER .modems[0].user $JSON_MODEM_CONFIG`
+		PPPD_USER="${PPPD_USER%\"}"
+		PPPD_USER="${PPPD_USER#\"}"
+	fi
+	PPPD_PASSWORD=""
+	RES=`$JSON_HELPER '.modems[0] | has("password")' $JSON_MODEM_CONFIG`
+	if [ "$RES" == "true" ]
+	then
+		PPPD_PASSWORD=`$JSON_HELPER .modems[0].password $JSON_MODEM_CONFIG`
+		PPPD_PASSWORD="${PPPD_PASSWORD%\"}"
+		PPPD_PASSWORD="${PPPD_PASSWORD#\"}"
+	fi
 
 	SHOW_USER=$PPPD_USER
 	[ "$SHOW_USER" == "" ] && SHOW_USER="no user name"
@@ -745,7 +769,7 @@ main()
 	if [ "$DIALUP" = "always" ];
 	then
 		trace_func "Now dialling..."
-		systemctl start modem-ppp.service
+		systemctl restart modem-ppp.service
 	else
 		trace_func "Modem initialised and ready to use."
 	fi

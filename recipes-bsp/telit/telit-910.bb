@@ -4,7 +4,7 @@ LICENSE = "CLOSED"
 
 PR = "r1"
 
-RDEPENDS_${PN} = "udev systemd ppp"
+RDEPENDS_${PN} = "udev systemd jq ppp"
 
 SRC_URI = "file://runmodem.sh \
            file://modem-at.service \
