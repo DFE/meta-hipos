@@ -1,10 +1,8 @@
 #!/bin/bash
-# Init modem and start pppd. Called from udev rule on ACTION add modem primary USB device.
-# Works with Telit LE910 modem only.
 #
 # Init Telit LE910 modem and start pppd.
 #
-# Copyright (C) DResearch Fahrzeugelektronik GmbH
+# Copyright (C) 2014 by DResearch Fahrzeugelektronik GmbH
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public
