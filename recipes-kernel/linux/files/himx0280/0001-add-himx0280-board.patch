@@ -1,40 +1,20 @@
-From 1034e815f9a871365bab2b1f9a41727fdb020cce Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 27 Jun 2014 16:17:03 +0200
-Subject: [PATCH] Add support for board himx0280
-
-Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
----
- arch/arm/boot/dts/Makefile              |    1 +
- arch/arm/boot/dts/imx6q-himx0280.dts    |   47 +++
- arch/arm/boot/dts/imx6qdl-himx0280.dtsi |  596 +++++++++++++++++++++++++++++++
- arch/arm/tools/mach-types               |    3 +
- 4 files changed, 647 insertions(+)
- create mode 100644 arch/arm/boot/dts/imx6q-himx0280.dts
- create mode 100644 arch/arm/boot/dts/imx6qdl-himx0280.dtsi
-
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 04b6f18..6d76a38 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -117,6 +117,7 @@ dtb-$(CONFIG_ARCH_MXC) += \
+diff -Nurd git.orig/arch/arm/boot/dts/Makefile git/arch/arm/boot/dts/Makefile
+--- git.orig/arch/arm/boot/dts/Makefile	2014-10-01 12:58:15.859494120 +0200
++++ git/arch/arm/boot/dts/Makefile	2014-10-01 12:59:56.544946489 +0200
+@@ -119,6 +119,7 @@
  	imx6dl-nitrogen6x.dtb \
  	imx6dl-nitrogen6_max.dtb \
  	imx6dl-nitrogen6_mtp.dtb \
 +	imx6dl-himx0280.dtb \
+ 	imx6dl-per.dtb \
  	imx6dl-sabreauto.dtb \
  	imx6dl-sabreauto-ecspi.dtb \
- 	imx6dl-sabreauto-flexcan1.dtb \
-diff --git a/arch/arm/tools/mach-types b/arch/arm/tools/mach-types
-index a10297d..f81f66e 100644
---- a/arch/arm/tools/mach-types
-+++ b/arch/arm/tools/mach-types
-@@ -1007,3 +1007,6 @@ eco5_bx2		MACH_ECO5_BX2		ECO5_BX2		4572
+diff -Nurd git.orig/arch/arm/tools/mach-types git/arch/arm/tools/mach-types
+--- git.orig/arch/arm/tools/mach-types	2014-10-01 12:58:17.354515691 +0200
++++ git/arch/arm/tools/mach-types	2014-10-01 13:01:16.738103183 +0200
+@@ -1007,3 +1007,5 @@
  eukrea_cpuimx28sd	MACH_EUKREA_CPUIMX28SD	EUKREA_CPUIMX28SD	4573
  domotab			MACH_DOMOTAB		DOMOTAB			4574
  pfla03			MACH_PFLA03		PFLA03			4575
 +himx0280		MACH_HIMX		HIMX			4759
 +himx0294		MACH_HIMX0294		HIMX0294		4922
-+
--- 
-1.7.9.5
