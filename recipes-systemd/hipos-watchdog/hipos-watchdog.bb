@@ -1,14 +1,13 @@
 DESCRIPTION = "This systemd-service is used to implement the watchdog using drbcc"
 SECTION = "base"
 LICENSE = "GPLv2"
-PACKAGE_ARCH = "all"
 LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
-inherit systemd
+inherit systemd allarch
 
 RDEPENDS_${PN} = " drbcc "
 
-PR = "r11"
+PR = "r12"
 
 SRC_URI = " \
         file://hipos-watchdog.service \

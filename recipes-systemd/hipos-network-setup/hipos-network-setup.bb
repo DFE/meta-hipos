@@ -1,14 +1,13 @@
 DESCRIPTION = "This systemd-service is used to setup network phys"
 SECTION = "base"
 LICENSE = "GPLv2"
-PACKAGE_ARCH = "all"
 LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
-inherit systemd
+inherit systemd allarch
 
 RDEPENDS_${PN} = " ethtool "
 
-PR = "r13"
+PR = "r14"
 
 SRC_URI = " file://hipos-network-setup.service  \
             file://hipos-network-setup.sh \
