@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r14"
+PR_append = "+r15"
 
 IMAGE_FEATURES += " package-management "
 
@@ -39,6 +39,7 @@ IMAGE_INSTALL += "  \
   nano              \
   screen            \
   file              \
+  minicom           \
 "
 
 # system / plumbing level tools
