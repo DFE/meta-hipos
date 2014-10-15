@@ -1,26 +1,26 @@
-From a33c3b19a0f601f00f9117d85c2b66a1a9466e90 Mon Sep 17 00:00:00 2001
+From 83c0a9098ae43d5b1dfe56102e11fd708b1eae07 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Tue, 4 Feb 2014 15:24:31 +0100
+Date: Fri, 3 Oct 2014 21:42:24 +0200
 Subject: [PATCH] hikirk: add hikirk board
 
 Add support for hikirk board
 
-Signed-off-by: Angelika Tobisch <angelika.tobisch@dresearch-fe.de>
-Signed-off-by: Eik Binscheck <eik.binscheck@dresearch-fe.de>
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- arch/arm/include/asm/mach-types.h |   13 +++
- board/Marvell/hikirk/Makefile     |   51 +++++++++++
- board/Marvell/hikirk/hikirk.c     |  170 +++++++++++++++++++++++++++++++++++++
- boards.cfg                        |    1 +
- include/configs/hikirk.h          |  137 ++++++++++++++++++++++++++++++
- 5 files changed, 372 insertions(+)
+ arch/arm/include/asm/mach-types.h |   1 +
+ board/Marvell/hikirk/Kconfig      |  23 ++++++
+ board/Marvell/hikirk/Makefile     |  14 ++++
+ board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
+ boards.cfg                        |   1 +
+ include/configs/hikirk.h          | 145 ++++++++++++++++++++++++++++++++
+ 6 files changed, 354 insertions(+)
+ create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
  create mode 100644 include/configs/hikirk.h
 
 diff --git a/arch/arm/include/asm/mach-types.h b/arch/arm/include/asm/mach-types.h
-index 440b041..7d5d5b4 100644
+index 440b041..a3c36f7 100644
 --- a/arch/arm/include/asm/mach-types.h
 +++ b/arch/arm/include/asm/mach-types.h
 @@ -1106,6 +1106,7 @@ extern unsigned int __machine_arch_type;
@@ -31,33 +31,42 @@ index 440b041..7d5d5b4 100644
  
  #ifdef CONFIG_ARCH_EBSA110
  # ifdef machine_arch_type
-@@ -14235,6 +14236,18 @@ extern unsigned int __machine_arch_type;
- # define machine_is_kzm9g()	(0)
- #endif
- 
-+#ifdef CONFIG_MACH_HIKIRK
-+# ifdef machine_arch_type
-+#  undef machine_arch_type
-+#  define machine_arch_type __machine_arch_type
-+# else
-+#  define machine_arch_type MACH_TYPE_HIKIRK
-+# endif
-+# define machine_is_hikirk()	(machine_arch_type == MACH_TYPE_HIKIRK)
-+#else
-+# define machine_is_hikirk()	(0)
-+#endif
+diff --git a/board/Marvell/hikirk/Kconfig b/board/Marvell/hikirk/Kconfig
+new file mode 100644
+index 0000000..0d7b8d7
+--- /dev/null
++++ b/board/Marvell/hikirk/Kconfig
+@@ -0,0 +1,23 @@
++if TARGET_HIKIRK
 +
- /*
-  * These have not yet been registered
-  */
++config SYS_CPU
++	string
++	default "arm926ejs"
++
++config SYS_BOARD
++	string
++	default "hikirk"
++
++config SYS_VENDOR
++	string
++	default "Marvell"
++
++config SYS_SOC
++	string
++	default "kirkwood"
++
++config SYS_CONFIG_NAME
++	string
++	default "hikirk"
++
++endif
 diff --git a/board/Marvell/hikirk/Makefile b/board/Marvell/hikirk/Makefile
 new file mode 100644
-index 0000000..5856e26
+index 0000000..f323ab8
 --- /dev/null
 +++ b/board/Marvell/hikirk/Makefile
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,14 @@
 +#
-+# Based on openrd:
 +# (C) Copyright 2009
 +# Net Insight <www.netinsight.net>
 +# Written-by: Simon Kagstrom <simon.kagstrom@netinsight.net>
@@ -67,50 +76,13 @@ index 0000000..5856e26
 +# Marvell Semiconductor <www.marvell.com>
 +# Written-by: Prafulla Wadaskar <prafulla@marvell.com>
 +#
-+# See file CREDITS for list of people who contributed to this
-+# project.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation; either version 2 of
-+# the License, or (at your option) any later version.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-+# MA 02110-1301 USA
++# SPDX-License-Identifier:	GPL-2.0+
 +#
 +
-+include $(TOPDIR)/config.mk
-+
-+LIB	= $(obj)lib$(BOARD).o
-+
-+COBJS	:= hikirk.o
-+
-+SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
-+OBJS	:= $(addprefix $(obj),$(COBJS))
-+SOBJS	:= $(addprefix $(obj),$(SOBJS))
-+
-+$(LIB):	$(obj).depend $(OBJS) $(SOBJS)
-+	$(call cmd_link_o_target, $(OBJS) $(SOBJS))
-+
-+#########################################################################
-+
-+# defines $(obj).depend target
-+include $(SRCTREE)/rules.mk
-+
-+sinclude $(obj).depend
-+
-+#########################################################################
-\ No newline at end of file
++obj-y	:= hikirk.o
 diff --git a/board/Marvell/hikirk/hikirk.c b/board/Marvell/hikirk/hikirk.c
 new file mode 100644
-index 0000000..5ad38fd
+index 0000000..d7b43af
 --- /dev/null
 +++ b/board/Marvell/hikirk/hikirk.c
 @@ -0,0 +1,170 @@
@@ -286,23 +258,23 @@ index 0000000..5ad38fd
 +#endif /* CONFIG_RESET_PHY_R */
 \ No newline at end of file
 diff --git a/boards.cfg b/boards.cfg
-index 6a368de..324e4ac 100644
+index 1ba2081..e608ad7 100644
 --- a/boards.cfg
 +++ b/boards.cfg
-@@ -181,6 +181,7 @@ wireless_space               arm         arm926ejs   wireless_space      LaCie
- dreamplug                    arm         arm926ejs   -                   Marvell        kirkwood
- guruplug                     arm         arm926ejs   -                   Marvell        kirkwood
- mv88f6281gtw_ge              arm         arm926ejs   -                   Marvell        kirkwood
-+hikirk                       arm         arm926ejs   hikirk              Marvell        kirkwood
- openrd_base                  arm         arm926ejs   openrd              Marvell        kirkwood        openrd:BOARD_IS_OPENRD_BASE
- openrd_client                arm         arm926ejs   openrd              Marvell        kirkwood        openrd:BOARD_IS_OPENRD_CLIENT
- openrd_ultimate              arm         arm926ejs   openrd              Marvell        kirkwood        openrd:BOARD_IS_OPENRD_ULTIMATE
+@@ -191,6 +191,7 @@ Active  arm         arm926ejs      kirkwood    LaCie           wireless_space
+ Active  arm         arm926ejs      kirkwood    Marvell         dreamplug           dreamplug                             -                                                                                                                                 Jason Cooper <u-boot@lakedaemon.net>
+ Active  arm         arm926ejs      kirkwood    Marvell         guruplug            guruplug                              -                                                                                                                                 Siddarth Gore <gores@marvell.com>
+ Active  arm         arm926ejs      kirkwood    Marvell         mv88f6281gtw_ge     mv88f6281gtw_ge                       -                                                                                                                                 Prafulla Wadaskar <prafulla@marvell.com>
++Active  arm         arm926ejs      kirkwood    Marvell         hikirk              hikirk                                -                                                                                                                                 Prafulla Wadaskar <prafulla@marvell.com>
+ Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_base                           openrd:BOARD_IS_OPENRD_BASE                                                                                                       Prafulla Wadaskar <prafulla@marvell.com>
+ Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_client                         openrd:BOARD_IS_OPENRD_CLIENT                                                                                                     -
+ Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_ultimate                       openrd:BOARD_IS_OPENRD_ULTIMATE                                                                                                   -
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..8393990
+index 0000000..9a85d4f
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,137 @@
+@@ -0,0 +1,145 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -359,6 +331,7 @@ index 0000000..8393990
 +#define CONFIG_CMD_DHCP
 +#define CONFIG_CMD_ENV
 +#define CONFIG_CMD_MII
++#define CONFIG_CMD_MMC
 +#define CONFIG_SPI_FLASH_MACRONIX
 +#define CONFIG_SPI_FLASH_STMICRO
 +#define CONFIG_CMD_SPI
@@ -439,7 +412,14 @@ index 0000000..8393990
 +#define CONFIG_SYS_ATA_IDE1_OFFSET	MV_SATA_PORT1_OFFSET
 +#endif /*CONFIG_MVSATA_IDE*/
 +
++#ifdef CONFIG_CMD_MMC
++#define CONFIG_MMC
++#define CONFIG_GENERIC_MMC
++#define CONFIG_MVEBU_MMC
++#define CONFIG_SYS_MMC_BASE KW_SDIO_BASE
++#endif /* CONFIG_CMD_MMC */
++
 +#endif /* _CONFIG_HIKIRK_H */
 -- 
-1.7.9.5
+1.8.4.5
 
