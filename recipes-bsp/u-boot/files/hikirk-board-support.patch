@@ -1,6 +1,6 @@
-From 83c0a9098ae43d5b1dfe56102e11fd708b1eae07 Mon Sep 17 00:00:00 2001
+From a6a94aaf6b97d72270739a87fe1f3e3a0621418f Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 3 Oct 2014 21:42:24 +0200
+Date: Mon, 27 Oct 2014 12:53:36 +0100
 Subject: [PATCH] hikirk: add hikirk board
 
 Add support for hikirk board
@@ -12,8 +12,8 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  board/Marvell/hikirk/Makefile     |  14 ++++
  board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
  boards.cfg                        |   1 +
- include/configs/hikirk.h          | 145 ++++++++++++++++++++++++++++++++
- 6 files changed, 354 insertions(+)
+ include/configs/hikirk.h          | 147 ++++++++++++++++++++++++++++++++
+ 6 files changed, 356 insertions(+)
  create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
@@ -82,7 +82,7 @@ index 0000000..f323ab8
 +obj-y	:= hikirk.o
 diff --git a/board/Marvell/hikirk/hikirk.c b/board/Marvell/hikirk/hikirk.c
 new file mode 100644
-index 0000000..d7b43af
+index 0000000..6faa856
 --- /dev/null
 +++ b/board/Marvell/hikirk/hikirk.c
 @@ -0,0 +1,170 @@
@@ -256,7 +256,6 @@ index 0000000..d7b43af
 +	mv_phy_init("egiga1");
 +}
 +#endif /* CONFIG_RESET_PHY_R */
-\ No newline at end of file
 diff --git a/boards.cfg b/boards.cfg
 index 1ba2081..e608ad7 100644
 --- a/boards.cfg
@@ -271,10 +270,10 @@ index 1ba2081..e608ad7 100644
  Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_ultimate                       openrd:BOARD_IS_OPENRD_ULTIMATE                                                                                                   -
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..9a85d4f
+index 0000000..16c4220
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,145 @@
+@@ -0,0 +1,147 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -395,6 +394,8 @@ index 0000000..9a85d4f
 +	"x_kernelB=sf read 0x2000000 0x900000 0x700000\0"	\
 +	"x_bootA=sf probe; ${x_kernelA}; setenv bootargs ${x_bootargsA} ethaddr=${ethaddr} eth1addr=${eth1addr} ${x_infoA}; bootm 0x2000000\0"	\
 +	"x_bootB=sf probe; ${x_kernelB}; setenv bootargs ${x_bootargsB} ethaddr=${ethaddr} eth1addr=${eth1addr} ${x_infoB}; bootm 0x2000000\0"
++
++#define CONFIG_OF_LIBFDT
 +
 +/*
 + * Ethernet Driver configuration
