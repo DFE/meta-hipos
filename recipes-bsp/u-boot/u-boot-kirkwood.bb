@@ -2,7 +2,7 @@ require recipes-bsp/u-boot/u-boot_2014.07.bb
 
 COMPATIBLE_MACHINE = "hikirk"
 
-PR = "r6"
+PR = "r7"
 
 SRC_URI_append_hikirk = " \
 	file://kwbimage_hikirk_533ddr3.data \
@@ -16,6 +16,7 @@ SRC_URI_append_hikirk = " \
 	file://mvsdio-driver-addtion.patch \
 	file://fix-mmc-bus-width.patch \
 	file://fix-mmc-high-capacity.patch \
+	file://mmc-speed-up.patch \
 "
 
 do_compile_append_hikirk () {

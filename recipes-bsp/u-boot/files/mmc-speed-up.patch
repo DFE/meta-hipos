@@ -1,0 +1,28 @@
+From b386db7b2dc9bd889eef9fdac642339706bf18e2 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 27 Oct 2014 13:06:35 +0100
+Subject: [PATCH] mvebu_mmc: Speed up access time
+
+Remove udelay, because card status is polled in a loop.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mmc/mvebu_mmc.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/mvebu_mmc.c b/drivers/mmc/mvebu_mmc.c
+index d34e743..8266377 100644
+--- a/drivers/mmc/mvebu_mmc.c
++++ b/drivers/mmc/mvebu_mmc.c
+@@ -72,8 +72,6 @@ static int mvebu_mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd,
+ 	debug("cmdidx [0x%x] resp_type[0x%x] cmdarg[0x%x]\n",
+ 	      cmd->cmdidx, cmd->resp_type, cmd->cmdarg);
+ 
+-	udelay(10*1000);
+-
+ 	debug("%s: cmd %d (hw state 0x%04x)\n", DRIVER_NAME,
+ 	      cmd->cmdidx, mvebu_mmc_read(SDIO_HW_STATE));
+ 
+-- 
+1.8.4.5
+
