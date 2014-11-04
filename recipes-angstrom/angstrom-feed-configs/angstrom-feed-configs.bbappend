@@ -1,7 +1,7 @@
 do_compile() {
     mkdir -p ${S}/${sysconfdir}/opkg
 
-    URI="http://package-feed.dresearch-fe.de/hipos/yocto-1.6-daisy"
+    URI="http://package-feed.dresearch-fe.de/hipos/yocto-1.7-dizzy"
 
     for feed in all ${MACHINE} ${FEED_ARCH} ; do
         echo "src/gz ${feed} ${URI}/${feed}" > ${S}/${sysconfdir}/opkg/${feed}-feed.conf
