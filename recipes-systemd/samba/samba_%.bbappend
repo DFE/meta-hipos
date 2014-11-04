@@ -1,4 +1,4 @@
-# bbapped to meta-openembedded/meta-oe/recipes-connectivity/samba/samba_3.6.8.bb
+# bbappend to meta-openembedded/meta-oe/recipes-connectivity/samba/samba_???.bb
 
 inherit systemd
 
