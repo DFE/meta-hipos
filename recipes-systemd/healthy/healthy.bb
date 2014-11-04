@@ -9,9 +9,9 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = " bootconfig "
 
-PR = "r5"
+PR = "r6"
 
-FILESEXTRAPATHS := "${THISDIR}/files:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI = " file://healthy.service \
 	    file://COPYING "
