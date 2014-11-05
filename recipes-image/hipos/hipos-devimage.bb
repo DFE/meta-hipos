@@ -1,6 +1,6 @@
 require hipos-image.inc
 
-PR_append = ".3"
+PR_append = ".4"
 
 export IMAGE_BASENAME = "hipos-devimage"
 
@@ -8,7 +8,7 @@ IMAGE_FSTYPES = "tar.bz2"
 
 # SDK
 IMAGE_INSTALL += " \
-  task-native-sdk \
+  packagegroup-sdk-target \
   gdb \
   gdbserver \
   openssh-sftp-server \
