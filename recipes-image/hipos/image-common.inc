@@ -2,12 +2,13 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r15"
+PR_append = "+r16"
 
 IMAGE_FEATURES += " package-management "
 
 IMAGE_INSTALL += "          \
   kernel-modules            \
+  kernel-devicetree         \
   linux-firmware-ralink     \
   htop                      \
   bash                      \
