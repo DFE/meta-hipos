@@ -1,0 +1,36 @@
+From ab50205e23a147366d0522825569f9499baf3cc4 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 4 Nov 2014 21:44:19 +0100
+Subject: [PATCH] Disable spi nor protecton
+
+Disable protection support, because it is used with not supported chip m25p80.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mtd/spi-nor/spi-nor.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/spi-nor/spi-nor.c b/drivers/mtd/spi-nor/spi-nor.c
+index b5ad6be..87edc4b 100644
+--- a/drivers/mtd/spi-nor/spi-nor.c
++++ b/drivers/mtd/spi-nor/spi-nor.c
+@@ -1002,12 +1002,15 @@ int spi_nor_scan(struct spi_nor *nor, const struct spi_device_id *id,
+ 	mtd->_erase = spi_nor_erase;
+ 	mtd->_read = spi_nor_read;
+ 
++#if 0
++	/* Disable protection support, because is is used with
++           not supported chips. */
+ 	/* nor protection support for STmicro chips */
+ 	if (JEDEC_MFR(info->jedec_id) == CFI_MFR_ST) {
+ 		mtd->_lock = spi_nor_lock;
+ 		mtd->_unlock = spi_nor_unlock;
+ 	}
+-
++#endif
+ 	/* sst nor chips use AAI word program */
+ 	if (info->flags & SST_WRITE)
+ 		mtd->_write = sst_write;
+-- 
+1.8.4.5
+

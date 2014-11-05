@@ -1,0 +1,156 @@
+/*
+ * Marvell Hikirk Board Description
+ *
+ *
+ * This file is licensed under the terms of the GNU General Public
+ * License version 2.  This program is licensed "as is" without any
+ * warranty of any kind, whether express or implied.
+ *
+ */
+
+/dts-v1/;
+
+#include "kirkwood.dtsi"
+#include "kirkwood-6282.dtsi"
+
+/ {
+	model = "DResearch Fahrzeugelektronik GmbH Hikirk";
+	compatible = "dfe,hikirk", "marvell,kirkwood-88f6282", "marvell,kirkwood";
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000000 0x40000000>;
+	};
+
+	aliases {
+		ethernet0 = &ethernet0port0;
+		ethernet1 = &ethernet1port0;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200n8";
+		stdout-path = &uart0;
+	};
+
+	mbus {
+		pcie-controller {
+			status = "okay";
+
+			pcie@1,0 {
+				status = "okay";
+			};
+		};
+	};
+
+	ocp@f1000000 {
+		pinctrl: pin-controller@10000 {
+			pinctrl-0 = <&pmx_host_runing &pmx_sdio_cd &pmx_hdd_usable &pmx_mpp38>;
+			pinctrl-names = "default";
+
+			pmx_uart0: pmx-uart0 {
+				marvell,pins = "mpp4", "mpp5";
+				marvell,function = "uart0";
+			};
+			pmx_sdio_cd: pmx-sdio-cd {
+				marvell,pins = "mpp29";
+				marvell,function = "gpio";
+			};
+			pmx_host_runing: pmx-host-running {
+				marvell,pins = "mpp36";
+				marvell,function = "gpio";
+			};
+			pmx_hdd_usable: pmx-hdd-usable {
+				marvell,pins = "mpp37";
+				marvell,function = "gpio";
+			};
+			pmx_mpp38: pmx-mpp38 {
+				marvell,pins = "mpp38";
+				marvell,function = "gpo";
+			};
+		};
+		spi@10600 {
+			status = "okay";
+
+			m25p80@0 {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				compatible = "st,m25p80";
+				spi-max-frequency = <20000000>;
+				reg = <0>;
+				mode = <0>;
+
+				partition@0 {
+					reg = <0x0 0x10000>;
+					label = "boot-header";
+				};
+				partition@10000 {
+					reg = <0x10000 0xe0000>;
+					label = "u-boot-0";
+				};
+				partition@f0000 {
+					reg = <0xf0000 0xe0000>;
+					label = "u-boot-1";
+				};
+				partition@1d0000 {
+					reg = <0x1d0000 0x20000>;
+					label = "u-boot-env";
+				};
+				partition@1f0000 {
+					reg = <0x1f0000 0x10000>;
+					label = "spare";
+				};
+				partition@200000 {
+					reg = <0x200000 0x700000>;
+					label = "kernel-0";
+				};
+				partition@900000 {
+					reg = <0x900000 0x700000>;
+					label = "kernel-1";
+				};
+			};
+		};
+		serial@12000 {
+			status = "okay";
+
+		};
+		sata@80000 {
+			status = "okay";
+			nr-ports = <2>;
+		};
+		mvsdio@90000 {
+			status = "okay";
+			cd-gpios = <&gpio0 29 9>;
+		};
+	};
+	gpio-poweroff {
+		compatible = "gpio-poweroff";
+		gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+	};
+
+};
+
+&mdio {
+	status = "okay";
+
+	ethphy0: ethernet-phy@2 {
+		reg = <2>;
+	};
+	ethphy1: ethernet-phy@3 {
+		reg = <3>;
+	};
+};
+
+&eth0 {
+	status = "okay";
+	ethernet0port0: ethernet0-port@0 {
+		phy-handle = <&ethphy0>;
+	};
+};
+
+&eth1 {
+	status = "okay";
+	ethernet1port0: ethernet1-port@0 {
+		phy-handle = <&ethphy1>;
+	};
+};
+
