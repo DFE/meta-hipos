@@ -5,10 +5,9 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = " drbcc \
-                   gawk "
+RDEPENDS_${PN} = "drbcc gawk bash"
 
-PR = "r14"
+PR = "r15"
 
 SRC_URI = " file://hipos-time.service \
             file://set-time.sh \
