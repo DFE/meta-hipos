@@ -1,6 +1,6 @@
-From a6a94aaf6b97d72270739a87fe1f3e3a0621418f Mon Sep 17 00:00:00 2001
+From 91a2d84991bf47b65c8d1797e361622f10488baa Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 27 Oct 2014 12:53:36 +0100
+Date: Mon, 10 Nov 2014 11:54:22 +0100
 Subject: [PATCH] hikirk: add hikirk board
 
 Add support for hikirk board
@@ -12,8 +12,8 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  board/Marvell/hikirk/Makefile     |  14 ++++
  board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
  boards.cfg                        |   1 +
- include/configs/hikirk.h          | 147 ++++++++++++++++++++++++++++++++
- 6 files changed, 356 insertions(+)
+ include/configs/hikirk.h          | 151 +++++++++++++++++++++++++++++++++
+ 6 files changed, 360 insertions(+)
  create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
@@ -270,10 +270,10 @@ index 1ba2081..e608ad7 100644
  Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_ultimate                       openrd:BOARD_IS_OPENRD_ULTIMATE                                                                                                   -
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..16c4220
+index 0000000..9721498
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,151 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -386,14 +386,18 @@ index 0000000..16c4220
 +#define CONFIG_BOOTCOMMAND		"run x_bootA"
 +
 +#define CONFIG_EXTRA_ENV_SETTINGS	"boot_usb=usb start;"			\
-+	"setenv bootargs console=ttyS0,115200 rw root=/dev/sda2 rootwait ethaddr=${ethaddr} eth1addr=${eth1addr};"	\
-+	"fatload usb 0 0x2000000 uImage;bootm 0x2000000\0"			\
++	"setenv bootargs console=ttyS0,115200 rw root=/dev/sda2 rootwait;"	\
++	"fatload usb 0 0x2000000 uImage; fatload usb 0 0x12000000 kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"			\
++	"boot_ide=ide reset; setenv bootargs console=ttyS0,115200 rw root=/dev/sda1 rootwait;"    \
++	"ext2load ide 0 0x2000000 boot/uImage; ext2load ide 0 0x12000000 /boot/kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"	\
 +	"x_bootargsA=console=ttyS0,115200 vmalloc=50M rw root=/dev/mmcblk0p1 rootflags=discard rootwait\0"	\
 +	"x_bootargsB=console=ttyS0,115200 vmalloc=50M rw root=/dev/mmcblk0p2 rootflags=discard rootwait\0"	\
-+	"x_kernelA=sf read 0x2000000 0x200000 0x700000\0"	\
-+	"x_kernelB=sf read 0x2000000 0x900000 0x700000\0"	\
-+	"x_bootA=sf probe; ${x_kernelA}; setenv bootargs ${x_bootargsA} ethaddr=${ethaddr} eth1addr=${eth1addr} ${x_infoA}; bootm 0x2000000\0"	\
-+	"x_bootB=sf probe; ${x_kernelB}; setenv bootargs ${x_bootargsB} ethaddr=${ethaddr} eth1addr=${eth1addr} ${x_infoB}; bootm 0x2000000\0"
++	"x_kernelA=ext2load mmc 0:1 0x2000000 /boot/uImage\0"	\
++	"x_kernelB=ext2load mmc 0:2 0x2000000 /boot/uImage\0"	\
++	"x_dtA=ext2load mmc 0:1 0x12000000 /boot/kirkwood-hikirk.dtb\0"	\
++	"x_dtB=ext2load mmc 0:2 0x12000000 /boot/kirkwood-hikirk.dtb\0"	\
++	"x_bootA=${x_kernelA}; ${x_dtA}; setenv bootargs ${x_bootargsA}; bootm 0x2000000 - 0x12000000\0"	\
++	"x_bootB=${x_kernelB}; ${x_dtB}; setenv bootargs ${x_bootargsB}; bootm 0x2000000 - 0x12000000\0"
 +
 +#define CONFIG_OF_LIBFDT
 +

@@ -2,7 +2,7 @@ require recipes-bsp/u-boot/u-boot_2014.07.bb
 
 COMPATIBLE_MACHINE = "hikirk"
 
-PR = "r7"
+PR = "r8"
 
 SRC_URI_append_hikirk = " \
 	file://kwbimage_hikirk_533ddr3.data \
