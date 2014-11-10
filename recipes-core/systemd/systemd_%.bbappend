@@ -5,6 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI_append = " \
 	       file://0001-systemd-halt.service-always-poweroff-on-halt.patch \
 	       file://0001-systemd-reboot.service-always-poweroff-on-reboot.patch \
+	       file://0001-tmpfiles.d-etc.conf-disable-resolv.conf-symlink.patch \
 "
 
 SRC_URI_append_nitrogen6x = " \
