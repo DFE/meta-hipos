@@ -14,6 +14,8 @@ SRC_URI_append_hikirk =  " \
 
 SRC_URI +=  " \
     file://Add-Telit-modem-support.patch \
+    file://gadgetfs-fmode_can_read.patch \
+    file://net2280-fix-request-completion.patch \
 "
 
 do_patch_append() {

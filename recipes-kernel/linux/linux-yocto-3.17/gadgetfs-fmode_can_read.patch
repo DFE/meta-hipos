@@ -1,0 +1,36 @@
+From 1f1912568fc43b189a7f658bfdc22aef0417cf86 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 14 Nov 2014 14:27:19 +0100
+Subject: [PATCH] gadgetfs: Set FMODE_CAN_READ
+
+After changing file function pointer there is also a read() method.
+OR flag FMODE_CAN_READ to file mode.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/usb/gadget/legacy/inode.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/usb/gadget/legacy/inode.c b/drivers/usb/gadget/legacy/inode.c
+index e96077b..1b56bee 100644
+--- a/drivers/usb/gadget/legacy/inode.c
++++ b/drivers/usb/gadget/legacy/inode.c
+@@ -857,6 +857,7 @@ ep_config (struct file *fd, const char __user *buf, size_t len, loff_t *ptr)
+ 	}
+ 	if (value == 0) {
+ 		fd->f_op = &ep_io_operations;
++		fd->f_mode |= FMODE_CAN_READ;
+ 		value = length;
+ 	}
+ gone:
+@@ -1926,6 +1927,7 @@ dev_config (struct file *fd, const char __user *buf, size_t len, loff_t *ptr)
+ 		 * kick in after the ep0 descriptor is closed.
+ 		 */
+ 		fd->f_op = &ep0_io_operations;
++		fd->f_mode |= FMODE_CAN_READ;
+ 		value = len;
+ 	}
+ 	return value;
+-- 
+1.8.4.5
+
