@@ -3,9 +3,9 @@ DESCRIPTION = "Telit Modem LE/HE 910 support"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://runmodem.sh;beginline=5;endline=19;md5=885d48456bbe1df46895affa4aae6635"
 
-PR = "r4"
+PR = "r5"
 
-RDEPENDS_${PN} = "udev systemd jq ppp"
+RDEPENDS_${PN} = "udev systemd jq ppp bash"
 
 SRC_URI = "file://runmodem.sh \
            file://modem-at.service \
