@@ -5,9 +5,9 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = " ethtool "
+RDEPENDS_${PN} = " ethtool bash "
 
-PR = "r14"
+PR = "r15"
 
 SRC_URI = " file://hipos-network-setup.service  \
             file://hipos-network-setup.sh \
