@@ -47,7 +47,7 @@ fetch_info()
 	local ret=0
 	# fetch device info file from BCTRL
 	local resp=`${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1`
-	if [ ! -f ${TMP_DEVID_FILE} ]; then 
+	if [ ! -s ${TMP_DEVID_FILE} ]; then
 		loggerANDstdoutError "No device identity info file available in BCTRL, drbcc resp: \'$resp\'"
 		ret=1
 		if [ ! -e ${DEVID_FILE} ]; then

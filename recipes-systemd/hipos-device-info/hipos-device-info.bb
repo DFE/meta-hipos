@@ -7,7 +7,7 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = "libdrbcc bash"
 
-PR = "r21"
+PR = "r22"
 
 SRC_URI = " file://hipos-device-info.service  \
             file://hipos-device-info.sh \
