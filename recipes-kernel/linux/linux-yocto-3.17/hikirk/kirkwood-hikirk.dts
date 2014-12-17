@@ -97,7 +97,7 @@
 				};
 				partition@1f0000 {
 					reg = <0x1f0000 0x10000>;
-					label = "spare";
+					label = "production";
 				};
 				partition@200000 {
 					reg = <0x200000 0x700000>;
