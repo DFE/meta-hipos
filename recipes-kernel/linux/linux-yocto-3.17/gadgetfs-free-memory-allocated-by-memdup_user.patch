@@ -1,0 +1,29 @@
+From 578d9d8f6df3ccddbc376f7a7a04b3256070c3ee Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 16 Dec 2014 09:12:43 +0100
+Subject: [PATCH] gadgetfs: Free memory allocated by memdup_user()
+
+Commit 3b74c73f8d6f053f422e85fce955b61fb181cfe7 switched over to memdup_user()
+in ep_write() function and removed kfree (kbuf).
+memdup_user() function allocates memory which is never freed.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/usb/gadget/legacy/inode.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/usb/gadget/legacy/inode.c b/drivers/usb/gadget/legacy/inode.c
+index 1b56bee..1ac9128 100644
+--- a/drivers/usb/gadget/legacy/inode.c
++++ b/drivers/usb/gadget/legacy/inode.c
+@@ -450,6 +450,7 @@ ep_write (struct file *fd, const char __user *buf, size_t len, loff_t *ptr)
+ 		data->name, len, (int) value);
+ free1:
+ 	mutex_unlock(&data->lock);
++	kfree (kbuf);
+ 	return value;
+ }
+ 
+-- 
+2.1.2
+

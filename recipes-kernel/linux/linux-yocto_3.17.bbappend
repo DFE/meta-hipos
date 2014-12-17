@@ -16,6 +16,7 @@ SRC_URI +=  " \
     file://Add-Telit-modem-support.patch \
     file://gadgetfs-fmode_can_read.patch \
     file://net2280-fix-request-completion.patch \
+    file://gadgetfs-free-memory-allocated-by-memdup_user.patch \
 "
 
 do_patch_append() {
