@@ -387,9 +387,9 @@ index 0000000..9721498
 +
 +#define CONFIG_EXTRA_ENV_SETTINGS	"boot_usb=usb start;"			\
 +	"setenv bootargs console=ttyS0,115200 rw root=/dev/sda2 rootwait;"	\
-+	"fatload usb 0 0x2000000 uImage; fatload usb 0 0x12000000 kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"			\
++	"ext2load usb 0:2 0x2000000 /boot/uImage; ext2load usb 0:2 0x12000000 /boot/kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"			\
 +	"boot_ide=ide reset; setenv bootargs console=ttyS0,115200 rw root=/dev/sda1 rootwait;"    \
-+	"ext2load ide 0 0x2000000 boot/uImage; ext2load ide 0 0x12000000 /boot/kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"	\
++	"ext2load ide 0 0x2000000 /boot/uImage; ext2load ide 0 0x12000000 /boot/kirkwood-hikirk.dtb; bootm 0x2000000 - 0x12000000\0"	\
 +	"x_bootargsA=console=ttyS0,115200 vmalloc=50M rw root=/dev/mmcblk0p1 rootflags=discard rootwait\0"	\
 +	"x_bootargsB=console=ttyS0,115200 vmalloc=50M rw root=/dev/mmcblk0p2 rootflags=discard rootwait\0"	\
 +	"x_kernelA=ext2load mmc 0:1 0x2000000 /boot/uImage\0"	\
