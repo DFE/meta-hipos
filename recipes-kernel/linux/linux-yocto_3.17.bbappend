@@ -17,6 +17,7 @@ SRC_URI +=  " \
     file://gadgetfs-fmode_can_read.patch \
     file://net2280-fix-request-completion.patch \
     file://gadgetfs-free-memory-allocated-by-memdup_user.patch \
+    file://0001-usb-gadget-f_fs-virtual-endpoint-address-mapping.patch \
 "
 
 do_patch_append() {
