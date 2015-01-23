@@ -1,0 +1,37 @@
+From 8dd4675db0a69be0106c55d6626f5fd92f90ef1b Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 23 Jan 2015 14:08:06 +0100
+Subject: [PATCH] usb: gadget: composite: os descriptor specific fix
+
+Add case USB_EXT_PROP_UNICODE_MULTI to fill_ext_prop.
+Compare USB_TYPE_VENDOR with bRequestType instead of bRequest.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/usb/gadget/composite.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/usb/gadget/composite.c b/drivers/usb/gadget/composite.c
+index 6935a82..cbb3d54 100644
+--- a/drivers/usb/gadget/composite.c
++++ b/drivers/usb/gadget/composite.c
+@@ -1379,6 +1379,7 @@ static int fill_ext_prop(struct usb_configuration *c, int interface, u8 *buf)
+ 				case USB_EXT_PROP_UNICODE:
+ 				case USB_EXT_PROP_UNICODE_ENV:
+ 				case USB_EXT_PROP_UNICODE_LINK:
++				case USB_EXT_PROP_UNICODE_MULTI:
+ 					usb_ext_prop_put_unicode(buf, ret,
+ 							 ext_prop->data,
+ 							 ext_prop->data_len);
+@@ -1615,7 +1616,7 @@ unknown:
+ 		 * OS descriptors handling
+ 		 */
+ 		if (cdev->use_os_string && cdev->os_desc_config &&
+-		    (ctrl->bRequest & USB_TYPE_VENDOR) &&
++		    (ctrl->bRequestType & USB_TYPE_VENDOR) &&
+ 		    ctrl->bRequest == cdev->b_vendor_code) {
+ 			struct usb_request		*req;
+ 			struct usb_configuration	*os_desc_cfg;
+-- 
+1.7.9.5
+
