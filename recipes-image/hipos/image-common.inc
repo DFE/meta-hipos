@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r16"
+PR_append = "+r17"
 
 IMAGE_FEATURES += " package-management "
 
@@ -16,6 +16,7 @@ IMAGE_INSTALL += "          \
   python-netserver          \
   python-subprocess         \
   udev-extraconf            \
+  connman-client            \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
