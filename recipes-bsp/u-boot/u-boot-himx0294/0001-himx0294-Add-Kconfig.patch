@@ -1,0 +1,37 @@
+From 145a21cade58ccd373d7c830ec8b17bb5a98e211 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 9 Feb 2015 12:38:53 +0100
+Subject: [PATCH] himx0294: Add Kconfig
+
+Add Kconfig support for himx0294 board.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/Kconfig | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 72558b8..f060a10 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -384,6 +384,9 @@ config TARGET_TITANIUM
+ config TARGET_NITROGEN6X
+ 	bool "Support nitrogen6x"
+ 
++config TARGET_HIMX0294
++	bool "Support himx0294"
++
+ config TARGET_CGTQMX6EVAL
+ 	bool "Support cgtqmx6eval"
+ 
+@@ -591,6 +594,7 @@ source "board/barco/titanium/Kconfig"
+ source "board/bluegiga/apx4devkit/Kconfig"
+ source "board/bluewater/snapper9260/Kconfig"
+ source "board/boundary/nitrogen6x/Kconfig"
++source "board/freescale/himx0294/Kconfig"
+ source "board/broadcom/bcm28155_ap/Kconfig"
+ source "board/broadcom/bcm958300k/Kconfig"
+ source "board/broadcom/bcm958622hr/Kconfig"
+-- 
+2.1.2
+
