@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r17"
+PR_append = "+r18"
 
 IMAGE_FEATURES += " package-management "
 
@@ -26,6 +26,11 @@ IMAGE_INSTALL_append_hikirk += "   \
   hipos-device-info         \
   hipos-time                \
   telit-910                 \
+"
+
+IMAGE_INSTALL_append_himx0294 += "   \
+  libdrbcc                  \
+  drbcc                     \
 "
 
 # profiling
