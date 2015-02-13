@@ -5,6 +5,7 @@ BindsTo=dev-modem_at.device
 After=dev-modem_at.device
 
 [Service]
+Type=oneshot
 ExecStart=/usr/bin/runmodem.sh
 
 [Install]
