@@ -346,11 +346,13 @@
 	status = "okay";
 };
 
+#if 0
 &hdmi_cec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hdmi_cec_2>;
 	status = "okay";
 };
+#endif
 
 &hdmi_core {
 	ipu_id = <0>;
@@ -369,6 +371,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1_1>;
 	status = "okay";
+
+	hdmi: edid@50 {
+		compatible = "fsl,imx6-hdmi-i2c";
+		reg = <0x50>;
+	};
 
 	codec: sgtl5000@0a {
 		compatible = "fsl,sgtl5000";
@@ -390,11 +397,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2_2>;
 	status = "okay";
-
-	hdmi: edid@50 {
-		compatible = "fsl,imx6-hdmi-i2c";
-		reg = <0x50>;
-	};
 
 	ov5642: ov5642@3d {
 		compatible = "ovti,ov5642";
