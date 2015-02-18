@@ -17,7 +17,7 @@
 #
 # Add gcc configuration parameter --with-float=hard for machine himx0294.
 
-EXTRA_OECONF_himx0294 += "\
+EXTRA_OECONF_append_himx0294 += "\
     --with-float=hard \
 "
 
