@@ -279,6 +279,7 @@
 		#reset-cells = <0>;
 	};
 #endif
+
 };
 
 &audmux {
@@ -455,7 +456,7 @@
 &i2c3 {
         clock-frequency = <100000>;
         pinctrl-names = "default";
-        pinctrl-0 = <&pinctrl_i2c3_3>;
+        pinctrl-0 = <&pinctrl_i2c3_5>;
         status = "okay";
 
 	adv7180: adv7180@20 {
@@ -550,6 +551,15 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog_1>;
 
+	i2c3 {
+		pinctrl_i2c3_5: i2c3grp-5 {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_5__I2C3_SCL  0x4001b8b1
+				MX6QDL_PAD_GPIO_6__I2C3_SDA  0x4001b8b1
+			>;
+		};
+	};
+
 	imx6q-nitrogen6x {
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
@@ -580,7 +590,7 @@
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x0b0b0		/* ov5640 mipi powerdown */
 				MX6QDL_PAD_NANDF_D5__GPIO2_IO05		0x000b0		/* ov5640 mipi reset */
 				MX6QDL_PAD_GPIO_3__CCM_CLKO2		0x000b0		/* ov5642 mclk */
-				MX6QDL_PAD_GPIO_6__GPIO1_IO06		0x000b0		/* ov5642 Power Down */
+		/*		MX6QDL_PAD_GPIO_6__GPIO1_IO06		0x000b0	*/	/* ov5642 Power Down */
 				MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x000b0		/* ov5642 Reset */
 				MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x0b0b0		/* USB Hub Reset */
 				MX6QDL_PAD_NANDF_CS1__GPIO6_IO14	0x100b0		/* wl12xx_wl_irq */
@@ -688,6 +698,12 @@
 
 &mipi_csi {
 	lanes = <2>;
+	status = "okay";
+};
+
+&mlb {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_mlb_2>;
 	status = "okay";
 };
 
