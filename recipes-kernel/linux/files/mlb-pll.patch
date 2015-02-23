@@ -1,0 +1,27 @@
+From 8c453e7a2a9fa4f4513976c1a13cd2c2a83068b8 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 23 Feb 2015 12:07:45 +0100
+Subject: [PATCH] imx6: Enable mlb pll
+
+Enable mlb8_pll.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/mach-imx/clk-imx6q.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/mach-imx/clk-imx6q.c b/arch/arm/mach-imx/clk-imx6q.c
+index e09b1e8..f344795 100644
+--- a/arch/arm/mach-imx/clk-imx6q.c
++++ b/arch/arm/mach-imx/clk-imx6q.c
+@@ -290,6 +290,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
+ 	clk[pll5_video]    = imx_clk_pllv3(IMX_PLLV3_AV,	"pll5_video",	"osc", base + 0xa0, 0x7f, false);
+ 	clk[pll6_enet]     = imx_clk_pllv3(IMX_PLLV3_ENET,	"pll6_enet",	"osc", base + 0xe0, 0x3, false);
+ 	clk[pll7_usb_host] = imx_clk_pllv3(IMX_PLLV3_USB,	"pll7_usb_host",	"osc", base + 0x20, 0x3, false);
++	clk[pll8_mlb]      = imx_clk_pllv3(IMX_PLLV3_MLB,	"pll8_mlb",	"osc", base + 0xd0, 0x0, false);
+ 
+ 	/*                              name            reg       shift width parent_names     num_parents */
+ 	clk[lvds1_sel]    = imx_clk_mux("lvds1_sel",    base + 0x160, 0,  5,  lvds_sels,       ARRAY_SIZE(lvds_sels));
+-- 
+2.1.2
+

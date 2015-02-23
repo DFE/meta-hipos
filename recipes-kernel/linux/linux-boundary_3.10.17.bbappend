@@ -13,6 +13,7 @@ SRC_URI_append_himx0280 =  " \
 SRC_URI_append_himx0294 =  " \
 	file://imx6qdl-himx0294.dtsi \
 	file://imx6q-himx0294.dts \
+	file://mlb-pll.patch \
 "
 
 do_configure_prepend_himx0280() {

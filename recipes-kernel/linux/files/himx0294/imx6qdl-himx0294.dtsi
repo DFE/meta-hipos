@@ -710,7 +710,9 @@
 
 &mlb {
 	pinctrl-names = "default";
+#if 0
 	pinctrl-0 = <&pinctrl_mlb_2>;
+#endif
 	status = "okay";
 };
 
