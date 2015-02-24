@@ -366,15 +366,14 @@ static void setup_spi(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
-	/* min rx data delay */
-	ksz9021_phy_extended_write(phydev,
-			MII_KSZ9021_EXT_RGMII_RX_DATA_SKEW, 0x0);
-	/* min tx data delay */
-	ksz9021_phy_extended_write(phydev,
-			MII_KSZ9021_EXT_RGMII_TX_DATA_SKEW, 0x0);
-	/* max rx/tx clock delay, min rx/tx control */
-	ksz9021_phy_extended_write(phydev,
-			MII_KSZ9021_EXT_RGMII_CLOCK_SKEW, 0xf0f0);
+	unsigned short val;
+	const char* devname = miiphy_get_current_dev();
+
+	/* Enable Tx and Rx RGMII delay on CPU port. */
+	miiphy_read(devname, 0x15, 0x1, &val);
+	val |= 0xC000;
+	miiphy_write(devname, 0x15, 0x1, val);
+
 	if (phydev->drv->config)
 		phydev->drv->config(phydev);
 
@@ -383,31 +382,8 @@ int board_phy_config(struct phy_device *phydev)
 
 int board_eth_init(bd_t *bis)
 {
-	uint32_t base = IMX_FEC_BASE;
-	struct mii_dev *bus = NULL;
-	struct phy_device *phydev = NULL;
-	int ret;
-
 	setup_iomux_enet();
-
-#ifdef CONFIG_FEC_MXC
-	bus = fec_get_miibus(base, -1);
-	if (!bus)
-		return 0;
-	/* scan phy 4,5,6,7 */
-	phydev = phy_find_by_mask(bus, (0xf << 4), PHY_INTERFACE_MODE_RGMII);
-	if (!phydev) {
-		free(bus);
-		return 0;
-	}
-	printf("using phy at %d\n", phydev->addr);
-	ret  = fec_probe(bis, -1, base, bus, phydev);
-	if (ret) {
-		printf("FEC MXC: %s:failed\n", __func__);
-		free(phydev);
-		free(bus);
-	}
-#endif
+	cpu_eth_init(bis);
 
 #ifdef CONFIG_CI_UDC
 	/* For otg ethernet*/
@@ -416,11 +392,13 @@ int board_eth_init(bd_t *bis)
 	return 0;
 }
 
+#if 0
 static void setup_buttons(void)
 {
 	imx_iomux_v3_setup_multiple_pads(button_pads,
 					 ARRAY_SIZE(button_pads));
 }
+#endif
 
 #if defined(CONFIG_VIDEO_IPUV3)
 
@@ -840,6 +818,7 @@ static iomux_v3_cfg_t const init_pads_imoc[] = {
 
 #define WL12XX_WL_IRQ_GP	IMX_GPIO_NR(6, 14)
 
+#if 0
 static unsigned gpios_out_low[] = {
 	/* Disable wl1271 */
 	IMX_GPIO_NR(6, 15),	/* disable wireless */
@@ -861,6 +840,7 @@ static void set_gpios(unsigned *p, int cnt, int val)
 	for (i = 0; i < cnt; i++)
 		gpio_direction_output(*p++, val);
 }
+#endif
 
 int board_early_init_f(void)
 {
