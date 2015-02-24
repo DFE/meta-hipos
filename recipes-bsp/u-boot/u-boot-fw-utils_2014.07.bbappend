@@ -37,7 +37,7 @@ do_install_append_hikirk () {
 }
 
 do_configure_prepend_himx0294 () {
-	mkdir ${S}/board/freescale/himx0294
+	mkdir -p ${S}/board/freescale/himx0294
 	cp ${WORKDIR}/himx0294.c ${B}/board/freescale/himx0294/
 	cp ${WORKDIR}/Makefile ${B}/board/freescale/himx0294/
 	cp ${WORKDIR}/Kconfig ${B}/board/freescale/himx0294/

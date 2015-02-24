@@ -18,7 +18,7 @@ SRC_URI_append_himx0294 = " \
 "
 
 do_configure_prepend() {
-	mkdir ${S}/board/freescale/himx0294
+	mkdir -p ${S}/board/freescale/himx0294
 	cp ${WORKDIR}/himx0294.c ${B}/board/freescale/himx0294/
 	cp ${WORKDIR}/Makefile ${B}/board/freescale/himx0294/
 	cp ${WORKDIR}/Kconfig ${B}/board/freescale/himx0294/
