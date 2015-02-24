@@ -21,6 +21,7 @@ SRC_URI_append_himx0294 = " \
 	file://1066mhz_4x128mx16.cfg \
 	file://himx0294_defconfig \
 	file://himx0294.h \
+	file://fw_env.config \
 "
 
 FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
@@ -48,5 +49,10 @@ do_configure_prepend_himx0294 () {
 
 	cp ${WORKDIR}/himx0294_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
+}
+
+do_install_append_himx0294 () {
+	install -d ${D}/etc
+	install -m 755 ${WORKDIR}/fw_env.config ${D}/etc/fw_env.config
 }
 
