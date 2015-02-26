@@ -123,9 +123,9 @@ static struct i2c_pads_info i2c_pad_info2 = {
 		.gp = IMX_GPIO_NR(1, 5)
 	},
 	.sda = {
-		.i2c_mode = MX6_PAD_GPIO_16__I2C3_SDA | PC,
-		.gpio_mode = MX6_PAD_GPIO_16__GPIO7_IO11 | PC,
-		.gp = IMX_GPIO_NR(7, 11)
+		.i2c_mode = MX6_PAD_GPIO_6__I2C3_SDA | PC,
+		.gpio_mode = MX6_PAD_GPIO_6__GPIO1_IO06 | PC,
+		.gp = IMX_GPIO_NR(1, 6)
 	}
 };
 
@@ -370,8 +370,9 @@ int board_phy_config(struct phy_device *phydev)
 	const char* devname = miiphy_get_current_dev();
 
 	/* Enable Tx and Rx RGMII delay on CPU port. */
+	/* Enable Forced Flow Control on CPU port. */
 	miiphy_read(devname, 0x15, 0x1, &val);
-	val |= 0xC000;
+	val |= 0xC0C0;
 	miiphy_write(devname, 0x15, 0x1, val);
 
 	if (phydev->drv->config)
