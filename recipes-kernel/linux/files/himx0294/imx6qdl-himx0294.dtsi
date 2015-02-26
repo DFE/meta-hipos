@@ -70,46 +70,6 @@
 		};
 	};
 
-	gpio-keys {
-		compatible = "gpio-keys";
-		power {
-			label = "Power Button";
-			gpios = <&gpio2 3 0>;
-			linux,code = <KEY_POWER>;	/* or KEY_SEARCH */
-			gpio-key,wakeup;
-		};
-
-		menu {
-			label = "Menu";
-			gpios = <&gpio2 1 0>;
-			linux,code = <KEY_MENU>;
-		};
-
-		home {
-			label = "Home";
-			gpios = <&gpio2 4 0>;
-			linux,code = <KEY_HOME>;
-		};
-
-		back {
-			label = "Back";
-			gpios = <&gpio2 2 0>;
-			linux,code = <KEY_BACK>;
-		};
-
-		volume-up {
-			label = "Volume Up";
-			gpios = <&gpio7 13 0>;
-			linux,code = <KEY_VOLUMEUP>;
-		};
-
-		volume-down {
-			label = "Volume Down";
-			gpios = <&gpio4 5 0>;
-			linux,code = <KEY_VOLUMEDOWN>;
-		};
-	};
-
 	sound {
 		compatible = "fsl,imx6q-nitrogen6x-sgtl5000",
 			     "fsl,imx-audio-sgtl5000";
@@ -271,15 +231,6 @@
 		gpios = <&gpio6 16 0>;
 	};
 
-#if 0
-	mipi_dsi_reset: mipi-dsi-reset {
-		compatible = "gpio-reset";
-		reset-gpios = <&gpio2 5 GPIO_ACTIVE_LOW>;
-		reset-delay-us = <50>;
-		#reset-cells = <0>;
-	};
-#endif
-
 	gpio-poweroff {
 		compatible = "gpio-poweroff";
 		gpios = <&gpio7 12 GPIO_ACTIVE_LOW>;
@@ -398,26 +349,6 @@
 	pinctrl-0 = <&pinctrl_i2c2_2>;
 	status = "okay";
 
-#if 0
-	ov5642: ov5642@3d {
-		compatible = "ovti,ov5642";
-		reg = <0x3d>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_ipu1_2>;
-		clocks = <&clks 200>;
-		clock-names = "csi_mclk";
-		DOVDD-supply = <&reg_1p8v>;
-		AVDD-supply = <&reg_2p5v>;
-		DVDD-supply = <&reg_1p8v>;
-		pwn-gpios = <&gpio1 6 1>;
-		rst-gpios = <&gpio1 8 0>;
-		ipu_id = <0>;
-		csi_id = <0>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-	};
-#endif
-
 	ov5640_mipi: ov5640_mipi@3e {
 		compatible = "ovti,ov5640_mipi";
 		reg = <0x3e>;
@@ -460,91 +391,11 @@
         pinctrl-0 = <&pinctrl_i2c3_5>;
         status = "okay";
 
-	adv7180: adv7180@20 {
-		compatible = "adv,adv7180";
-		reg = <0x20>;
-		pinctrl-names = "default", "no_cea861", "cea861";
-		pinctrl-0 = <&pinctrl_adv7180>;
-		pinctrl-1 = <&pinctrl_adv7180_no_cea861>;
-		pinctrl-2 = <&pinctrl_adv7180_cea861>;
-		cea861 = <0>;
-		DOVDD-supply = <&reg_3p3v>; /* 3.3v, enabled via 2.8 VGEN6 */
-		AVDD-supply = <&reg_3p3v>;  /* 1.8v */
-		DVDD-supply = <&reg_3p3v>;  /* 1.8v */
-		PVDD-supply = <&reg_3p3v>;  /* 1.8v */
-#define GP_ADV7180_PWN		<&gpio3 13 GPIO_ACTIVE_LOW>
-#define GP_ADV7180_RESET	<&gpio3 14 GPIO_ACTIVE_LOW>
-#define GP_ADV7180_IRQ		<&gpio5 0 IRQ_TYPE_LEVEL_LOW>
-		rst-gpios = GP_ADV7180_RESET;
-		pwn-gpios = GP_ADV7180_PWN;
-		interrupts-extended = GP_ADV7180_IRQ;
-		csi_id = <1>;
-		mclk = <28636300>;
-		mclk_source = <0>;
-		cvbs = <1>;
-        };
-
-	adv7391: adv7391@2a {
-		compatible = "adv,mxc_adv739x";
-		reg = <0x2a>;
-		pinctrl-names = "default", "enable";
-		pinctrl-0 = <&pinctrl_adv7391_off>;
-		pinctrl-1 = <&pinctrl_adv7391>;
-#define GP_ADV7391_RESET	<&gpio4 20 GPIO_ACTIVE_LOW>
-		rst-gpios = GP_ADV7391_RESET;
-		ipu_id = <0>;
-		disp_id = <0>;
-        };
-
-        egalax_ts@04 {
-                compatible = "eeti,egalax_ts";
-                reg = <0x04>;
-                interrupt-parent = <&gpio1>;
-                interrupts = <9 2>;
-                wakeup-gpios = <&gpio1 9 0>;
-        };
-
-        ft5x06_ts@38 {
-		compatible = "ft5x06-ts,ft5x06-ts";
-		reg = <0x38>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <9 2>;
-		wakeup-gpios = <&gpio1 9 0>;
-	};
-
-        ili210x@41 {
-		compatible = "ili210x";
-		reg = <0x41>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <9 2>;
-		wakeup-gpios = <&gpio1 9 0>;
-	};
-
-	ov5640: ov5640@3c {
-		compatible = "ovti,ov5640";
-		reg = <0x3c>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_ov5640 &pinctrl_ov5640_gpios>;
-		clocks = <&clk24m 0>;
-		clock-names = "csi_mclk";
-		DOVDD-supply = <&reg_1p8v>;
-		AVDD-supply = <&reg_2p5v>;
-		DVDD-supply = <&reg_1p8v>;
-		pwn-gpios = <&gpio3 13 1>;
-		rst-gpios = <&gpio3 14 0>;
-		csi_id = <1>;
-		mclk = <24000000>;
-		mclk_source = <0>;
-	};
-
-	tsc2004: tsc2004@48 {
-		compatible = "tsc2004,tsc2004";
-		reg = <0x48>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_tsc2004>;
-		interrupt-parent = <&gpio4>;
-		interrupts = <20 2>;
-		wakeup-gpios = <&gpio4 20 0>;
+	tsl2x7x_core@39 {
+		compatible = "taos,tmd2771";
+		reg = <0x39>;
+		interrupt-parent = <&gpio7>;
+		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
 	};
 };
 
@@ -598,67 +449,6 @@
 				MX6QDL_PAD_NANDF_CS3__GPIO6_IO16	0x000b0		/* wl12xx_bt_en */
 				MX6QDL_PAD_SD1_CLK__OSC32K_32K_OUT	0x000b0		/* TiWi slow clock */
 				MX6QDL_PAD_NANDF_CLE__GPIO6_IO07	0x1b0b0		/* ISL1208 interrupt */
-			>;
-		};
-
-		pinctrl_adv7180: adv7180grp {
-			/* parallel camera on CSI1, pins differ for iMX6Q/iMX6DL */
-		};
-
-		pinctrl_adv7180_cea861: adv7180_cea861grp {
-			/* parallel camera on CSI1, pins differ for iMX6Q/iMX6DL */
-		};
-
-		pinctrl_adv7180_no_cea861: adv7180_no_cea861grp {
-			/* parallel camera on CSI1, pins differ for iMX6Q/iMX6DL */
-		};
-
-		pinctrl_adv7391: adv7391grp-1 {
-			fsl,pins = <
-				MX6QDL_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK 0x10		/* Pixclk */
-				MX6QDL_PAD_DISP0_DAT16__IPU1_DISP0_DATA16  0x10
-				MX6QDL_PAD_DISP0_DAT17__IPU1_DISP0_DATA17  0x10
-				MX6QDL_PAD_DISP0_DAT18__IPU1_DISP0_DATA18  0x10
-				MX6QDL_PAD_DISP0_DAT19__IPU1_DISP0_DATA19  0x10
-				MX6QDL_PAD_DISP0_DAT20__IPU1_DISP0_DATA20  0x10
-				MX6QDL_PAD_DISP0_DAT21__IPU1_DISP0_DATA21  0x10
-				MX6QDL_PAD_DISP0_DAT22__IPU1_DISP0_DATA22  0x10
-				MX6QDL_PAD_DISP0_DAT23__IPU1_DISP0_DATA23  0x10
-			>;
-		};
-
-		pinctrl_adv7391_off: adv7391grp-2 {
-			fsl,pins = <
-				MX6QDL_PAD_DI0_DISP_CLK__GPIO4_IO16	0x0b0b0		/* Pixclk */
-				MX6QDL_PAD_DI0_PIN2__GPIO4_IO18		0x0b0b0		/* HSYNC */
-				MX6QDL_PAD_DI0_PIN3__GPIO4_IO19		0x0b0b0		/* VSYNC */
-				MX6QDL_PAD_DISP0_DAT16__GPIO5_IO10	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT17__GPIO5_IO11	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT19__GPIO5_IO13	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT20__GPIO5_IO14	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT21__GPIO5_IO15	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT22__GPIO5_IO16	0x0b0b0
-				MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17	0x0b0b0
-#define GP_ADV7391_RESET	<&gpio4 20 GPIO_ACTIVE_LOW>
-				MX6QDL_PAD_DI0_PIN4__GPIO4_IO20		0x000b0		/* reset */
-			>;
-		};
-
-		pinctrl_ov5640: pinctrl_ov5640 {
-			/* parallel camera on CSI1, pins differ for iMX6Q/iMX6DL */
-		};
-
-		pinctrl_ov5640_gpios: pinctrl_ov5640_gpios {
-			fsl,pins = <
-				MX6QDL_PAD_EIM_DA13__GPIO3_IO13		0x0b0b0		/* Power */
-				MX6QDL_PAD_EIM_DA14__GPIO3_IO14		0x030b0		/* Reset */
-			>;
-		};
-
-		pinctrl_tsc2004: tsc2004grp {
-			fsl,pins = <
-				MX6QDL_PAD_DI0_PIN4__GPIO4_IO20		0x1b0b0		/* tsc2004 interrupt */
 			>;
 		};
 
