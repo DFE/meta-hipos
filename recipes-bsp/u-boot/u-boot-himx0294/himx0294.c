@@ -905,11 +905,7 @@ int board_init(void)
 
 int checkboard(void)
 {
-	if (gpio_get_value(WL12XX_WL_IRQ_GP))
-		puts("Board: Nitrogen6X\n");
-	else
-		puts("Board: SABRE Lite\n");
-
+	puts("Board: himx0294\n");
 	return 0;
 }
 
