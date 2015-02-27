@@ -2,7 +2,7 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r18"
+PR_append = "+r19"
 
 IMAGE_FEATURES += " package-management "
 
@@ -29,6 +29,7 @@ IMAGE_INSTALL_append_hikirk += "   \
 "
 
 IMAGE_INSTALL_append_himx0294 += "   \
+  u-boot-fw-utils           \
   libdrbcc                  \
   drbcc                     \
 "
