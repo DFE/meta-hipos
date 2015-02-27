@@ -14,6 +14,8 @@ SRC_URI_append_himx0294 =  " \
 	file://imx6qdl-himx0294.dtsi \
 	file://imx6q-himx0294.dts \
 	file://mlb-pll.patch \
+	file://iio-tsl2x7x-fix-proximity-setting.patch \
+	file://iio-tsl2x7x-fix-trigger.patch \
 "
 
 do_configure_prepend_himx0280() {
