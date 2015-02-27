@@ -437,11 +437,11 @@
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* Spare */
 		/*		MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x000b0	*/	/* SGTL5000 sys_mclk */
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x80000000	/* CAN standby */
-				MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000	/* Spare */
+		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* Spare */
 				MX6QDL_PAD_GPIO_9__GPIO1_IO09		0x80000000	/* I2C3 touch screen interrupt */
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x0b0b0		/* ov5640 mipi powerdown */
 				MX6QDL_PAD_NANDF_D5__GPIO2_IO05		0x000b0		/* ov5640 mipi reset */
-				MX6QDL_PAD_GPIO_3__CCM_CLKO2		0x000b0		/* ov5642 mclk */
+				MX6QDL_PAD_GPIO_3__XTALOSC_REF_CLK_24M	0x00068		/* USB 24MHz CLK */
 		/*		MX6QDL_PAD_GPIO_6__GPIO1_IO06		0x000b0	*/	/* ov5642 Power Down */
 		/*		MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x000b0	*/	/* ov5642 Reset */
 		/*		MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x0b0b0	*/	/* USB Hub Reset */
@@ -547,6 +547,7 @@
 };
 
 &usbh1 {
+	reset-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
