@@ -19,6 +19,7 @@
 		mxcfb1 = &mxcfb2;
 		mxcfb2 = &mxcfb3;
 		mxcfb3 = &mxcfb4;
+		ethernet0 = &fec;
 	};
 
 	memory {
