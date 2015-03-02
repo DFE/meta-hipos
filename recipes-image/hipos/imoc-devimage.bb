@@ -76,9 +76,20 @@ IMAGE_INSTALL += " \
 # gstreamer
 IMAGE_INSTALL += " packagegroup-fsl-gstreamer"
 IMAGE_INSTALL += " packagegroup-fsl-gstreamer-full"
+
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-commercial"
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0"
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-full"
+
+# The 1.0 stuff didn't work because it failed to install a wayland sink.
+# So, we do it manually:
+
+IMAGE_INSTALL += " \
+  gstreamer1.0-plugins-imx \
+  gstreamer1.0-plugins-base-meta \
+  gstreamer1.0-plugins-good-meta \
+  gstreamer1.0-plugins-bad-meta \
+"
 
 # more multimedia
 IMAGE_INSTALL += " \
