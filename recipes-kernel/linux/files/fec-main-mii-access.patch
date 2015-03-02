@@ -1,0 +1,30 @@
+From faac6ca99b2ef7ec68fe6546aefc5cdea3e3d822 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Sun, 1 Mar 2015 16:50:31 +0100
+Subject: [PATCH] fec_main: Fix mii access
+
+Do mii ioctl regardless if controller has extend desc buffer.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/net/ethernet/freescale/fec_main.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
+index 22941d3..06ad92c 100644
+--- a/drivers/net/ethernet/freescale/fec_main.c
++++ b/drivers/net/ethernet/freescale/fec_main.c
+@@ -1740,8 +1740,10 @@ static int fec_enet_ioctl(struct net_device *ndev, struct ifreq *rq, int cmd)
+ 	if (((cmd == SIOCSHWTSTAMP) || ((cmd >= PTP_ENBL_TXTS_IOCTL) &&
+ 		(cmd <= PTP_FLUSH_TIMESTAMP))) && fep->bufdesc_ex)
+ 		return fec_ptp_ioctl(ndev, rq, cmd);
++/* Do mii ioctl regardless if controller has extend desc buffer
+ 	else if (fep->bufdesc_ex)
+ 		return -ENODEV;
++*/
+ 
+ 	return phy_mii_ioctl(phydev, rq, cmd);
+ }
+-- 
+2.1.4
+

@@ -24,9 +24,9 @@ SRC_URI_append_himx0294 = " \
 	file://fw_env.config \
 "
 
-FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
-
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
 
 SRC_URI_append_hikirk +=  " file://fw_env.config \
 	      file://hikirk-board-support.patch \
