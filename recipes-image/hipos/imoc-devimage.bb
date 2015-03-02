@@ -1,10 +1,14 @@
+# this is FBL's working image for himx0294
+
 require hipos-image.inc
 
-PR_append = ".4"
+PR_append = ".5"
 
 export IMAGE_BASENAME = "imoc-devimage"
 
 IMAGE_FSTYPES = "tar.bz2"
+
+EXTRA_IMAGE_FEATURES += " debug-tweaks package-management"
 
 # SDK
 IMAGE_INSTALL += " \
@@ -26,6 +30,8 @@ IMAGE_INSTALL += " \
   tiobench \
   imx-test \
   sntp \
+  cpuburn-neon \
+  htop \
 "
 
 # qt5
@@ -62,37 +68,28 @@ IMAGE_INSTALL += " \
     qtlocation-qmlplugins \
     cinematicexperience \
 "
-# these would require ruby-native:
+# Qt5, but these would require ruby-native:
 #    qtwebkit
 #    qtwebkit-examples-examples
 #    qtwebkit-qmlplugins
 
+# gstreamer
+IMAGE_INSTALL += " packagegroup-fsl-gstreamer"
+IMAGE_INSTALL += " packagegroup-fsl-gstreamer-full"
+# IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-commercial"
+# IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0"
+# IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-full"
 
-# multimedia
+# more multimedia
 IMAGE_INSTALL += " \
-  gstreamer \
-  gstreamer-dev \
-  gst-plugins-base-app \
-  gst-plugins-base-app-dev \
-  gst-plugins-base-meta \
-  gst-plugins-good-meta \
-  gst-plugins-ugly-meta \
-  gst-meta-audio \
-  gst-meta-video \
-  gst-meta-debug \
-  gst-plugins-base-tcp \
-  gst-plugins-good-meta \
-  gst-plugins-good-udp \
-  gst-plugins-good-rtp \
-  gst-plugins-good-rtpmanager \
-  gst-plugins-good-rtsp \
+  tw6869 \
   v4l-utils \
   live555 \
   opencv \
   opencv-dev \
 "
 
-IMAGE_INSTALL_append_himx0280 += " \
+IMAGE_INSTALL_append_himx0294 += " \
   gst-fsl-plugin \
   fsl-alsa-plugins \
 "
