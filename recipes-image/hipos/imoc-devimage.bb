@@ -28,11 +28,13 @@ IMAGE_INSTALL += " \
   memtester \
   bonnie++ \
   tiobench \
-  imx-test \
   sntp \
   cpuburn-neon \
   htop \
 "
+
+# did not work without X11
+# imx-test 
 
 # qt5
 IMAGE_INSTALL += " \
@@ -66,17 +68,26 @@ IMAGE_INSTALL += " \
     qtconnectivity-qmlplugins \
     qtlocation-plugins \
     qtlocation-qmlplugins \
-    cinematicexperience \
 "
+
+# more (better) qt5 examples
+IMAGE_INSTALL += " \
+  cinematicexperience \
+  qtsmarthome \
+  qt5everywheredemo \
+"
+
 # Qt5, but these would require ruby-native:
 #    qtwebkit
 #    qtwebkit-examples-examples
 #    qtwebkit-qmlplugins
 
-# gstreamer
+# gstreamer 0.10
 IMAGE_INSTALL += " packagegroup-fsl-gstreamer"
-IMAGE_INSTALL += " packagegroup-fsl-gstreamer-full"
+# this did'nt work because gst-plugins-bad compilation failed (wrong SDL lib)
+# IMAGE_INSTALL += " packagegroup-fsl-gstreamer-full"
 
+# gstreamer 1.0
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-commercial"
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0"
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-full"
@@ -93,7 +104,6 @@ IMAGE_INSTALL += " \
 
 # more multimedia
 IMAGE_INSTALL += " \
-  tw6869 \
   v4l-utils \
   live555 \
   opencv \
@@ -101,6 +111,12 @@ IMAGE_INSTALL += " \
 "
 
 IMAGE_INSTALL_append_himx0294 += " \
+  gpu-viv-bin-mx6q \
+  tw6869 \
+  tw6869-vbuf2 \
+  packagegroup-fsl-gstreamer \
+  packagegroup-fslc-gstreamer1.0 \
+  gstreamer1.0-plugins-imx \
   gst-fsl-plugin \
   fsl-alsa-plugins \
 "
