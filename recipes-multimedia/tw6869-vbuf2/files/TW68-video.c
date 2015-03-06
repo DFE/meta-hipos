@@ -1435,13 +1435,15 @@ void TW68_irq_video_done(struct TW68_dev *dev, unsigned int nId, u32 dwRegPB)
 	vc = &dev->vc[nId];
 	if (!vb2_is_streaming(&vc->vb_vidq))
 		return;
+	
 	Fn = (dwRegPB >> 24) & (1 << nId);
 	PB = (dwRegPB) & (1 << nId);
 	/// printk("TW68__irq_video_done .curr%p    nId= 0X%x	 dwRegPB 0X%X\n", dev->video_dmaq[nId].curr, nId, dwRegPB);
 	/// printk("TW68__irq_video_done   nId= 0X%x\n",  nId);
+	
 	spin_lock_irqsave(&vc->qlock, flags);
 	if (list_empty(&vc->buf_list)) {
-		//printk("No active queue to serve\n");
+		printk("TW68_irq_video_done: No active queue to serve\n");
 		vc->Done = 0;
 		spin_unlock_irqrestore(&vc->qlock, flags);
 		return;
@@ -1486,7 +1488,7 @@ void TW68_irq_video_done(struct TW68_dev *dev, unsigned int nId, u32 dwRegPB)
 	// copy bottom field, but only copy if first field was done.
 	// otherwise it will start on the next frame as desired
 	if (PB != vc->curPB) {
-		printk(KERN_DEBUG "s812: DMA mismatch, skipping frame\n");
+		printk( "TW68_irq_video_done: DMA mismatch, skipping frame\n");
 		vc->Done = 0;
 		vc->stat.pb_mismatch++;
 		return;
@@ -1603,10 +1605,10 @@ int vdev_init(struct TW68_dev *dev, struct video_device *template,  char *type)
 		video_set_drvdata(vfd, vc);
 		snprintf(vfd->name, sizeof(vfd->name), "%s %s (%s22)",
 			 dev->name, type, TW68_boards[dev->board].name);
-		printk(KERN_INFO "*****%d*****video DEVICE NAME : %s   vfdev[%d] 0x%p\n", k, vc->vdev.name, k, vfd);
+		printk(KERN_DEBUG "*****%d*****video DEVICE NAME : %s   vfdev[%d] 0x%p\n", k, vc->vdev.name, k, vfd);
 		err0 = video_register_device(&vc->vdev, VFL_TYPE_GRABBER, video_nr[dev->nr]);
 		vc->vfd_DMA_num = vfd->num;
-		printk(KERN_INFO "*****%d*****video DEVICE NAME : %s   minor %d	  DMA %d  err0 %d\n", k, vfd->name, vc->vdev.minor, vc->vfd_DMA_num, err0);
+		printk(KERN_DEBUG "*****%d*****video DEVICE NAME : %s   minor %d	  DMA %d  err0 %d\n", k, vfd->name, vc->vdev.minor, vc->vfd_DMA_num, err0);
 	}
 	printk(KERN_INFO "%s Video DEVICE NAME : %s\n", __func__, dev->vc[0].vdev.name);
 	return 0;

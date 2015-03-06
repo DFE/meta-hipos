@@ -446,16 +446,16 @@ static struct page *snd_card_TW68_page(struct snd_pcm_substream *substream,
  */
 
 static struct snd_pcm_ops snd_card_TW68_capture_ops = {
-	.open =			snd_card_TW68_capture_open,
+	.open =		snd_card_TW68_capture_open,
 	.close =		snd_card_TW68_capture_close,
 	.ioctl =		snd_pcm_lib_ioctl,
 	.hw_params =	snd_card_TW68_hw_params,
-	.hw_free =		snd_card_TW68_hw_free,
-	.prepare =		snd_card_TW68_capture_prepare,
-	.trigger =		snd_card_TW68_capture_trigger,
-	.pointer =		snd_card_TW68_capture_pointer,
-	.page =			snd_card_TW68_page,
-    .mmap =         snd_pcm_lib_mmap_vmalloc,
+	.hw_free =	snd_card_TW68_hw_free,
+	.prepare =	snd_card_TW68_capture_prepare,
+	.trigger =	snd_card_TW68_capture_trigger,
+	.pointer =	snd_card_TW68_capture_pointer,
+	.page =		snd_card_TW68_page,
+	.mmap =		snd_pcm_lib_mmap_vmalloc,
 };
 
 /*
@@ -471,10 +471,14 @@ static int snd_card_TW68_pcm(snd_card_TW68_t *card_TW68, long device)
 	struct snd_pcm *pcm;
 	int err;
 
+	printk( "ENTER %s\n", __FUNCTION__ );
 	daprintk(DPRT_LEVEL0, card_TW68->dev, "%s()\n", __func__);
 
 	if ((err = snd_pcm_new(card_TW68->card, "TW6869 PCM", device, 0, 1, &pcm)) < 0)
+	{
+		printk( "snd_pcm_new failed, err=%d\n", err );
 		return err;
+	}
 
 	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE, &snd_card_TW68_capture_ops);
 	pcm->private_data = card_TW68;
@@ -485,10 +489,10 @@ static int snd_card_TW68_pcm(snd_card_TW68_t *card_TW68, long device)
 
 static void snd_TW68_free(struct snd_card * card)
 {
-    snd_card_TW68_t *card_TW68 = (snd_card_TW68_t*)card->private_data;
-    struct TW68_adev* dev = card_TW68->dev;
+	snd_card_TW68_t *card_TW68 = (snd_card_TW68_t*)card->private_data;
+	struct TW68_adev* dev = card_TW68->dev;
 
-    daprintk(DPRT_LEVEL0, dev, "%s()\n", __func__);
+	daprintk(DPRT_LEVEL0, dev, "%s()\n", __func__);
 }
 
 /*
@@ -501,38 +505,53 @@ static void snd_TW68_free(struct snd_card * card)
 
 int TW68_alsa_create(struct TW68_adev *dev)
 {
-
 	struct snd_card *card = NULL;
 	snd_card_TW68_t *card_TW68;
 	int err;
 
+	printk( "ENTER %s\n", __FUNCTION__ );
 	daprintk(DPRT_LEVEL0, dev, "%s()\n", __func__);
 
-	if(TW68_audio_nPCM > (SNDRV_CARDS-2))
+	if(TW68_audio_nPCM > (SNDRV_CARDS-1))
+	{
+		printk( "TW68_alsa_create failed to create card %ld > %d-1\n", TW68_audio_nPCM, SNDRV_CARDS );
 		return -ENODEV;
+	}
+	
+	dev->dma_area = pci_alloc_consistent(dev->chip->pci, PAGE_SIZE * 2 * 40, &dev->dma_addr);
+	if (dev->dma_area == NULL)
+	{
+		printk( "TW68_alsa_create: err = -ENOMEM\n" );
+		return -ENOMEM;
+	}
 
-    dev->dma_area = pci_alloc_consistent(dev->chip->pci, PAGE_SIZE * 2 * 40, &dev->dma_addr);
-    if (dev->dma_area == NULL)
-        return -ENOMEM;
-
-    TW68_dev_set_adma_buffer (dev, dev->dma_addr, 0);
-    TW68_dev_set_adma_buffer (dev, dev->dma_addr + AUDIO_PAGE_SIZE, 1);
-
+	TW68_dev_set_adma_buffer (dev, dev->dma_addr, 0);
+	TW68_dev_set_adma_buffer (dev, dev->dma_addr + AUDIO_PAGE_SIZE, 1);
 
 #if(LINUX_VERSION_CODE > KERNEL_VERSION(2,6,30))
 #if(LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0))
-    err = snd_card_create(-1, NULL, THIS_MODULE,
-			      sizeof(snd_card_TW68_t), &card);
-#else
-    err = snd_card_new(&dev->chip->pci->dev, -1, NULL, THIS_MODULE,
-			      sizeof(snd_card_TW68_t), &card);
-#endif
+	err = snd_card_create(-1, NULL, THIS_MODULE, sizeof(snd_card_TW68_t), &card);
 	if (err < 0)
+	{
+		printk( "TW68_alsa_create: snd_card_create failed err=%d\n", err );
 		return err;
+	}
+#else
+	err = snd_card_new(&dev->chip->pci->dev, -1, NULL, THIS_MODULE, sizeof(snd_card_TW68_t), &card);
+	if (err < 0)
+	{
+		printk( "TW68_alsa_create: snd_card_new failed err=%d\n", err );
+		return err;
+	}
+#endif
+
 #else
 	card = snd_card_new(-2, NULL, THIS_MODULE, sizeof(snd_card_TW68_t));
 	if (card == NULL)
+	{
+		printk( "TW68_alsa_create: snd_card_new failed err=-ENOMEM\n" );
 		return -ENOMEM;
+	}
 #endif
 
 	strcpy(card->driver, "TW6869");
@@ -550,7 +569,10 @@ int TW68_alsa_create(struct TW68_adev *dev)
 	mutex_init(&dev->lock);
 
 	if ((err = snd_card_TW68_pcm(card_TW68, 0)) < 0)
+	{
+		printk( "TW68_alsa_create: snd_card_TW68_pcm failed err=%d\n", err );
 		goto __nodev;
+	}
 
 	snd_card_set_dev(card, &dev->chip->pci->dev);
 
@@ -562,7 +584,7 @@ int TW68_alsa_create(struct TW68_adev *dev)
 
 	daprintk(1, dev, "alsa: %s registered as card %d\n",card->longname,dev->channel_id);
 	if ((err = snd_card_register(card)) == 0) {
-	    TW68_audio_nPCM++;
+		TW68_audio_nPCM++;
 		return 0;
 	}
 

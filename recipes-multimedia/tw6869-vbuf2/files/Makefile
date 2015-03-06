@@ -6,12 +6,12 @@
 
 EXTRA_CFLAGS += -Idrivers/media/video
 
-ifeq (${audio}, n)
-tw6869_vbuf2-objs := TW68-core.o TW68-video.o
-else
+#ifeq (${audio}, n)
+#tw6869_vbuf2-objs := TW68-core.o TW68-video.o
+#else
 tw6869_vbuf2-objs := TW68-core.o TW68-video.o TW68-ALSA.o
-EXTRA_CFLAGS += -DAUDIO_BUILD
-endif
+ccflags-y := -DAUDIO_BUILD
+#endif
 
 obj-m := tw6869_vbuf2.o
 

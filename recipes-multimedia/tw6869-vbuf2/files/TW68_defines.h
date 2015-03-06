@@ -4,6 +4,7 @@
 
 #pragma once
 
+
 #define   DMA_MODE_SG_RT		0		//Scatter Gather, Real-Time
 #define   DMA_MODE_SG_SWITCH	1		//Scatter Gather, Non-Real-Time
 #define   DMA_MODE_BLOCK		2		//Block Memory
