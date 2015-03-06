@@ -31,6 +31,7 @@ IMAGE_INSTALL += " \
   sntp \
   cpuburn-neon \
   htop \
+  alsa-utils \
 "
 
 # did not work without X11
@@ -100,6 +101,7 @@ IMAGE_INSTALL += " \
   gstreamer1.0-plugins-base-meta \
   gstreamer1.0-plugins-good-meta \
   gstreamer1.0-plugins-bad-meta \
+  gstreamer1.0-rtsp-server \
 "
 
 # more multimedia
