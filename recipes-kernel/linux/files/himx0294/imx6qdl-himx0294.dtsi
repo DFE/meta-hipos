@@ -416,6 +416,7 @@
 	imx6q-nitrogen6x {
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
+				MX6QDL_PAD_GPIO_0__GPIO1_IO00		0x1b0b0 	/* HDD_USABLE */
 				/* Power Button */
                                 MX6QDL_PAD_NANDF_D3__GPIO2_IO03         0x1b0b0
                                 /* Menu Button */
