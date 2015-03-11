@@ -6,7 +6,7 @@ DEPENDS = "gstreamer1.0 gstreamer1.0-plugins-base libfslvpuwrap virtual/kernel v
            virtual/libgles2 ${@base_contains('DISTRO_FEATURES', 'x11', 'virtual/libx11', '', d)}"
 
 SRCBRANCH ?= "master"
-SRCREV = "898e51dbdb01926d6423d0d31a9530ec6deb5192"
+SRCREV = "355ea981c570ed8cdd0646c1c4c22040d8a017f8"
 SRC_URI = "git://github.com/Freescale/gstreamer-imx.git;branch=${SRCBRANCH}"
 
 S = "${WORKDIR}/git"
