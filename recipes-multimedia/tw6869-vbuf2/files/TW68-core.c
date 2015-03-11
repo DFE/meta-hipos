@@ -340,7 +340,7 @@ void BFDMA_setup(struct TW68_dev *dev, int nDMA_channel, int H, int W)  //    Fi
 {
 	u32  regDW, dwV, dn;
 	
-	printk( "ENTER %s\n", __FUNCTION__ );
+	printk( "ENTER %s nDMA_channel=%d, W=%d, H=%d\n", __FUNCTION__, nDMA_channel, W, H );
 	
 	reg_writel((BDMA_ADDR_P_0 + nDMA_channel*8), dev->BDbuf[nDMA_channel][0].dma_addr);						//P DMA page table
 	reg_writel((BDMA_ADDR_B_0 + nDMA_channel*8), dev->BDbuf[nDMA_channel][1].dma_addr);	
@@ -807,7 +807,6 @@ int	VideoDecoderDetect(struct TW68_dev *dev, unsigned int DMA_nCH)
 	{
 		printk("60HZ VideoStandardDetect DMA_nCH %d  regDW 0x%x  dwReg%d \n", DMA_nCH, regDW, dwReg );
 		return 60;
-			
 	}
 }
 
@@ -821,32 +820,36 @@ static irqreturn_t TW68_irq(int irq, void *dev_id)    /// hardware dev id for th
 
 	handled = 1;
 	spin_lock_irqsave(&dev->slock, flags);
-	dwRegST = reg_readl(DMA_INT_STATUS);
-	// DMA_INT_ERROR named FIFO_STATUS in TW6869 manual
-	dwRegER = reg_readl(DMA_INT_ERROR);
-	dwRegPB = reg_readl(DMA_PB_STATUS);
-	dwRegVP = reg_readl(VIDEO_PARSER_STATUS);
+	dwRegST = reg_readl(DMA_INT_STATUS);            // reg 0x00
+	dwRegPB = reg_readl(DMA_PB_STATUS);             // reg 0x01
+	dwRegER = reg_readl(DMA_INT_ERROR);             // reg 0x03 FIFO_STATUS in TW6869 manual
+	dwRegVP = reg_readl(VIDEO_PARSER_STATUS);       // reg 0x05 
 	spin_unlock_irqrestore(&dev->slock, flags);
 
-	if (dwRegER & 0xff000000) {
-		printk("DWREGERR error for register ER=0x%08x, ST=0x%08x, PB=0x%08x, VP=0x%08x !\n", dwRegER, dwRegST, dwRegPB, dwRegVP );
+	printk("TW68_irq: enter, request from channel mask=0x%04x\n", dwRegST & 0xFFFF ); // INTSTA_DMA[15:0]
+	
+	if (dwRegST & 0xFF000000) {
+		printk("TW68_irq: BAD_FMT error, channel mask=0x%02x, BAD_FMT=0x%02x, BAD_PTR=0x%02x\n", dwRegST>>24, dwRegER>>24, 0xFF&(dwRegER>>16) );
 	}
-	if (!(dwRegST & 0xffff) && dwRegST) {
+	
+	if (!(dwRegST & 0xFFFF) && dwRegST) {
 		int j;
 		for (j = 0; j < 8; j++) {
 			dev->vc[j].stat.dma_timeout++;
 		}
-		printk("DWREGST dma timeout?: register ER=0x%08x, ST=0x%08x, PB=0x%08x, VP=0x%08x !\n", dwRegER, dwRegST, dwRegPB, dwRegVP );
+		printk("dma timeout? register ST=0x%08x, PB=0x%08x, ER=0x%08x, VP=0x%08x !\n", dwRegST, dwRegPB, dwRegER, dwRegVP );
 	}
+	
 	if (!dwRegST) {
-		printk("not our interrupt, ER=0x%08x, ST=0x%08x\n", dwRegER, dwRegST);
+		printk("not our interrupt? register ST=0x%08x, PB=0x%08x, ER=0x%08x, VP=0x%08x !\n", dwRegST, dwRegPB, dwRegER, dwRegVP );
 		handled = 0;
+		printk("TW68_irq: leave (0)\n");
 		return IRQ_RETVAL(handled);
 	} 
 	
 	///////////////////////////////////////////////////////////////////////////
 
-	if((dwRegER &0xFF000000) && dev->video_DMA_1st_started && dev->err_times<9)
+	if((dwRegER & 0xFF000000) && dev->video_DMA_1st_started && dev->err_times<9)
 	{
 		dwRegE = reg_readl(DMA_CHANNEL_ENABLE);
 
@@ -901,7 +904,6 @@ static irqreturn_t TW68_irq(int irq, void *dev_id)    /// hardware dev id for th
 		else
 		{
 			// Normal interrupt:
-			printk("  tw6869 normal interrupt:  ++++ ##  ST=0x%08x  ER=0x%08x  VP=0x%08x  PB=0x%08x\n", dwRegST, dwRegER, dwRegVP,  dwRegPB );
 #ifdef AUDIO_BUILD
 			for (k = 0; k < TW68_NUM_AUDIO; k++) {
 				if (dwRegST & TW6864_R_DMA_INT_STATUS_DMA(k+TW686X_AUDIO_BEGIN)) {
@@ -939,6 +941,7 @@ static irqreturn_t TW68_irq(int irq, void *dev_id)    /// hardware dev id for th
 			}
 		}
 	}
+	printk("TW68_irq: leave (1)\n");
 	return IRQ_RETVAL(handled);
 }
 
@@ -1052,14 +1055,13 @@ static int TW68_hwinit1(struct TW68_dev *dev)
 	//  Allocate PB DMA pagetable  total 16K  filled with 0xFF
 	videoDMA_pgtable_alloc(dev->pci, &dev->m_Page0);
 
-	ChannelOffset = pgn = 128;   ///125;
-	pgn = 85;					///   starting for 720 * 240 * 2
+	ChannelOffset = 128;
+	pgn = 85;                   // starting for 720 * 240 * 2
 	m_nDropChannelNum = 0;
 	m_bDropMasterOrSlave = 1;   // master
 	m_bDropField = 0;
 	m_bDropOddOrEven = 0;
 
-//	m_nVideoFormat = VIDEO_FORMAT_RGB565;
 	m_nVideoFormat = VIDEO_FORMAT_YUYV;
 	m_bHorizontalDecimate = 0;
 	m_bVerticalDecimate = 0;
@@ -1070,20 +1072,20 @@ static int TW68_hwinit1(struct TW68_dev *dev)
 		m_nCurVideoChannelNum = 0;  // real-time video channel  starts 0
 		m_nVideoFormat = 0;   ///0; ///VIDEO_FORMAT_UYVY;
 
-		m_dwCHConfig = ( m_StartIdx&0x3FF)			|    // 10 bits
-			((m_EndIdx&0x3FF)<<10)			|	 // 10 bits
-			((m_nVideoFormat&7)<<20)		|
-			((m_bHorizontalDecimate&1)<<23)|
-			((m_bVerticalDecimate&1)<<24)	|
-			((m_nDropChannelNum&3)<<25)	|
-			((m_bDropMasterOrSlave&1)<<27) |    // 1 bit
-			((m_bDropField&1)<<28)			|
-			((m_bDropOddOrEven&1)<<29)		|
+		m_dwCHConfig = ( m_StartIdx&0x3FF)      |  // 10 bits
+			((m_EndIdx&0x3FF)<<10)          |  // 10 bits
+			((m_nVideoFormat&7)<<20)        |
+			((m_bHorizontalDecimate&1)<<23) |
+			((m_bVerticalDecimate&1)<<24)   |
+			((m_nDropChannelNum&3)<<25)     |
+			((m_bDropMasterOrSlave&1)<<27)  |  // 1 bit
+			((m_bDropField&1)<<28)          |
+			((m_bDropOddOrEven&1)<<29)      |
 			((m_nCurVideoChannelNum&3)<<30);
 
 		reg_writel( DMA_CH0_CONFIG+ k,m_dwCHConfig);
 		dwReg = reg_readl(DMA_CH0_CONFIG+ k);
-		printk(" ********#### buffer_setup%d::  m_StartIdx 0X%x  0x%X  dwReg: 0x%X  m_dwCHConfig 0x%X  \n", k, m_StartIdx, pgn,  m_dwCHConfig, dwReg );
+		printk(" ********#### buffer_setup%d::  m_StartIdx=0x%08x  pgn=%d  m_dwCHConfig=0x%08x\n", k, m_StartIdx, pgn, dwReg );
 
 		reg_writel( VERTICAL_CTRL, 0x24); //0x26 will cause ch0 and ch1 have dma_error.  0x24
 		reg_writel( LOOP_CTRL,   0xA5  );     // 0xfd   0xA5     /// 1005
@@ -1095,8 +1097,8 @@ static int TW68_hwinit1(struct TW68_dev *dev)
 	regDW = reg_readl( (DMA_PAGE_TABLE1_ADDR) );
 	printk(KERN_INFO "DMA %s: DMA_PAGE_TABLE1_ADDR  0x%x    \n",  dev->name, regDW );
 
-	reg_writel((DMA_PAGE_TABLE0_ADDR), dev->m_Page0.dma);						//P DMA page table
-	reg_writel((DMA_PAGE_TABLE1_ADDR), dev->m_Page0.dma + (PAGE_SIZE <<1));		//B DMA page table
+	reg_writel((DMA_PAGE_TABLE0_ADDR), dev->m_Page0.dma);                    // P DMA page table
+	reg_writel((DMA_PAGE_TABLE1_ADDR), dev->m_Page0.dma + (PAGE_SIZE<<1));   // B DMA page table
 
 
 	regDW = reg_readl( (DMA_PAGE_TABLE0_ADDR) );
@@ -1104,12 +1106,6 @@ static int TW68_hwinit1(struct TW68_dev *dev)
 	regDW = reg_readl( (DMA_PAGE_TABLE1_ADDR) );
 	printk(KERN_INFO "DMA %s: DMA_PAGE_TABLE1_ADDR  0x%x    \n",  dev->name, regDW );
 
-	/*
-	  regDW = tw_readl( (DMA_PAGE_TABLE0_ADDR) );
-	  printk(KERN_INFO "DMA %s: tw DMA_PAGE_TABLE0_ADDR  0x%x    \n",  dev->name, regDW );
-	  regDW = tw_readl( (DMA_PAGE_TABLE1_ADDR) );
-	  printk(KERN_INFO "DMA %s: tw DMA_PAGE_TABLE1_ADDR  0x%x    \n",  dev->name, regDW );
-	*/
 
 	reg_writel(AVSRST,0x3F);        // u32
 	regDW = reg_readl(AVSRST);
@@ -1215,13 +1211,13 @@ static int TW68_hwinit1(struct TW68_dev *dev)
 	// decoder parameter setup
 	TW68_video_init2(dev);   // set TV param
 
-	dev->video_DMA_1st_started =0;  // initial value for skipping startup DMA error
-	dev->err_times =0;  // DMA error counter
+	dev->video_DMA_1st_started = 0;  // initial value for skipping startup DMA error
+	dev->err_times = 0;  // DMA error counter
 
 	dev->TCN = 16;
 
 	for (k=0; k<8; k++) {
-		dev->vc[k].videoDMA_run=0;
+		dev->vc[k].videoDMA_run = 0;
 	}
 
 	return 0;
@@ -1244,12 +1240,12 @@ int vdev_init (struct TW68_dev *dev, struct video_device *template,  char *type)
 
 static void TW68_unregister_video(struct TW68_dev *dev)
 {
-        int i;
-        for (i = 0; i < 8; i++) {
-                video_unregister_device(&dev->vc[i].vdev);
-        }
-        v4l2_device_unregister(&dev->v4l2_dev);
-    return;
+	int i;
+	for (i = 0; i < 8; i++) {
+		video_unregister_device(&dev->vc[i].vdev);
+	}
+	v4l2_device_unregister(&dev->v4l2_dev);
+	return;
 }
 
 // probe function
@@ -1274,7 +1270,7 @@ static int TW68_initdev(struct pci_dev *pci_dev,
 	
 	for (i = 0; i < 8; i++) {
 		dev->vc[i].dev = dev;
-        dev->vc[i].nId = i;
+	dev->vc[i].nId = i;
 		spin_lock_init(&dev->vc[i].qlock);
 		mutex_init(&dev->vc[i].vb_lock);
 	}
@@ -1354,10 +1350,10 @@ static int TW68_initdev(struct pci_dev *pci_dev,
 
 	dev->board = 1;
 	printk(KERN_INFO "%s: subsystem: %04x:%04x, board: %s [card=%d,%s]\n",
-	       dev->name,pci_dev->subsystem_vendor,
-	       pci_dev->subsystem_device,TW68_boards[dev->board].name,
-	       dev->board, dev->autodetected ?
-	       "autodetected" : "insmod option");
+		dev->name,pci_dev->subsystem_vendor,
+		pci_dev->subsystem_device,TW68_boards[dev->board].name,
+		dev->board, dev->autodetected ?
+		"autodetected" : "insmod option");
 
 	/* get mmio */
 	if (!request_mem_region(pci_resource_start(pci_dev,0),
@@ -1381,8 +1377,8 @@ static int TW68_initdev(struct pci_dev *pci_dev,
 		       dev->name);
 		goto fail2;
 	}
-   	//printk(KERN_INFO "	TW6869 PCI_BAR0 mapped registers: phy: 0x%X   dev->lmmio 0X%x  dev->bmmio 0X%x   length: %x \n",
-        //  pci_resource_start(pci_dev, 0), (unsigned int)dev->lmmio, (unsigned int)dev->bmmio, (unsigned int)pci_resource_len(pci_dev,0) );
+	//printk(KERN_INFO "	TW6869 PCI_BAR0 mapped registers: phy: 0x%X   dev->lmmio 0X%x  dev->bmmio 0X%x   length: %x \n",
+	//  pci_resource_start(pci_dev, 0), (unsigned int)dev->lmmio, (unsigned int)dev->bmmio, (unsigned int)pci_resource_len(pci_dev,0) );
 	/* initialize hardware #1 */
 
 	reg_writel(0xfb, 0xa2);
@@ -1444,28 +1440,28 @@ static int TW68_initdev(struct pci_dev *pci_dev,
 #endif
 
 #ifdef AUDIO_BUILD
-    for (i = 0; i < TW68_NUM_AUDIO; i++) {
-            struct TW68_adev *adev;
-            adev = kzalloc(sizeof(struct TW68_adev), GFP_KERNEL);
-            if (NULL == adev) {
-                return -ENOMEM;
-            }
-            adev->chip = dev;
-            adev->channel_id = i;
-            spin_lock_init(&adev->slock2);
-            dev->aud_dev[i] = adev;
-            if (TW68_alsa_create(adev) < 0) {
-                    printk(KERN_ERR "%s:  Failed to create "
-                           "audio adapters %d\n", __func__, i);
-                    kfree( adev );
-                    dev->aud_dev[i] = NULL;
-                    break;
-            }
-    }
+	for (i = 0; i < TW68_NUM_AUDIO; i++) {
+		struct TW68_adev *adev;
+		adev = kzalloc(sizeof(struct TW68_adev), GFP_KERNEL);
+		if (NULL == adev) {
+			return -ENOMEM;
+		}
+		adev->chip = dev;
+		adev->channel_id = i;
+		spin_lock_init(&adev->slock2);
+		dev->aud_dev[i] = adev;
+		if (TW68_alsa_create(adev) < 0) {
+			printk(KERN_ERR "%s:  Failed to create "
+				"audio adapters %d\n", __func__, i);
+			kfree( adev );
+			dev->aud_dev[i] = NULL;
+			break;
+		}
+	}
 #endif
 	TW68_devcount++;
 	printk(KERN_INFO "%s: registered PCI device %d [v4l2]:%d  err: |%d| \n",
-	       dev->name, TW68_devcount, dev->vc[0].vdev.num, err0);
+		dev->name, TW68_devcount, dev->vc[0].vdev.num, err0);
 
 	return 0;
 fail4:
@@ -1494,8 +1490,8 @@ static void TW68_finidev(struct pci_dev *pci_dev)
 
 	struct v4l2_device *v4l2_dev = pci_get_drvdata(pci_dev);
 	struct TW68_dev *dev = container_of(v4l2_dev, struct TW68_dev, v4l2_dev);
-    printk(KERN_INFO "%s: Starting unregister video device %d\n",
-           dev->name, dev->vc[0].vdev.num);
+	printk(KERN_INFO "%s: Starting unregister video device %d\n",
+	dev->name, dev->vc[0].vdev.num);
 
 	printk(KERN_INFO " /* shutdown hardware */ dev 0x%p \n" , dev);
 
@@ -1517,7 +1513,7 @@ static void TW68_finidev(struct pci_dev *pci_dev)
 	   this, but just in case they are still present... */
 	//if (dev->dmasound.priv_data != NULL) {
 	// free_irq(pci_dev->irq, &dev->dmasound);
-	//	dev->dmasound.priv_data = NULL;
+	// dev->dmasound.priv_data = NULL;
 	//}
 
 	del_timer(&dev->delay_resync);

@@ -336,15 +336,6 @@ static void set_tvnorm(struct TW68_dev *dev, struct TW68_tvnorm *norm)
 
 /* ------------------------------------------------------------------ */
 
-struct cliplist {
-	__u16 position;
-	__u8  enable;
-	__u8  disable;
-};
-
-
-
-
 static int buffer_prepare(struct vb2_buffer *vb)
 {
 	struct TW68_vc *vc = vb2_get_drv_priv(vb->vb2_queue);
@@ -373,6 +364,8 @@ static int queue_setup(struct vb2_queue *vq, const struct v4l2_format *fmt,
 	struct TW68_dev *dev;
 	int single_field = 0;
 
+	printk( "ENTER %s nbuffers=%d, nplanes=%d\n", __FUNCTION__, *nbuffers, *nplanes );
+	
 	if (vq == NULL)
 		return -ENODEV;
 	vc = vb2_get_drv_priv(vq);
@@ -391,14 +384,14 @@ static int queue_setup(struct vb2_queue *vq, const struct v4l2_format *fmt,
 	dwReg2 =  reg_readl(DMA_CH0_CONFIG + 2);
 	dwReg =	 reg_readl(DMA_CH0_CONFIG + nId);
 
-	printk(KERN_DEBUG
-	       " ****buffer_setu#  CH%d::   dwReg2: 0x%X   deReg 0x%X\n",
+	printk(KERN_INFO
+	       " ****buffer_setu#  CH%d::   dwReg2=0x%08x   dwReg=0x%08x\n",
 	       nId, dwReg2, dwReg);
 
 
 	single_field = (vc->field == V4L2_FIELD_TOP) ||
 		(vc->field == V4L2_FIELD_BOTTOM);
-	dprintk("queue setup single field : %d\n", single_field);
+	printk("queue setup single field : %d\n", single_field);
 
 	if (sfield) {
 		if (single_field) {
@@ -447,9 +440,10 @@ static int queue_setup(struct vb2_queue *vq, const struct v4l2_format *fmt,
 
 	reg_writel(DMA_CH0_CONFIG + nId, m_dwCHConfig);
 	dwReg = reg_readl(DMA_CH0_CONFIG + nId);
-	printk(KERN_DEBUG
-	       " **# %s CH%d: m_SIdx 0X%x  pgn%d m_dwCHConfig: %X dwReg: %X\n",
-	       __func__, nId, m_StartIdx, pgn,  m_dwCHConfig, dwReg);
+	printk(KERN_INFO
+	       "DMA_CH0_CONFIG CH%d: m_StartIdx=0x%08x  pgn=%d m_dwCHConfig=0x%08x dwReg0x%08x\n",
+	       nId, m_StartIdx, pgn,  m_dwCHConfig, dwReg);
+	
 	/* external video decoder settings */
 	dwRegW = vc->width;
 	if (sfield && single_field)
@@ -491,14 +485,14 @@ static int queue_setup(struct vb2_queue *vq, const struct v4l2_format *fmt,
 	dwReg = (dwRegH & 0x1F) |
 		((dwRegH & 0x3FF) << 5) |
 		(dwReg << 15);
-	reg_writel(DROP_FIELD_REG0 + nId, 0xBFFFFFFF);	//28 // B 30 FPS
-///  reg_writel(DROP_FIELD_REG0+ nId,	0xBFFFCFFF);	// 28  // 26 FPS   last xx FC
-///reg_writel(DROP_FIELD_REG0+ nId,  0x8FFCFCFF);    // 28  // 26 FPS	 last xx FC
-////   reg_writel(DROP_FIELD_REG0+ nId,  0xBF3F3F3F);	 // 24 FPS
-///  - -  reg_writel(DROP_FIELD_REG0+ nId,  0x8FCFCFCF);   // 24 FPS
+	
+	// see video_framerate table
+	reg_writel(DROP_FIELD_REG0 + nId, 0xBFFFFFFF);
+	//reg_writel(DROP_FIELD_REG0 + nId, 0x83333333);
+
 	dwReg2 = reg_readl(DMA_CH0_CONFIG + 2);
 	dwReg = reg_readl(DMA_CH0_CONFIG + nId);
-	printk(KERN_INFO " ********#### buffer_setup CH%d::   dwReg2: 0x%X   deReg 0x%X\n", nId, dwReg2, dwReg);
+	printk(KERN_INFO " ********#### buffer_setup CH%d::   dwReg2: 0x%08x   deReg 0x%08x\n", nId, dwReg2, dwReg);
 	return 0;
 }
 
@@ -764,15 +758,15 @@ static int video_open(struct file *file)
 				reg_writel(MISC_CONTROL3, 0x85);	
 				reg_writel(MISC_CONTROL3+ 0x100, 0x85);
 			}
-            if (k <= 3) {
-                reg_writel(DECODER0_SDT+ (k*0x10), vc->PAL50 ? 1 : 0);
-            } else {
-                reg_writel(DECODER0_SDT+0x100+ ((k-4)*0x10), vc->PAL50 ? 1 : 0);
-            }
+			if (k <= 3) {
+				reg_writel(DECODER0_SDT+ (k*0x10), vc->PAL50 ? 1 : 0);
+			} else {
+				reg_writel(DECODER0_SDT+0x100+ ((k-4)*0x10), vc->PAL50 ? 1 : 0);
+			}
 		}
 	}
 	dev->video_opened = dev->video_opened | request;
-	printk(KERN_DEBUG "\n&&&&&&&&&&&&&&&  0X%p  open /dev/video%d  minor%d type=%s  video_opened=0x%X k:%d	tvnorm::%s  %d\n", dev, vc->vdev.num,  vc->nId, //  0901 array
+	printk(KERN_INFO "0x%p  open /dev/video%d  minor%d type=%s  video_opened=0x%X k:%d	tvnorm::%s  %d\n", dev, vc->vdev.num,  vc->nId, //  0901 array
 	       v4l2_type_names[V4L2_BUF_TYPE_VIDEO_CAPTURE], dev->video_opened, k, vc->tvnormf->name,
 	       vc->PAL50);
 	return 0;
@@ -891,7 +885,7 @@ static int TW68_try_fmt_vid_cap(struct file *file, void *priv,
 		return -EINVAL;
 	}
 	f->fmt.pix.field = field;
-	dprintk("TW68 _try_fmt_vid_cap fmt::pixelformat %x  field: %d _fmt: width %d  height %d\n", fmt->fourcc, field, f->fmt.pix.width, f->fmt.pix.height);
+	printk("TW68 _try_fmt_vid_cap fmt::pixelformat %x  field: %d _fmt: width %d  height %d\n", fmt->fourcc, field, f->fmt.pix.width, f->fmt.pix.height);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32)
 	v4l_bound_align_image(&f->fmt.pix.width, 128, maxw, 2,	  // 4 pixel  test 360	4,
@@ -903,7 +897,7 @@ static int TW68_try_fmt_vid_cap(struct file *file, void *priv,
 		f->fmt.pix.height * f->fmt.pix.bytesperline;
 	f->fmt.pix.colorspace = V4L2_COLORSPACE_SMPTE170M;
 	f->fmt.pix.priv = 0;
-	dprintk("TW68 _try_fmt_vid_cap: width %d  height %d %d  %d\n", f->fmt.pix.width, f->fmt.pix.height, maxw, maxh);
+	printk("TW68 _try_fmt_vid_cap: width=%d height=%d maxw=%d maxh=%d\n", f->fmt.pix.width, f->fmt.pix.height, maxw, maxh);
 	return 0;
 }
 
@@ -914,9 +908,8 @@ static int TW68_s_fmt_vid_cap(struct file *file, void *priv,
 	int rc;
 	struct vb2_queue *q = &vc->vb_vidq;
 	struct TW68_format *fmt = format_by_fourcc(f->fmt.pix.pixelformat);
-	struct TW68_dev *dev = vc->dev;
 
-	dprintk("~~~~~~~~~~~~~TW68_s_fmt_vid_cap: %x  W:%d H:%d	 field:%X\n", f->fmt.pix.pixelformat, vc->width, vc->height, vc->field);
+	printk("TW68_s_fmt_vid_cap: pixelformat=0x%08x W=%d H=%d field=%d\n", f->fmt.pix.pixelformat, vc->width, vc->height, vc->field);
 
 	if (vb2_is_busy(q))
 		return -EBUSY;
@@ -946,8 +939,6 @@ static int TW68_s_fmt_vid_cap(struct file *file, void *priv,
 	vc->width = f->fmt.pix.width;
 	vc->height = f->fmt.pix.height;
 	vc->field = f->fmt.pix.field;
-
-	printk(KERN_ERR "~~~~~~~~~~~~~TW68_s_fmt_vid_cap: vc->fmt   W:%d H:%d  field:%X\n",  vc->width, vc->height, vc->field);
 
 	return 0;
 }
@@ -1168,10 +1159,10 @@ static void stop_streaming(struct vb2_queue *vq)
 	dprintk("%s:  DMA_nCH:%x   videobuf_streamoff delete video timeout\n", dev->name, vc->nId);
 	spin_lock_irqsave(&vc->qlock, flags);
 	list_for_each_entry_safe(buf, node, &vc->buf_list, list) {
-	    list_del(&buf->list);
-	    vb2_buffer_done(&buf->vb, VB2_BUF_STATE_ERROR);
-	    dprintk("[%p/%d] done\n",
-		    buf, buf->vb.v4l2_buf.index);
+		list_del(&buf->list);
+		vb2_buffer_done(&buf->vb, VB2_BUF_STATE_ERROR);
+		dprintk("[%p/%d] done\n",
+			buf, buf->vb.v4l2_buf.index);
 	}
 	spin_unlock_irqrestore(&vc->qlock, flags);
 
@@ -1181,66 +1172,65 @@ static void stop_streaming(struct vb2_queue *vq)
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(3, 15, 0)
 	return 0;
 #else
-    return;
+	return;
 #endif
 }
 
 static int video_release(struct file *file)
 {
-    int rc;
-    rc = vb2_fop_release(file);
-    msleep(33);
-    return rc;
+	int rc;
+	rc = vb2_fop_release(file);
+	msleep(33);
+	return rc;
 }
 
 static const struct v4l2_file_operations video_fops = {
-	.owner = THIS_MODULE,
-	.open = video_open,
-	.release = video_release,//vb2_fop_release,
-	.poll = vb2_fop_poll,
+	.owner          = THIS_MODULE,
+	.open           = video_open,
+	.release        = video_release,
+	.poll           = vb2_fop_poll,
 	.unlocked_ioctl = video_ioctl2,
-	.mmap = vb2_fop_mmap,
-	.read = vb2_fop_read,
+	.mmap           = vb2_fop_mmap,
+	.read           = vb2_fop_read,
 };
 
 
 
 static const struct v4l2_ioctl_ops video_ioctl_ops = {
-	.vidioc_querycap		= TW68_querycap,
-	.vidioc_enum_fmt_vid_cap	= TW68_enum_fmt_vid_cap,
-	.vidioc_g_fmt_vid_cap		= TW68_g_fmt_vid_cap,
-	.vidioc_try_fmt_vid_cap		= TW68_try_fmt_vid_cap,
-	.vidioc_s_fmt_vid_cap		= TW68_s_fmt_vid_cap,
-	.vidioc_reqbufs			= vb2_ioctl_reqbufs,
-	.vidioc_querybuf		= vb2_ioctl_querybuf,
-	.vidioc_qbuf			= vb2_ioctl_qbuf,
-	.vidioc_dqbuf			= vb2_ioctl_dqbuf,
-	.vidioc_s_std			= TW68_s_std,
-	.vidioc_g_std			= TW68_g_std,
-	.vidioc_enum_input		= TW68_enum_input,
-	.vidioc_g_input			= TW68_g_input,
-	.vidioc_s_input			= TW68_s_input,
-	.vidioc_streamon		= vb2_ioctl_streamon,
-	.vidioc_streamoff		= vb2_ioctl_streamoff,
-	.vidioc_log_status		= v4l2_ctrl_log_status,
-	.vidioc_subscribe_event		= v4l2_ctrl_subscribe_event,
-	.vidioc_unsubscribe_event	= v4l2_event_unsubscribe,
+	.vidioc_querycap          = TW68_querycap,
+	.vidioc_enum_fmt_vid_cap  = TW68_enum_fmt_vid_cap,
+	.vidioc_g_fmt_vid_cap     = TW68_g_fmt_vid_cap,
+	.vidioc_try_fmt_vid_cap   = TW68_try_fmt_vid_cap,
+	.vidioc_s_fmt_vid_cap     = TW68_s_fmt_vid_cap,
+	.vidioc_reqbufs           = vb2_ioctl_reqbufs,
+	.vidioc_querybuf          = vb2_ioctl_querybuf,
+	.vidioc_qbuf              = vb2_ioctl_qbuf,
+	.vidioc_dqbuf             = vb2_ioctl_dqbuf,
+	.vidioc_s_std             = TW68_s_std,
+	.vidioc_g_std             = TW68_g_std,
+	.vidioc_enum_input        = TW68_enum_input,
+	.vidioc_g_input           = TW68_g_input,
+	.vidioc_s_input           = TW68_s_input,
+	.vidioc_streamon          = vb2_ioctl_streamon,
+	.vidioc_streamoff         = vb2_ioctl_streamoff,
+	.vidioc_log_status        = v4l2_ctrl_log_status,
+	.vidioc_subscribe_event   = v4l2_ctrl_subscribe_event,
+	.vidioc_unsubscribe_event = v4l2_event_unsubscribe,
 };
 
 
 
-
-/* ----------------------------------------------------------- */
-/* exported stuff					       */
+/* -----------------*/
+/* exported stuff   */
 
 struct video_device TW68_video_template = {
-	.name				= "TW686v-video",
-	.fops				= &video_fops,
-	.ioctl_ops			= &video_ioctl_ops,
-	.minor				= -1,
-	.tvnorms			= TW68_NORMS,
+	.name         = "TW686v-video",
+	.fops         = &video_fops,
+	.ioctl_ops    = &video_ioctl_ops,
+	.minor        = -1,
+	.tvnorms      = TW68_NORMS,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0)
-	.current_norm			= V4L2_STD_NTSC,
+	.current_norm = V4L2_STD_NTSC,
 #endif
 };
 
@@ -1249,7 +1239,7 @@ struct video_device TW68_video_template = {
 int TW68_video_init1(struct TW68_dev *dev)
 {
 	int k, m, n;
-	__le32	    *cpu;
+	__le32    *cpu;
 	dma_addr_t   dma_addr;
 	struct TW68_vc *vc;
 	/* sanitycheck insmod options */
@@ -1259,8 +1249,7 @@ int TW68_video_init1(struct TW68_dev *dev)
 		gbufsize = gbufsize_max;
 	gbufsize = (gbufsize + PAGE_SIZE - 1) & PAGE_MASK;
 
-// pci_alloc_consistent	  32 4 * 8  continuous field memory buffer
-
+	// pci_alloc_consistent	32 = 4 * 8 continuous field memory buffer
 	for (n = 0; n < 8; n++)
 		for (m = 0; m < 4; m++) {
 			cpu = pci_alloc_consistent(dev->pci, 800*300*2, &dma_addr);   /* 8* 4096 contiguous  */
@@ -1270,13 +1259,13 @@ int TW68_video_init1(struct TW68_dev *dev)
 		}
 
 	/* put some sensible defaults into the data structures ... */
-	dev->ctl_bright = ctrl_by_id(V4L2_CID_BRIGHTNESS)->default_value;
-	dev->ctl_contrast = ctrl_by_id(V4L2_CID_CONTRAST)->default_value;
-	dev->ctl_hue = ctrl_by_id(V4L2_CID_HUE)->default_value;
-	dev->ctl_saturation = ctrl_by_id(V4L2_CID_SATURATION)->default_value;
-	dev->ctl_volume = ctrl_by_id(V4L2_CID_AUDIO_VOLUME)->default_value;
-	dev->ctl_mute = 1; // ctrl_by_id(V4L2_CID_AUDIO_MUTE)->default_value;
-	//dev->ctl_automute = ctrl_by_id(V4L2_CID_PRIVATE_AUTOMUTE)->default_value;
+	dev->ctl_bright         = ctrl_by_id(V4L2_CID_BRIGHTNESS)->default_value;
+	dev->ctl_contrast       = ctrl_by_id(V4L2_CID_CONTRAST)->default_value;
+	dev->ctl_hue            = ctrl_by_id(V4L2_CID_HUE)->default_value;
+	dev->ctl_saturation     = ctrl_by_id(V4L2_CID_SATURATION)->default_value;
+	dev->ctl_volume         = ctrl_by_id(V4L2_CID_AUDIO_VOLUME)->default_value;
+	dev->ctl_mute           = 1; // ctrl_by_id(V4L2_CID_AUDIO_MUTE)->default_value;
+	//dev->ctl_automute     = ctrl_by_id(V4L2_CID_PRIVATE_AUTOMUTE)->default_value;
 
 	////////////////////////////////////////////////////////xxxxxxxxxxx
 	init_timer(&dev->delay_resync);	     //1021
@@ -1296,17 +1285,17 @@ int TW68_video_init1(struct TW68_dev *dev)
 		//vc->video_dmaq.timeout.function = TW68_buffer_timeout;
 		//vc->video_dmaq.timeout.data = (unsigned long)(&vc->video_dmaq)
 		if (k < 4) {
-			vc->video_param.ctl_bright = reg_readl(CH1_BRIGHTNESS_REG + k * 0x10);
-			vc->video_param.ctl_contrast = reg_readl(CH1_CONTRAST_REG + k * 0x10);
-			vc->video_param.ctl_hue = reg_readl(CH1_HUE_REG + k * 0x10);
+			vc->video_param.ctl_bright     = reg_readl(CH1_BRIGHTNESS_REG + k * 0x10);
+			vc->video_param.ctl_contrast   = reg_readl(CH1_CONTRAST_REG + k * 0x10);
+			vc->video_param.ctl_hue        = reg_readl(CH1_HUE_REG + k * 0x10);
 			vc->video_param.ctl_saturation = reg_readl(CH1_SAT_U_REG + k * 0x10) / 2;
-			vc->video_param.ctl_mute = reg_readl(CH1_SAT_V_REG + k * 0x10) / 2;
+			vc->video_param.ctl_mute       = reg_readl(CH1_SAT_V_REG + k * 0x10) / 2;
 		} else {
 			vc->video_param.ctl_bright     = reg_readl(CH1_BRIGHTNESS_REG + (k-4)*0x10 + 0x100);
 			vc->video_param.ctl_contrast   = reg_readl(CH1_CONTRAST_REG + (k-4)*0x10 + 0x100);
-			vc->video_param.ctl_hue	      = reg_readl(CH1_HUE_REG + (k-4)*0x10 + 0x100);
+			vc->video_param.ctl_hue	       = reg_readl(CH1_HUE_REG + (k-4)*0x10 + 0x100);
 			vc->video_param.ctl_saturation = reg_readl(CH1_SAT_U_REG + (k-4)*0x10 + 0x100) / 2;
-			vc->video_param.ctl_mute = reg_readl(CH1_SAT_V_REG + (k-4)*0x10 + 0x100) / 2;
+			vc->video_param.ctl_mute       = reg_readl(CH1_SAT_V_REG + (k-4)*0x10 + 0x100) / 2;
 		}
 
 		printk(KERN_INFO
@@ -1323,13 +1312,13 @@ int TW68_video_init1(struct TW68_dev *dev)
 		vc->video_param.ctl_saturation = dev->vc[k-1].video_param.ctl_saturation;
 		vc->video_param.ctl_mute = dev->vc[k-1].video_param.ctl_mute;
 		printk(KERN_INFO
-		       "TW68_  _video_init1	  get decoder %d default AMP: BRIGHTNESS %d  CONTRAST %d  HUE_ %d  SAT_U_%d SAT_V_%d\n",
-		       k,
-		       vc->video_param.ctl_bright,
-		       vc->video_param.ctl_contrast,
-		       vc->video_param.ctl_hue,
-		       vc->video_param.ctl_saturation,
-		       vc->video_param.ctl_mute);
+			"TW68_  _video_init1	  get decoder %d default AMP: BRIGHTNESS %d  CONTRAST %d  HUE_ %d  SAT_U_%d SAT_V_%d\n",
+			k,
+			vc->video_param.ctl_bright,
+			vc->video_param.ctl_contrast,
+			vc->video_param.ctl_hue,
+			vc->video_param.ctl_saturation,
+			vc->video_param.ctl_mute);
 	}
 
 	// Normalize the reg value to standard value range
@@ -1340,10 +1329,11 @@ int TW68_video_init1(struct TW68_dev *dev)
 		vc->video_param.ctl_hue = vc->video_param.ctl_hue & 0xFF;
 		vc->video_param.ctl_saturation = vc->video_param.ctl_saturation & 0xFF;
 		vc->video_param.ctl_mute = vc->video_param.ctl_mute & 0xFF;
-		dprintk("TW68_  _video_init1   remap  %d def AMP: BR %d	CONT %d	 HUE_ %d  SAT_U_%d SAT_V_%d\n", k,
-		       vc->video_param.ctl_bright, vc->video_param.ctl_contrast,
-		       vc->video_param.ctl_hue, vc->video_param.ctl_saturation,
-		       vc->video_param.ctl_mute);
+		printk(KERN_INFO
+			"TW68_  _video_init1   remap  %d def AMP: BR %d	CONT %d	 HUE_ %d  SAT_U_%d SAT_V_%d\n", k,
+			vc->video_param.ctl_bright, vc->video_param.ctl_contrast,
+			vc->video_param.ctl_hue, vc->video_param.ctl_saturation,
+			vc->video_param.ctl_mute);
 	}
 	return 0;
 }
@@ -1353,20 +1343,24 @@ int TW68_video_init2(struct TW68_dev *dev)
 {
 	/* init video hw */
 	int k;
-	printk(KERN_DEBUG "TW68_  _video_init2    set_tvnorm\n");
+
+	printk( "ENTER %s\n", __FUNCTION__ );
+	
 	set_tvnorm(dev, &tvnorms[0]);
 	for (k = 0; k < 8; k++)
 		dev->vc[k].tvnormf = &tvnorms[0];
 	return 0;
 }
 
-int BF_Copy(struct TW68_dev *dev, int nDMA_channel, u32 Fn, u32 PB, u32 single, struct TW68_buf *buf)
+static int BF_Copy(struct TW68_dev *dev, int nDMA_channel, u32 Fn, u32 PB, u32 single, struct TW68_buf *buf)
 {
 	int n, Hmax, Wmax, h, pos, pitch;
 	struct TW68_vc *vc;
-	/// printk(KERN_INFO " Field_Copy:  start 0000\n");
 	int nId = nDMA_channel;
 	void *vbuf, *srcbuf;  // = videobuf_to_vmalloc(&buf->vb);
+
+	//printk( "ENTER %s\n", __FUNCTION__ );
+
 	vc = &dev->vc[nId];
 	///printk("@@@@ locate buffer_next %p [prev=%p/next=%p]	  &buf->vb.queue= %p\n",
 	///	buf, q->queue.prev,q->queue.next,  &buf->vb.queue);
@@ -1416,6 +1410,8 @@ int BF_Copy(struct TW68_dev *dev, int nDMA_channel, u32 Fn, u32 PB, u32 single, 
 			srcbuf += pitch;
 		}
 	}
+
+	//printk( "LEAVE %s return 1\n", __FUNCTION__ );
 	return 1;
 }
 
@@ -1429,21 +1425,18 @@ void TW68_irq_video_done(struct TW68_dev *dev, unsigned int nId, u32 dwRegPB)
 	struct TW68_vc *vc;
 	struct TW68_buf *buf;
 
+	// printk("TW68__irq_video_done:  nId=%d  PB=0x%08x\n", nId, dwRegPB );
+
 	if (nId >= 8)
 		return;
 
 	vc = &dev->vc[nId];
 	if (!vb2_is_streaming(&vc->vb_vidq))
 		return;
-	
-	Fn = (dwRegPB >> 24) & (1 << nId);
-	PB = (dwRegPB) & (1 << nId);
-	/// printk("TW68__irq_video_done .curr%p    nId= 0X%x	 dwRegPB 0X%X\n", dev->video_dmaq[nId].curr, nId, dwRegPB);
-	/// printk("TW68__irq_video_done   nId= 0X%x\n",  nId);
-	
+
 	spin_lock_irqsave(&vc->qlock, flags);
 	if (list_empty(&vc->buf_list)) {
-		printk("TW68_irq_video_done: No active queue to serve\n");
+		///printk("TW68_irq_video_done: No active queue to serve\n");
 		vc->Done = 0;
 		spin_unlock_irqrestore(&vc->qlock, flags);
 		return;
@@ -1457,9 +1450,11 @@ void TW68_irq_video_done(struct TW68_dev *dev, unsigned int nId, u32 dwRegPB)
 	}
 	field = vc->field;
 	single_field = ((field == V4L2_FIELD_BOTTOM) || (field == V4L2_FIELD_TOP)) && sfield;
-	Fn = (dwRegPB >> 24) & (1 << nId);
-	PB = (dwRegPB) & (1 << nId);
-	//  weave frame output
+
+	Fn = (dwRegPB >> 24) & (1 << nId);	// FFLAG:  0=Field1; 1=Field2
+	PB = (dwRegPB) & (1 << nId);		// PBFLAG: 0=P; 1=B
+
+	// weave frame output
 	// buffer is queued, fill it.
 	if (Fn == 0) {
 		// field 0 interrupt  program update  P field mapping
@@ -1495,7 +1490,7 @@ void TW68_irq_video_done(struct TW68_dev *dev, unsigned int nId, u32 dwRegPB)
 	}
 	vc->Done = 0;
 	if (!vb2_is_streaming(&vc->vb_vidq))
-	    return;
+		return;
 	BF_Copy(dev, nId, Fn, PB, 0, buf);
 	spin_lock_irqsave(&vc->qlock, flags);
 	list_del(&buf->list);
@@ -1542,14 +1537,14 @@ int vdev_init(struct TW68_dev *dev, struct video_device *template,  char *type)
 					  video_ctrls[j].default_value);
 			if (vc->hdl.error) {
 				printk(KERN_ERR
-				       "error %x at %d\n", vc->hdl.error, j);
+					"error %x at %d\n", vc->hdl.error, j);
 				break;
 			}
 		}
 		v4l2_ctrl_new_custom(&vc->hdl, &TW68_gpio_ctrl, NULL);
 		if (vc->hdl.error) {
 			printk(KERN_ERR
-			       "error adding ctrl %x\n", vc->hdl.error);
+				"error adding ctrl %x\n", vc->hdl.error);
 			v4l2_ctrl_handler_free(&vc->hdl);
 			return vc->hdl.error;
 		}
