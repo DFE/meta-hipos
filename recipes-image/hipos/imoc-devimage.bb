@@ -88,6 +88,25 @@ IMAGE_INSTALL += " packagegroup-fsl-gstreamer"
 # this did'nt work because gst-plugins-bad compilation failed (wrong SDL lib)
 # IMAGE_INSTALL += " packagegroup-fsl-gstreamer-full"
 
+IMAGE_INSTALL += " \
+  gstreamer \
+  gstreamer-dev \
+  gst-plugins-base-app \
+  gst-plugins-base-app-dev \
+  gst-plugins-base-meta \
+  gst-plugins-good-meta \
+  gst-plugins-ugly-meta \
+  gst-meta-audio \
+  gst-meta-video \
+  gst-meta-debug \
+  gst-plugins-base-tcp \
+  gst-plugins-good-meta \
+  gst-plugins-good-udp \
+  gst-plugins-good-rtp \
+  gst-plugins-good-rtpmanager \
+  gst-plugins-good-rtsp \
+"
+
 # gstreamer 1.0
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0-commercial"
 # IMAGE_INSTALL += " packagegroup-fslc-gstreamer1.0"
