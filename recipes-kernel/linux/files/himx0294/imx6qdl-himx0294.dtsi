@@ -398,6 +398,11 @@
 		interrupt-parent = <&gpio7>;
 		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
 	};
+
+	rafi_gs@45 {
+		compatible = "rafi,rafi_gs";
+		reg = <0x45>;
+	};
 };
 
 &iomuxc {
