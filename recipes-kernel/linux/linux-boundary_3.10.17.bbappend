@@ -20,6 +20,7 @@ SRC_URI_append_himx0294 = " \
 	file://fec-main-mii-access.patch \
 	file://fec-main-simulate-phy.patch \
 	file://rafi-touchscreen-support.patch \
+	file://telit-modem-support.patch \
 "
 
 do_configure_prepend_himx0280() {
