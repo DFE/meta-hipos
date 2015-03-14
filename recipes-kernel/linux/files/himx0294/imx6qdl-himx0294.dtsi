@@ -290,7 +290,6 @@
 &flexcan1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1_1>;
-	trx-stby-gpio = <&gpio1 2 GPIO_ACTIVE_LOW>;
 	status = "okay";
 };
 
@@ -398,6 +397,11 @@
 		interrupt-parent = <&gpio7>;
 		interrupts = <13 IRQ_TYPE_LEVEL_LOW>;
 	};
+
+	rafi_gs@45 {
+		compatible = "rafi,rafi_gs";
+		reg = <0x45>;
+	};
 };
 
 &iomuxc {
@@ -416,6 +420,7 @@
 	imx6q-nitrogen6x {
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
+				MX6QDL_PAD_GPIO_0__GPIO1_IO00		0x1b0b0 	/* HDD_USABLE */
 				/* Power Button */
                                 MX6QDL_PAD_NANDF_D3__GPIO2_IO03         0x1b0b0
                                 /* Menu Button */
@@ -437,7 +442,7 @@
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* Spare */
 		/*		MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x000b0	*/	/* SGTL5000 sys_mclk */
-				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x80000000	/* CAN standby */
+				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x0b868		/* LTE_ON_OFF */
 		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* Spare */
 				MX6QDL_PAD_GPIO_9__GPIO1_IO09		0x80000000	/* I2C3 touch screen interrupt */
 				MX6QDL_PAD_NANDF_WP_B__GPIO6_IO09	0x0b0b0		/* ov5640 mipi powerdown */

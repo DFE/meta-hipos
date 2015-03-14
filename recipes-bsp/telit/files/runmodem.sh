@@ -672,6 +672,7 @@ function log_qos()
         local PORT=$1
         local LOGSTRING
         local TMP=/tmp/3gmodemreply
+	local rxtx=(`ifconfig ppp0 2>/dev/null | grep -E '(RX|TX) packets:' | sed -e 's/.*packets:\([0-9]*\)\ .*/\1/'`)
 
         chat -e ABORT 'ERROR' TIMEOUT 1 '' AT+CSQ 'OK' '' < $PORT > $PORT 2> $TMP
         LOGSTRING=`grep "^+CSQ:" $TMP`
@@ -684,7 +685,12 @@ function log_qos()
         LOGSTRING=$LOGSTRING"; "`grep '^+CGATT:' $TMP`
         logger -t 3G-Modem $LOGSTRING
 
-        echo "$REG_TYPE:$QUALITY" > $MODEM_DRANOR.new; mv $MODEM_DRANOR.new $MODEM_DRANOR
+	if [ -z ${rxtx[0]} -o -z ${rxtx[1]} ]; then
+		echo "$REG_TYPE:$QUALITY" > $MODEM_DRANOR.new
+	else
+		echo "$REG_TYPE:$QUALITY,${rxtx[0]},${rxtx[1]}" > $MODEM_DRANOR.new
+	fi
+	mv $MODEM_DRANOR.new $MODEM_DRANOR
 }
 
 set_pppd_parameter()
