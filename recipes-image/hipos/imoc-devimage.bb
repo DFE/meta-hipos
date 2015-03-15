@@ -133,6 +133,8 @@ IMAGE_INSTALL += " \
 
 IMAGE_INSTALL_append_himx0294 += " \
   gpu-viv-bin-mx6q \
+  gpu-viv-g2d \
+  eglinfo-fb \
   tw6869 \
   tw6869-vbuf2 \
   packagegroup-fsl-gstreamer \
@@ -140,5 +142,11 @@ IMAGE_INSTALL_append_himx0294 += " \
   gstreamer1.0-plugins-imx \
   gst-fsl-plugin \
   fsl-alsa-plugins \
+"
+
+# FBL this was not needed up to now, but maybe a another interesting API to be investigated 
+IMAGE_INSTALL_append_himx0294 += " \
+  directfb \
+  directfb-examples \
 "
 
