@@ -45,6 +45,7 @@ MODEM_DRANOR="/var/run/dranor.modem"
 
 PIN_ERROR_FILE="/tmp/3g-pin-error"         # used by /etc/init.d/3g-led; 3G status daemon HACK; see HYP-1755
 MODEM_PRESENT_FILE="/tmp/3g-modem-present" # also used by /etc/init.d/3g-led; 3G status daemon HACK; see HYP-1755
+REG_TYPE=offline
 
 #----------------------
 #      FUNCTIONS
@@ -783,6 +784,7 @@ main()
 	# signal SIM PIN related error for /etc/init.d/3g-led (HYP-1755)
 	echo "0" > "$MODEM_PRESENT_FILE"
 
+	log_qos $SECONDARY_PORT
 	wait_modem_registration $SECONDARY_PORT
 
 	set_pppd_parameter user "$PPPD_USER"
