@@ -2,7 +2,6 @@
 Description=Modem AT
 
 BindsTo=dev-modem_at.device
-After=dev-modem_at.device
 
 [Service]
 Type=oneshot

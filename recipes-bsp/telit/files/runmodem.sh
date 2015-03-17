@@ -670,21 +670,21 @@ function_test()
 
 function log_qos()
 {
-	local PORT=$1
-	local LOGSTRING
-	local TMP=/tmp/3gmodemreply
+        local PORT=$1
+        local LOGSTRING
+        local TMP=/tmp/3gmodemreply
 	local rxtx=(`ifconfig ppp0 2>/dev/null | grep -E '(RX|TX) packets:' | sed -e 's/.*packets:\([0-9]*\)\ .*/\1/'`)
 
-	chat -e ABORT 'ERROR' TIMEOUT 1 '' AT+CSQ 'OK' '' < $PORT > $PORT 2> $TMP
-	LOGSTRING=`grep "^+CSQ:" $TMP`
-	if [[ "$LOGSTRING" =~ .*:\ *([0-9]*) ]]; then QUALITY=${BASH_REMATCH[1]}; else QUALITY=0; fi
+        chat -e ABORT 'ERROR' TIMEOUT 1 '' AT+CSQ 'OK' '' < $PORT > $PORT 2> $TMP
+        LOGSTRING=`grep "^+CSQ:" $TMP`
+        if [[ "$LOGSTRING" =~ .*:\ *([0-9]*) ]]; then QUALITY=${BASH_REMATCH[1]}; else QUALITY=0; fi
 
-	chat -e ABORT 'ERROR' TIMEOUT 1 '' 'AT$GPSACP' 'OK' '' < $PORT > $PORT 2> $TMP
-	LOGSTRING=$LOGSTRING"; "`grep '^$GPSACP:' $TMP`
+        chat -e ABORT 'ERROR' TIMEOUT 1 '' 'AT$GPSACP' 'OK' '' < $PORT > $PORT 2> $TMP
+        LOGSTRING=$LOGSTRING"; "`grep '^$GPSACP:' $TMP`
 
-	chat -e ABORT 'ERROR' TIMEOUT 1 '' AT+CGATT? 'OK' '' < $PORT > $PORT 2> $TMP
-	LOGSTRING=$LOGSTRING"; "`grep '^+CGATT:' $TMP`
-	logger -t 3G-Modem $LOGSTRING
+        chat -e ABORT 'ERROR' TIMEOUT 1 '' AT+CGATT? 'OK' '' < $PORT > $PORT 2> $TMP
+        LOGSTRING=$LOGSTRING"; "`grep '^+CGATT:' $TMP`
+        logger -t 3G-Modem $LOGSTRING
 
 	if [ -z ${rxtx[0]} -o -z ${rxtx[1]} ]; then
 		echo "$REG_TYPE:$QUALITY" > $MODEM_DRANOR.new
@@ -719,7 +719,7 @@ set_pppd_parameter()
 main()
 {
 	# clean up previous errors; part of 3G status daemon HACK, see HYP-1755
-	rm "$PIN_ERROR_FILE" "$MODEM_PRESENT_FILE"
+	rm "$PIN_ERROR_FILE" "$MODEM_PRESENT_FILE" "$MODEM_DRANOR"
 
 	PRIMARY_PORT=/dev/modem_ppp
 	SECONDARY_PORT=/dev/modem_at
