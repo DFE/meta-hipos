@@ -165,159 +165,27 @@
 #define CONFIG_LOADADDR			       0x12000000
 #define CONFIG_SYS_TEXT_BASE	       0x17800000
 
-#ifdef CONFIG_CMD_SATA
-#define CONFIG_DRIVE_SATA "sata "
-#else
-#define CONFIG_DRIVE_SATA
-#endif
+#define CONFIG_BOOTCOMMAND	"run x_bootA"
 
-#ifdef CONFIG_CMD_MMC
-#define CONFIG_DRIVE_MMC "mmc "
-#else
-#define CONFIG_DRIVE_MMC
-#endif
-
-#ifdef CONFIG_USB_STORAGE
-#define CONFIG_DRIVE_USB "usb "
-#else
-#define CONFIG_DRIVE_USB
-#endif
-
-#define CONFIG_DRIVE_TYPES CONFIG_DRIVE_SATA CONFIG_DRIVE_MMC CONFIG_DRIVE_USB
-#define CONFIG_UMSDEVS CONFIG_DRIVE_SATA CONFIG_DRIVE_MMC
-
-#if defined(CONFIG_SABRELITE)
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"script=boot.scr\0" \
-	"uimage=uImage\0" \
+	"boot_usb=start usb; setenv boottype usb; setenv bootdev 0; " \
+		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
 	"console=ttymxc1\0" \
-	"fdt_high=0xffffffff\0" \
-	"initrd_high=0xffffffff\0" \
-	"fdt_file=imx6q-sabrelite.dtb\0" \
-	"fdt_addr=0x18000000\0" \
-	"boot_fdt=try\0" \
-	"ip_dyn=yes\0" \
-	"mmcdevs=0 1\0" \
-	"mmcpart=1\0" \
-	"mmcroot=/dev/mmcblk0p2 rootwait rw\0" \
-	"mmcargs=setenv bootargs console=${console},${baudrate} " \
-		"root=${mmcroot}\0" \
-	"loadbootscript=" \
-		"load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
-	"bootscript=echo Running bootscript from mmc ...; " \
-		"source\0" \
-	"loaduimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${uimage}\0" \
-	"loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
-	"mmcboot=echo Booting from mmc ...; " \
-		"run mmcargs; " \
-		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-			"if run loadfdt; then " \
-				"bootm ${loadaddr} - ${fdt_addr}; " \
-			"else " \
-				"if test ${boot_fdt} = try; then " \
-					"bootm; " \
-				"else " \
-					"echo WARN: Cannot load the DT; " \
-				"fi; " \
-			"fi; " \
-		"else " \
-			"bootm; " \
-		"fi;\0" \
-	"netargs=setenv bootargs console=${console},${baudrate} " \
-		"root=/dev/nfs " \
-	"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
-		"netboot=echo Booting from net ...; " \
-		"run netargs; " \
-		"if test ${ip_dyn} = yes; then " \
-			"setenv get_cmd dhcp; " \
-		"else " \
-			"setenv get_cmd tftp; " \
-		"fi; " \
-		"${get_cmd} ${uimage}; " \
-		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-			"if ${get_cmd} ${fdt_addr} ${fdt_file}; then " \
-				"bootm ${loadaddr} - ${fdt_addr}; " \
-			"else " \
-				"if test ${boot_fdt} = try; then " \
-					"bootm; " \
-				"else " \
-					"echo WARN: Cannot load the DT; " \
-				"fi; " \
-			"fi; " \
-		"else " \
-			"bootm; " \
-		"fi;\0"
+	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
+		"bootm 0x12000000 - 0x22000000\0" \
+	"load_fdt=ext2load mmc 0:2 0x22000000 /boot/imx6q-himx0294.dtb\0" \
+	"load_kernel=ext2load mmc 0:2 0x12000000 /boot/uImage\0" \
+	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
+		"root=${bootroot} rootwait " \
+		"video=mxcfb0:dev=ldb,1280x768M@60,if=RGB24 " \
+		"video=mxcfb1:dev=hdmi,1280x1024M@60,if=RGB24 " \
+		"video=mxcfb2:off video=mxcfb3:off fbmem=24M,24M " \
+		"mxc_hdmi.only_cea=0 enable_wait_mode=off\0" \
+	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
+		"setenv bootroot /dev/mmcblk0p1; run do_boot\0" \
+	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
+		"setenv bootroot /dev/mmcblk0p2; run do_boot\0"
 
-#define CONFIG_BOOTCOMMAND \
-	"for mmcdev in ${mmcdevs}; do " \
-		"mmc dev ${mmcdev}; " \
-		"if mmc rescan; then " \
-			"if run loadbootscript; then " \
-				"run bootscript; " \
-			"else " \
-				"if run loaduimage; then " \
-					"run mmcboot; " \
-				"fi; " \
-			"fi; " \
-		"fi; " \
-	"done; " \
-	"run netboot; "
-#else
-#define CONFIG_EXTRA_ENV_SETTINGS \
-	"bootdevs=" CONFIG_DRIVE_TYPES "\0" \
-	"umsdevs=" CONFIG_UMSDEVS "\0" \
-	"console=ttymxc1\0" \
-	"clearenv=if sf probe || sf probe || sf probe 1 ; then " \
-		"sf erase 0xc0000 0x2000 && " \
-		"echo restored environment to factory default ; fi\0" \
-	"bootcmd=for dtype in ${bootdevs}" \
-		"; do " \
-			"if itest.s \"xusb\" == \"x${dtype}\" ; then " \
-				"usb start ;" \
-			"fi; " \
-			"for disk in 0 1 ; do ${dtype} dev ${disk} ;" \
-				"load " \
-					"${dtype} ${disk}:1 " \
-					"10008000 " \
-					"/6x_bootscript" \
-					"&& source 10008000 ; " \
-			"done ; " \
-		"done; " \
-		"setenv stdout serial,vga ; " \
-		"echo ; echo 6x_bootscript not found ; " \
-		"echo ; echo serial console at 115200, 8N1 ; echo ; " \
-		"echo details at http://boundarydevices.com/6q_bootscript ; " \
-		"setenv stdout serial;" \
-		"setenv stdin serial,usbkbd;" \
-		"for dtype in ${umsdevs} ; do " \
-			"if itest.s sata == ${dtype}; then " \
-				"initcmd='sata init' ;" \
-			"else " \
-				"initcmd='mmc rescan' ;" \
-			"fi; " \
-			"for disk in 0 1 ; do " \
-				"if $initcmd && $dtype dev $disk ; then " \
-					"setenv stdout serial,vga; " \
-					"echo expose ${dtype} ${disk} " \
-						"over USB; " \
-					"ums 0 $dtype $disk ;" \
-				"fi; " \
-		"	done; " \
-		"done ;" \
-		"setenv stdout serial,vga; " \
-		"echo no block devices found;" \
-		"\0" \
-	"initrd_high=0xffffffff\0" \
-	"upgradeu=for dtype in ${bootdevs}" \
-		"; do " \
-		"for disk in 0 1 ; do ${dtype} dev ${disk} ;" \
-			"load ${dtype} ${disk}:1 10008000 " \
-				"/6x_upgrade " \
-				"&& source 10008000 ; " \
-		"done ; " \
-	"done\0" \
-
-#endif
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
 #define CONFIG_SYS_HUSH_PARSER
