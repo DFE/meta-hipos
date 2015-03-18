@@ -158,12 +158,20 @@
 
 #undef CONFIG_CMD_IMLS
 
-#define CONFIG_BOOTDELAY	       1
-
 #define CONFIG_PREBOOT                 ""
 
 #define CONFIG_LOADADDR			       0x12000000
 #define CONFIG_SYS_TEXT_BASE	       0x17800000
+
+/*
+ * auto boot
+ */
+#define CONFIG_AUTOBOOT_KEYED
+#define CONFIG_AUTOBOOT_STOP_STR "."
+#define CONFIG_ZERO_BOOTDELAY_CHECK
+#define CONFIG_BOOTDELAY 0
+#define CONFIG_AUTOBOOT_PROMPT \
+                        "Press . to abort autoboot in %d seconds\n",bootdelay
 
 #define CONFIG_BOOTCOMMAND	"run x_bootA"
 
