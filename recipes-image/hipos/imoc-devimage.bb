@@ -2,8 +2,6 @@
 
 require hipos-image.inc
 
-PR_append = ".5"
-
 export IMAGE_BASENAME = "imoc-devimage"
 
 IMAGE_FSTYPES = "tar.bz2"

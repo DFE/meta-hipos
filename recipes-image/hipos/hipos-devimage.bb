@@ -1,7 +1,5 @@
 require hipos-image.inc
 
-PR_append = ".4"
-
 export IMAGE_BASENAME = "hipos-devimage"
 
 IMAGE_FSTYPES = "tar.bz2"

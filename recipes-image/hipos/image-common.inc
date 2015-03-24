@@ -2,8 +2,6 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-PR_append = "+r19"
-
 IMAGE_FEATURES += " package-management "
 
 IMAGE_INSTALL += "          \
