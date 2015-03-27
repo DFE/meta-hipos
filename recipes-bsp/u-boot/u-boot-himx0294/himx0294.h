@@ -181,8 +181,8 @@
 	"console=ttymxc1\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm 0x12000000 - 0x22000000\0" \
-	"load_fdt=ext2load mmc 0:2 0x22000000 /boot/imx6q-himx0294.dtb\0" \
-	"load_kernel=ext2load mmc 0:2 0x12000000 /boot/uImage\0" \
+	"load_fdt=ext2load mmc ${bootdev}:${bootpart} 0x22000000 /boot/imx6q-himx0294.dtb\0" \
+	"load_kernel=ext2load mmc ${bootdev}:${bootpart} 0x12000000 /boot/uImage\0" \
 	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
 		"root=${bootroot} rootwait " \
 		"video=mxcfb0:dev=ldb,1280x768M@60,if=RGB24 " \
