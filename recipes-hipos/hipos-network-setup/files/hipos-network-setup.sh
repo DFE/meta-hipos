@@ -19,20 +19,16 @@ echo "lanspeed=$lanspeed"
 
 for (( i=0; i<${#lanspeed}; i++ ))
 do
+        ifconfig eth$i down
         if [ "${lanspeed:$i:1}" == "g" ]
                 then
                         echo "eth$i: use 1000MBit/s"
                         ethtool -s eth$i advertise 0xFF
-                        ifconfig eth$i down
-                        sleep 1
-                        ifconfig eth$i up
                 else
                         echo "eth$i: use 100MBit/s"
                         ethtool -s eth$i advertise 0xF
-                        ifconfig eth$i down
-                        sleep 1
-                        ifconfig eth$i up
         fi
+        ifconfig eth$i up
 done
 
 exit 0
