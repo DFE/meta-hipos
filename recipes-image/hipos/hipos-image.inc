@@ -6,3 +6,7 @@ IMAGE_INSTALL_append_hikirk += " \
   hipos-watchdog \
 "
 
+IMAGE_INSTALL_append_himx0294 += " \
+  hipos-watchdog \
+"
+
