@@ -10,7 +10,6 @@ IMAGE_INSTALL += "          \
   linux-firmware-ralink     \
   htop                      \
   bash                      \
-  hipos-network-setup       \
   python-netserver          \
   python-subprocess         \
   udev-extraconf            \
@@ -23,6 +22,7 @@ IMAGE_INSTALL_append_hikirk += "   \
   drbcc                     \
   hipos-device-info         \
   hipos-time                \
+  hipos-network-setup       \
   telit-910                 \
 "
 
