@@ -1,21 +1,22 @@
-From bce59c37991d04edac087ba78bf9a81c6bc4a63b Mon Sep 17 00:00:00 2001
+From ee78590cfbd434f75ca5476f1b10ebd3d745675a Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 27 Feb 2015 08:33:10 +0100
-Subject: [PATCH] iio: tsl2x7x: Fix trigger
+Date: Tue, 7 Apr 2015 15:36:01 +0200
+Subject: [PATCH] iio: tsl2x7x: Fix trigger, set defaults
 
 Interrupt trigger is low and not rising.
 Set 0x11 as default for Persistence Register 0xC.
+Set proximity pulse count to 2, Proximity Pulse Count register 0xE.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/staging/iio/light/tsl2x7x_core.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/staging/iio/light/tsl2x7x_core.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/staging/iio/light/tsl2x7x_core.c b/drivers/staging/iio/light/tsl2x7x_core.c
-index d64da7a..b2a9129 100644
+index d64da7a..75408bc 100644
 --- a/drivers/staging/iio/light/tsl2x7x_core.c
 +++ b/drivers/staging/iio/light/tsl2x7x_core.c
-@@ -247,7 +247,7 @@ static const struct tsl2x7x_settings tsl2x7x_default_settings = {
+@@ -247,12 +247,12 @@ static const struct tsl2x7x_settings tsl2x7x_default_settings = {
  	.als_cal_target = 150,
  	.als_thresh_low = 200,
  	.als_thresh_high = 256,
@@ -24,6 +25,12 @@ index d64da7a..b2a9129 100644
  	.interrupts_en = 0,
  	.prox_thres_low  = 0,
  	.prox_thres_high = 512,
+ 	.prox_max_samples_cal = 30,
+-	.prox_pulse_count = 8
++	.prox_pulse_count = 1
+ };
+ 
+ static const s16 tsl2X7X_als_gainadj[] = {
 @@ -1906,7 +1906,7 @@ static int tsl2x7x_probe(struct i2c_client *clientp,
  		ret = request_threaded_irq(clientp->irq,
  					   NULL,
