@@ -1,5 +1,0 @@
-ABORT 'BUSY'
-ABORT 'NO CARRIER'
-ABORT 'ERROR' 
-''     'ATD*99***1#'
-'CONNECT' ''

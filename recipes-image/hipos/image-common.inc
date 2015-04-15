@@ -24,7 +24,6 @@ IMAGE_INSTALL_append_hikirk += "   \
   hipos-device-info         \
   hipos-time                \
   hipos-network-setup       \
-  telit-910                 \
 "
 
 IMAGE_INSTALL_append_himx0294 += "   \
