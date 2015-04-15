@@ -14,6 +14,7 @@ IMAGE_INSTALL += "          \
   python-subprocess         \
   udev-extraconf            \
   connman-client            \
+  hip-udev-extra-rules      \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \

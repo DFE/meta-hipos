@@ -1,12 +1,14 @@
 DESCRIPTION = "HIPOS Boardcontroller communication tool"
 SECTION = "libs"
 DEPENDS = "readline lockdev"
+RDEPENDS_${PN} = "hip-udev-extra-rules"
+RDEPENDS_drbcc = "hip-udev-extra-rules"
 
 LICENSE = "GPLv3 LGPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
 		    file://COPYING.LIB;md5=e6a600fd5e1d9cbde2d983680233ad02 "
 
-PR = "r4"
+PR = "r6"
 
 S = "${WORKDIR}/git"
 
