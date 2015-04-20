@@ -23,10 +23,6 @@
 	compatible = "dfe,himx0294", "fsl,imx6q";
 };
 
-&hdmi_core {
-	ipu_id = <1>;
-};
-
 &mxcfb1 {
 	status = "okay";
 };
@@ -35,27 +31,7 @@
 	status = "okay";
 };
 
-&mxcfb3 {
-	status = "okay";
-};
-
-&mxcfb4 {
-	status = "okay";
-};
-
 &sata {
 	status = "okay";
 };
 
-/* ov5640_mipi */
-&v4l2_cap_1 {
-	ipu_id = <1>;
-	csi_id = <0>;
-	mipi_camera = <1>;
-};
-
-/* adv7180, ov5640 */
-&v4l2_cap_2 {
-	ipu_id = <1>;
-	csi_id = <1>;
-};
