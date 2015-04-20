@@ -4,6 +4,9 @@ require recipes-images/angstrom/systemd-image.bb
 
 IMAGE_FEATURES += " package-management "
 
+# HIPOS does not use connman like Angstrom does
+IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi"
+
 IMAGE_INSTALL += "          \
   kernel-modules            \
   kernel-devicetree         \
@@ -13,8 +16,8 @@ IMAGE_INSTALL += "          \
   python-netserver          \
   python-subprocess         \
   udev-extraconf            \
-  connman-client            \
   hip-udev-extra-rules      \
+  init-ifupdown             \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
