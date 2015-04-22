@@ -179,16 +179,18 @@
 	"boot_usb=start usb; setenv boottype usb; setenv bootdev 0; " \
 		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
 	"console=ttymxc1\0" \
+	"kernel_addr=0x12000000\0" \
+	"kernel_file=/boot/uImage\0" \
+	"fdt_addr=0x22000000\0" \
+	"fdt_file=/boot/imx6q-himx0294.dtb\0" \
+	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
-		"bootm 0x12000000 - 0x22000000\0" \
-	"load_fdt=ext2load mmc ${bootdev}:${bootpart} 0x22000000 /boot/imx6q-himx0294.dtb\0" \
-	"load_kernel=ext2load mmc ${bootdev}:${bootpart} 0x12000000 /boot/uImage\0" \
+		"bootm ${kernel_addr} - ${fdt_addr}\0" \
+	"load_fdt=ext2load ${boottype} ${bootdev}:${bootpart} ${fdt_addr} ${fdt_file}\0" \
+	"load_kernel=ext2load ${boottype} ${bootdev}:${bootpart} ${kernel_addr} ${kernel_file}\0" \
 	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
 		"root=${bootroot} rootwait " \
-		"video=mxcfb0:dev=ldb,1280x768M@60,if=RGB24 " \
-		"video=mxcfb1:dev=hdmi,1280x1024M@60,if=RGB24 " \
-		"video=mxcfb2:off video=mxcfb3:off fbmem=24M,24M " \
-		"mxc_hdmi.only_cea=0 enable_wait_mode=off\0" \
+		"mxc_hdmi.only_cea=0\0" \
 	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
 		"setenv bootroot /dev/mmcblk0p1; run do_boot\0" \
 	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
