@@ -68,6 +68,7 @@ RDEPENDS_packagegroup-hipos-gstreamer = "\
     gst-plugins-good-rtp \
     gst-plugins-good-rtpmanager \
     gst-plugins-good-rtsp \
+    gst-fluendo-mpegdemux \
     gstreamer1.0-plugins-base-meta \
     gstreamer1.0-plugins-good-meta \
     gstreamer1.0-plugins-bad-meta \
