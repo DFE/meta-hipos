@@ -22,7 +22,6 @@ IMAGE_INSTALL += " \
   memtester \
   bonnie++ \
   tiobench \
-  imx-test \
   sntp \
 "
 
