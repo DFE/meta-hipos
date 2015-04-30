@@ -57,7 +57,6 @@ IMAGE_INSTALL += "  \
 
 # helpers
 IMAGE_INSTALL += "  \
-  vim               \
   mtd-utils         \
   mc                \
   nano              \
