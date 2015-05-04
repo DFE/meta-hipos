@@ -270,6 +270,42 @@
 			>;
 		};
 	};
+
+	pwm3 {
+		pinctrl_pwm3_2: pwm3grp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_SD1_DAT1__PWM3_OUT 0x1b0b1
+			>;
+		};
+	};
+
+	pwm4 {
+		pinctrl_pwm4_2: pwm4grp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_SD1_CMD__PWM4_OUT 0x1b0b1
+			>;
+		};
+	};
+
+	uart1 {
+		pinctrl_uart1_2: uart1grp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_SD3_DAT7__UART1_TX_DATA 0x1b0b1
+				MX6QDL_PAD_SD3_DAT6__UART1_RX_DATA 0x1b0b1
+			>;
+		};
+	};
+
+	uart3 {
+		pinctrl_uart3_2: uart3grp-2 {
+			fsl,pins = <
+				MX6QDL_PAD_EIM_D25__UART3_RX_DATA 0x1b0b1
+				MX6QDL_PAD_EIM_D24__UART3_TX_DATA 0x1b0b1
+				MX6QDL_PAD_EIM_D23__UART3_CTS_B   0x1b0b1
+				MX6QDL_PAD_EIM_D31__UART3_RTS_B   0x1b0b1
+			>;
+		};
+	};
 };
 
 &ldb {

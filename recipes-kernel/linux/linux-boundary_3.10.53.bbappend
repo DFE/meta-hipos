@@ -7,7 +7,6 @@ SRC_URI_append_himx0280 =  " \
 	file://defconfig \
 	file://imx6qdl-himx0280.dtsi \
 	file://imx6q-himx0280.dts \
-	file://0001-add-himx0280-board.patch \
 "
 
 SRC_URI_append_himx0294 = " \
@@ -15,7 +14,6 @@ SRC_URI_append_himx0294 = " \
 	file://imx6qdl-himx0294.dtsi \
 	file://imx6q-himx0294.dts \
 	file://mlb-pll.patch \
-	file://iio-tsl2x7x-fix-proximity-setting.patch \
 	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-mii-access.patch \
 	file://fec-main-simulate-phy.patch \
@@ -26,18 +24,18 @@ SRC_URI_append_himx0294 = " \
 "
 
 do_configure_prepend_himx0280() {
-	cp ${WORKDIR}/defconfig ${B}/arch/arm/configs/himx0280_defconfig
-	cp ${WORKDIR}/imx6qdl-himx0280.dtsi ${B}/arch/arm/boot/dts/imx6qdl-himx0280.dtsi
-	cp ${WORKDIR}/imx6q-himx0280.dts ${B}/arch/arm/boot/dts/imx6q-himx0280.dts
+	cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0280_defconfig
+	cp ${WORKDIR}/imx6qdl-himx0280.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0280.dtsi
+	cp ${WORKDIR}/imx6q-himx0280.dts ${S}/arch/arm/boot/dts/imx6q-himx0280.dts
 }
 
 do_configure_prepend_himx0294() {
-        cp ${WORKDIR}/defconfig ${B}/arch/arm/configs/himx0294_defconfig
-	cp ${WORKDIR}/imx6qdl-himx0294.dtsi ${B}/arch/arm/boot/dts/imx6qdl-himx0294.dtsi
-	cp ${WORKDIR}/imx6q-himx0294.dts ${B}/arch/arm/boot/dts/imx6q-himx0294.dts
+        cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0294_defconfig
+	cp ${WORKDIR}/imx6qdl-himx0294.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294.dtsi
+	cp ${WORKDIR}/imx6q-himx0294.dts ${S}/arch/arm/boot/dts/imx6q-himx0294.dts
 }
 
 do_configure_prepend_nitrogen6x() {
-        cp ${WORKDIR}/defconfig ${B}/arch/arm/configs/nitrogen6x_defconfig
+        cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/nitrogen6x_defconfig
 }
 
