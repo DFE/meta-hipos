@@ -7,6 +7,7 @@ SRC_URI_append_himx0280 =  " \
 	file://defconfig \
 	file://imx6qdl-himx0280.dtsi \
 	file://imx6q-himx0280.dts \
+	file://0001-net-core-tso.c-implicit-declaration-of-function-tcp_.patch \
 "
 
 SRC_URI_append_himx0294 = " \
