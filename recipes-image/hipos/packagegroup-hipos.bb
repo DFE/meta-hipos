@@ -13,15 +13,12 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtbase-fonts \
     qtbase-plugins \
     qtbase-tools \
-    qtbase-examples \
     qtdeclarative \
     qtdeclarative-plugins \
     qtdeclarative-tools \
-    qtdeclarative-examples \
     qtdeclarative-qmlplugins \
     qtmultimedia \
     qtmultimedia-plugins \
-    qtmultimedia-examples \
     qtmultimedia-qmlplugins \
     qtsvg \
     qtsvg-plugins \
@@ -29,11 +26,9 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtimageformats-plugins \
     qtsystems \
     qtsystems-tools \
-    qtsystems-examples \
     qtsystems-qmlplugins \
     qtscript \
     qt3d \
-    qt3d-examples \
     qt3d-qmlplugins \
     qt3d-tools \
     qtgraphicaleffects-qmlplugins \
@@ -41,7 +36,6 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtlocation-plugins \
     qtlocation-qmlplugins \
     qtwebkit \
-    qtwebkit-examples-examples \
     qtwebkit-qmlplugins \
 "
 
@@ -49,6 +43,7 @@ RDEPENDS_packagegroup-hipos-qt-examples = "\
     cinematicexperience \
     qtsmarthome \
     qt5everywheredemo \
+    qtwebkit-examples-examples \
 "
 
 RDEPENDS_packagegroup-hipos-gstreamer = "\
