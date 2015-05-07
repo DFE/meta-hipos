@@ -1,32 +1,56 @@
-From 91a2d84991bf47b65c8d1797e361622f10488baa Mon Sep 17 00:00:00 2001
+From 8edad7022813794ee3e2192a7d2242e3aa70b656 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 10 Nov 2014 11:54:22 +0100
+Date: Thu, 7 May 2015 09:10:29 +0200
 Subject: [PATCH] hikirk: add hikirk board
 
 Add support for hikirk board
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- arch/arm/include/asm/mach-types.h |   1 +
- board/Marvell/hikirk/Kconfig      |  23 ++++++
- board/Marvell/hikirk/Makefile     |  14 ++++
- board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
- boards.cfg                        |   1 +
- include/configs/hikirk.h          | 151 +++++++++++++++++++++++++++++++++
- 6 files changed, 360 insertions(+)
+ arch/arm/cpu/arm926ejs/kirkwood/Kconfig |   4 +
+ arch/arm/include/asm/mach-types.h       |   1 +
+ board/Marvell/hikirk/Kconfig            |  23 +++++
+ board/Marvell/hikirk/Makefile           |  14 +++
+ board/Marvell/hikirk/hikirk.c           | 170 ++++++++++++++++++++++++++++++++
+ configs/hikirk_defconfig                |   4 +
+ include/configs/hikirk.h                | 153 ++++++++++++++++++++++++++++
+ 7 files changed, 369 insertions(+)
  create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
+ create mode 100644 configs/hikirk_defconfig
  create mode 100644 include/configs/hikirk.h
 
+diff --git a/arch/arm/cpu/arm926ejs/kirkwood/Kconfig b/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
+index 6c037a1..53bc464 100644
+--- a/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
++++ b/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
+@@ -3,6 +3,9 @@ if KIRKWOOD
+ choice
+ 	prompt "Marvell Kirkwood board select"
+ 
++config TARGET_HIKIRK
++	bool "Marvell hikirk Board"
++
+ config TARGET_OPENRD
+ 	bool "Marvell OpenRD Board"
+ 
+@@ -63,6 +66,7 @@ config SYS_SOC
+ 	default "kirkwood"
+ 
+ source "board/Marvell/openrd/Kconfig"
++source "board/Marvell/hikirk/Kconfig"
+ source "board/Marvell/mv88f6281gtw_ge/Kconfig"
+ source "board/Marvell/rd6281a/Kconfig"
+ source "board/Marvell/dreamplug/Kconfig"
 diff --git a/arch/arm/include/asm/mach-types.h b/arch/arm/include/asm/mach-types.h
-index 440b041..a3c36f7 100644
+index d4a447b..41d9a7b 100644
 --- a/arch/arm/include/asm/mach-types.h
 +++ b/arch/arm/include/asm/mach-types.h
-@@ -1106,6 +1106,7 @@ extern unsigned int __machine_arch_type;
- #define MACH_TYPE_OMAP5_SEVM           3777
- #define MACH_TYPE_ARMADILLO_800EVA     3863
+@@ -1108,6 +1108,7 @@ extern unsigned int __machine_arch_type;
  #define MACH_TYPE_KZM9G                4140
+ #define MACH_TYPE_COLIBRI_T30          4493
+ #define MACH_TYPE_APALIS_T30           4513
 +#define MACH_TYPE_HIKIRK               4745
  
  #ifdef CONFIG_ARCH_EBSA110
@@ -82,7 +106,7 @@ index 0000000..f323ab8
 +obj-y	:= hikirk.o
 diff --git a/board/Marvell/hikirk/hikirk.c b/board/Marvell/hikirk/hikirk.c
 new file mode 100644
-index 0000000..6faa856
+index 0000000..cd484a0
 --- /dev/null
 +++ b/board/Marvell/hikirk/hikirk.c
 @@ -0,0 +1,170 @@
@@ -119,7 +143,7 @@ index 0000000..6faa856
 +#include <common.h>
 +#include <miiphy.h>
 +#include <asm/arch/cpu.h>
-+#include <asm/arch/kirkwood.h>
++#include <asm/arch/soc.h>
 +#include <asm/arch/mpp.h>
 +
 +#define HIKIRK_OE_LOW		(~(1<<28))        /* RS232 / RS485 */
@@ -136,7 +160,7 @@ index 0000000..6faa856
 +	 * There are maximum 64 gpios controlled through 2 sets of registers
 +	 * the  below configuration configures mainly initial LED status
 +	 */
-+	kw_config_gpio(HIKIRK_OE_VAL_LOW,
++	mvebu_config_gpio(HIKIRK_OE_VAL_LOW,
 +			HIKIRK_OE_VAL_HIGH,
 +			HIKIRK_OE_LOW, HIKIRK_OE_HIGH);
 +
@@ -207,7 +231,7 @@ index 0000000..6faa856
 +	gd->bd->bi_arch_number = MACH_TYPE_HIKIRK;
 +
 +	/* adress of boot parameters */
-+	gd->bd->bi_boot_params = kw_sdram_bar(0) + 0x100;
++	gd->bd->bi_boot_params = mvebu_sdram_bar(0) + 0x100;
 +	return 0;
 +}
 +
@@ -256,24 +280,22 @@ index 0000000..6faa856
 +	mv_phy_init("egiga1");
 +}
 +#endif /* CONFIG_RESET_PHY_R */
-diff --git a/boards.cfg b/boards.cfg
-index 1ba2081..e608ad7 100644
---- a/boards.cfg
-+++ b/boards.cfg
-@@ -191,6 +191,7 @@ Active  arm         arm926ejs      kirkwood    LaCie           wireless_space
- Active  arm         arm926ejs      kirkwood    Marvell         dreamplug           dreamplug                             -                                                                                                                                 Jason Cooper <u-boot@lakedaemon.net>
- Active  arm         arm926ejs      kirkwood    Marvell         guruplug            guruplug                              -                                                                                                                                 Siddarth Gore <gores@marvell.com>
- Active  arm         arm926ejs      kirkwood    Marvell         mv88f6281gtw_ge     mv88f6281gtw_ge                       -                                                                                                                                 Prafulla Wadaskar <prafulla@marvell.com>
-+Active  arm         arm926ejs      kirkwood    Marvell         hikirk              hikirk                                -                                                                                                                                 Prafulla Wadaskar <prafulla@marvell.com>
- Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_base                           openrd:BOARD_IS_OPENRD_BASE                                                                                                       Prafulla Wadaskar <prafulla@marvell.com>
- Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_client                         openrd:BOARD_IS_OPENRD_CLIENT                                                                                                     -
- Active  arm         arm926ejs      kirkwood    Marvell         openrd              openrd_ultimate                       openrd:BOARD_IS_OPENRD_ULTIMATE                                                                                                   -
+diff --git a/configs/hikirk_defconfig b/configs/hikirk_defconfig
+new file mode 100644
+index 0000000..e907c2b
+--- /dev/null
++++ b/configs/hikirk_defconfig
+@@ -0,0 +1,4 @@
++CONFIG_SYS_EXTRA_OPTIONS="BOARD_IS_HIKIRK"
++CONFIG_ARM=y
++CONFIG_KIRKWOOD=y
++CONFIG_TARGET_HIKIRK=y
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..9721498
+index 0000000..a946154
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,153 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -331,8 +353,6 @@ index 0000000..9721498
 +#define CONFIG_CMD_ENV
 +#define CONFIG_CMD_MII
 +#define CONFIG_CMD_MMC
-+#define CONFIG_SPI_FLASH_MACRONIX
-+#define CONFIG_SPI_FLASH_STMICRO
 +#define CONFIG_CMD_SPI
 +#define CONFIG_CMD_SF
 +#define CONFIG_SF_DEFAULT_SPEED  80000000
@@ -347,6 +367,9 @@ index 0000000..9721498
 + */
 +#include "mv-common.h"
 +
++#undef CONFIG_SPI_FLASH_MACRONIX
++#define CONFIG_SPI_FLASH_MACRONIX
++#define CONFIG_SPI_FLASH_STMICRO
 +/*
 + *  Environment variables configurations
 + */
@@ -376,6 +399,7 @@ index 0000000..9721498
 +#define CONFIG_AUTOBOOT_KEYED
 +#define CONFIG_AUTOBOOT_STOP_STR "."
 +#define CONFIG_ZERO_BOOTDELAY_CHECK
++#undef CONFIG_BOOTDELAY
 +#define CONFIG_BOOTDELAY 0
 +#define CONFIG_AUTOBOOT_PROMPT \
 +                        "Press . to abort autoboot in %d seconds\n",bootdelay
@@ -426,5 +450,5 @@ index 0000000..9721498
 +
 +#endif /* _CONFIG_HIKIRK_H */
 -- 
-1.8.4.5
+2.1.4
 

@@ -1,4 +1,4 @@
-require recipes-bsp/u-boot/u-boot_2014.07.bb
+require recipes-bsp/u-boot/u-boot_2015.01.bb
 
 COMPATIBLE_MACHINE = "hikirk"
 
@@ -12,12 +12,8 @@ SRC_URI_append_hikirk = " \
 	file://kwbimage_sata.hdr \
 	file://kwbimage_spi.hdr \
 	file://hikirk-board-support.patch \
-	file://add-mvsdio-driver.patch \
-	file://mvsdio-driver-addtion.patch \
-	file://fix-mmc-bus-width.patch \
 	file://fix-mmc-high-capacity.patch \
 	file://env_sf-fix-recovery-default.patch \
-	file://mmc-speed-up.patch \
 "
 
 do_compile_append_hikirk () {
