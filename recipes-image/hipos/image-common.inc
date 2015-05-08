@@ -35,6 +35,9 @@ IMAGE_INSTALL_append_himx0294 += "   \
 "
 
 IMAGE_INSTALL_append_himx0294 += " \
+  tslib \
+  tslib-calibrate \
+  tslib-tests \
   packagegroup-hipos-qt     \
   packagegroup-hipos-qt-examples \
   packagegroup-fsl-gstreamer \
