@@ -19,6 +19,7 @@ SRC_URI_append_himx0294 = " \
 	file://fec-main-mii-access.patch \
 	file://fec-main-simulate-phy.patch \
 	file://rafi-touchscreen-support.patch \
+	file://rafi-touchscreen-event-report.patch \
 	file://telit-modem-support.patch \
 	file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
 	file://0002-igb-intel-i210-skip-eprom-error-HYP-11312.patch \
