@@ -192,9 +192,9 @@
 		"root=${bootroot} rootwait " \
 		"mxc_hdmi.only_cea=0\0" \
 	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
-		"setenv bootroot /dev/mmcblk0p1; run do_boot\0" \
+		"setenv bootroot /dev/mmcblk2p1; run do_boot\0" \
 	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
-		"setenv bootroot /dev/mmcblk0p2; run do_boot\0"
+		"setenv bootroot /dev/mmcblk2p2; run do_boot\0"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
