@@ -176,7 +176,7 @@
 #define CONFIG_BOOTCOMMAND	"run x_bootA"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"boot_usb=start usb; setenv boottype usb; setenv bootdev 0; " \
+	"boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
 		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
 	"console=ttymxc1\0" \
 	"kernel_addr=0x12000000\0" \
