@@ -133,8 +133,6 @@ IMAGE_INSTALL_append_himx0294 += " \
   gpu-viv-bin-mx6q \
   gpu-viv-g2d \
   eglinfo-fb \
-  tw6869 \
-  tw6869-vbuf2 \
   packagegroup-fsl-gstreamer \
   packagegroup-fslc-gstreamer1.0 \
   gstreamer1.0-plugins-imx \
