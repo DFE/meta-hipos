@@ -44,8 +44,6 @@ IMAGE_INSTALL_append_himx0294 += " \
   packagegroup-hipos-gstreamer \
   gstreamer1.0-plugins-imx \
   eglinfo-fb \
-  tw6869 \
-  tw6869-vbuf2 \
   packagegroup-fslc-gstreamer1.0 \
   gst-fsl-plugin \
   fsl-alsa-plugins \
