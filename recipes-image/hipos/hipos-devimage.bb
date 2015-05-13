@@ -45,11 +45,11 @@ IMAGE_INSTALL += " \
   gst-plugins-good-rtsp \
   v4l-utils \
   live555 \
-  opencv \
-  opencv-dev \
 "
 
 IMAGE_INSTALL_append_himx0280 += " \
+  opencv \
+  opencv-dev \
   gst-fsl-plugin \
   fsl-alsa-plugins \
 "
