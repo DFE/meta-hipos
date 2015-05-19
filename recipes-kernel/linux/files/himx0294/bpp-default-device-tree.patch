@@ -23,8 +23,8 @@ index 344f243..d331b40 100644
 -		if(mxcfbi->fb_pix_fmt == 0)
 +		if(mxcfbi->fb_pix_fmt == 0) {
  			mxcfbi->fb_pix_fmt = bpp_to_pixfmt(setting.default_bpp);
-+			if (fb_pix_fmt)
-+				pixfmt_to_var(fb_pix_fmt, &fbi->var);
++			if (mxcfbi->fb_pix_fmt)
++				pixfmt_to_var(mxcfbi->fb_pix_fmt, &fbi->var);
 +		}
  
  		ret = mxcfb_get_crtc(&pdev->dev, mxcfbi, setting.crtc);
