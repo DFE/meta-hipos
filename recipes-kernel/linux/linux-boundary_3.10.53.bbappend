@@ -11,7 +11,6 @@ SRC_URI_append_himx0280 =  " \
 "
 
 SRC_URI_append_himx0294 = " \
-	file://0001-re-implemented-CONFIG_MX6_VPU_352M.patch \
 	file://imx6qdl-himx0294.dtsi \
 	file://imx6q-himx0294.dts \
 	file://mlb-pll.patch \
