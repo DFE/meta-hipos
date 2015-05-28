@@ -61,7 +61,6 @@ IMAGE_INSTALL += "  \
   mtd-utils         \
   mc                \
   nano              \
-  vim               \
   screen            \
   file              \
   minicom           \
