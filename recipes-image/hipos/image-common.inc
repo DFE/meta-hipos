@@ -4,6 +4,9 @@ require recipes-images/angstrom/systemd-image.bb
 
 IMAGE_FEATURES += " package-management "
 
+# remove connman
+IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi"
+
 IMAGE_INSTALL += "          \
   kernel-modules            \
   kernel-devicetree         \
@@ -13,7 +16,6 @@ IMAGE_INSTALL += "          \
   python-netserver          \
   python-subprocess         \
   udev-extraconf            \
-  connman-client            \
   hip-udev-extra-rules      \
 "
 
@@ -59,6 +61,7 @@ IMAGE_INSTALL += "  \
   mtd-utils         \
   mc                \
   nano              \
+  vim               \
   screen            \
   file              \
   minicom           \
@@ -74,6 +77,7 @@ IMAGE_INSTALL += "  \
     iperf           \
     procps          \
     wireless-tools  \
+    init-ifupdown   \
 "
 
 # smb support
@@ -96,4 +100,3 @@ IMAGE_INSTALL += "      \
     hdparm		\
     smartmontools	\
 "
-

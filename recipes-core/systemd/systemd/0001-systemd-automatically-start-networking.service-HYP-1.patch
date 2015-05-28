@@ -1,0 +1,26 @@
+From 07ac17e22ce66a6701e142602216ff98c1b61dbe Mon Sep 17 00:00:00 2001
+From: Angelika Tobisch <tobisch@dresearch-fe.de>
+Date: Thu, 28 May 2015 15:00:26 +0200
+Subject: [PATCH] systemd: automatically start networking.service, HYP-11339
+
+The service has been added to network.target.
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+Signed-off-by: Angelika Tobisch <tobisch@dresearch-fe.de>
+---
+ units/network.target | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/units/network.target b/units/network.target
+index 65fc64b..14cc326 100644
+--- a/units/network.target
++++ b/units/network.target
+@@ -9,3 +9,5 @@
+ Description=Network
+ Documentation=man:systemd.special(7)
+ Documentation=http://www.freedesktop.org/wiki/Software/systemd/NetworkTarget
++Requires=networking.service
++After=networking.service
+-- 
+2.1.0
+
