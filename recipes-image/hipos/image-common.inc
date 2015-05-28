@@ -73,6 +73,7 @@ IMAGE_INSTALL += "  \
     tcpdump         \
     iperf           \
     procps          \
+    wireless-tools  \
 "
 
 # smb support
