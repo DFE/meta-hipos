@@ -186,8 +186,8 @@
 	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm ${kernel_addr} - ${fdt_addr}\0" \
-	"load_fdt=ext2load ${boottype} ${bootdev}:${bootpart} ${fdt_addr} ${fdt_file}\0" \
-	"load_kernel=ext2load ${boottype} ${bootdev}:${bootpart} ${kernel_addr} ${kernel_file}\0" \
+	"load_fdt=ext4load ${boottype} ${bootdev}:${bootpart} ${fdt_addr} ${fdt_file}\0" \
+	"load_kernel=ext4load ${boottype} ${bootdev}:${bootpart} ${kernel_addr} ${kernel_file}\0" \
 	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
 		"root=${bootroot} rootwait " \
 		"mxc_hdmi.only_cea=0\0" \
