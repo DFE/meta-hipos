@@ -4,9 +4,6 @@ Requires=network.target
 After=network.target
 Requires=hipos-device-info.service
 After=hipos-device-info.service
-# Make sure that network speed is set after connman. HYP-11185
-Requires=connman.service
-After=connman.service
 
 [Service]
 Type=oneshot
