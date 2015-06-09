@@ -284,11 +284,87 @@ static void setup_spi(void)
 }
 #endif
 
+#define SMI_PHY_COMMAND_REGISTER 0x18
+#define SMI_PHY_DATA_REGISTER    0x19
+#define MARVELL_GLOBAL2_ADDR 0x1C
+#define SMI_BUSY_BIT 15
+#define PHY_SPEED_1000 0xe00
+#define PHY_SPEED_100  0x0
+/*
+ * Reads a Marvell register from the MII Management serial interface
+ */
+static unsigned short marvell_phy_read(int phyaddr, int phyreg)
+{
+	const char* devname = miiphy_get_current_dev();
+	unsigned short val;
+	int cmd = 0x9800;
+	cmd |= ((phyaddr & 0x1F) << 5);
+	cmd |= (phyreg & 0x1F);
+	miiphy_write(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_COMMAND_REGISTER, cmd);
+
+	for (;;) {
+		miiphy_read(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_COMMAND_REGISTER, &val);
+		if (!(val & (1 << SMI_BUSY_BIT))) {
+			break;
+		}
+	}
+	miiphy_read(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_DATA_REGISTER, &val);
+	return val;
+}
+
+/*
+ * Writes a Marvell register to the MII Management serial interface
+ */
+static void marvell_phy_write(int phyaddr, int phyreg, int phydata)
+{
+	const char* devname = miiphy_get_current_dev();
+	int cmd = 0x9400;
+	cmd |= ((phyaddr & 0x1F) << 5);
+	cmd |= (phyreg & 0x1F);
+
+	miiphy_write(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_DATA_REGISTER, phydata);
+	miiphy_write(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_COMMAND_REGISTER, cmd);
+	for (;;) {
+		unsigned short val;
+		miiphy_read(devname, MARVELL_GLOBAL2_ADDR, SMI_PHY_COMMAND_REGISTER, &val);
+		if (!(val & (1 << SMI_BUSY_BIT))) {
+			break;
+		}
+	}
+}
+
+static void set_phy_speed(int phyaddr, int phydata)
+{
+	marvell_phy_write(phyaddr, MII_CTRL1000, phydata);
+	// reset to take effect
+	int ctrl = marvell_phy_read(phyaddr, MII_BMCR);
+	marvell_phy_write(phyaddr, MII_BMCR, ctrl|BMCR_RESET);
+	while (marvell_phy_read(phyaddr, MII_BMCR) & BMCR_RESET) {
+		udelay(250000);
+		printf(".");
+	}
+}
+
+static void phy_speed(void)
+{
+	int i;
+	char *lanspeed = getenv("lanspeed");
+
+	for(i=0; i<2; ++i) {
+		if(lanspeed && strlen(lanspeed)>i && lanspeed[i]=='g') {
+			set_phy_speed(i, PHY_SPEED_1000);
+		} else {
+			set_phy_speed(i, PHY_SPEED_100);
+		}
+	}
+}
+
 int board_phy_config(struct phy_device *phydev)
 {
 	unsigned short val;
 	const char* devname = miiphy_get_current_dev();
 
+	phy_speed();
 	/* Enable Tx and Rx RGMII delay on CPU port. */
 	/* Enable Forced Flow Control on CPU port. */
 	miiphy_read(devname, 0x15, 0x1, &val);
