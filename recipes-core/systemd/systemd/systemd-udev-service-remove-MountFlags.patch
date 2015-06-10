@@ -1,0 +1,29 @@
+From 765a7e40909251e907f6809592942924f2d19977 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 10 Jun 2015 09:02:26 +0200
+Subject: [PATCH] systemd-udev.service remove MountFlags
+
+Remove MountFlags=slave. The default MountFlags=shared is now active.
+MountFlags=shared ensures that mounts and umounts done by udev rules are
+propagated to host. See also
+
+http://www.volkerschatz.com/unix/advmount.html
+http://www.freedesktop.org/software/systemd/man/systemd.exec.html
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ units/systemd-udevd.service.in | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/units/systemd-udevd.service.in b/units/systemd-udevd.service.in
+index 2791f73..04f0b98 100644
+--- a/units/systemd-udevd.service.in
++++ b/units/systemd-udevd.service.in
+@@ -21,4 +21,3 @@ Sockets=systemd-udevd-control.socket systemd-udevd-kernel.socket
+ Restart=always
+ RestartSec=0
+ ExecStart=@rootlibexecdir@/systemd-udevd
+-MountFlags=slave
+-- 
+2.1.4
+

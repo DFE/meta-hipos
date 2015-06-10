@@ -12,13 +12,13 @@ Signed-off-by: Angelika Tobisch <tobisch@dresearch-fe.de>
  1 file changed, 2 insertions(+)
 
 diff --git a/units/network.target b/units/network.target
-index 65fc64b..14cc326 100644
+index 61ebdca..aa53844 100644
 --- a/units/network.target
 +++ b/units/network.target
-@@ -9,3 +9,5 @@
- Description=Network
- Documentation=man:systemd.special(7)
+@@ -11,3 +11,5 @@ Documentation=man:systemd.special(7)
  Documentation=http://www.freedesktop.org/wiki/Software/systemd/NetworkTarget
+ After=network-pre.target
+ RefuseManualStart=yes
 +Requires=networking.service
 +After=networking.service
 -- 
