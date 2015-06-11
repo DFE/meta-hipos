@@ -1,0 +1,13 @@
+#!/bin/sh
+
+VERBOSITY=0
+
+if [ -f "/var/run/udhcpc.$IFACE.pid" ]; then
+	/bin/cat /var/run/udhcpc.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+fi
+
+if [ -f "/var/run/wpa_supplicant.$IFACE.pid" ]; then
+	/bin/cat /var/run/wpa_supplicant.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+fi
+
+exit 0
