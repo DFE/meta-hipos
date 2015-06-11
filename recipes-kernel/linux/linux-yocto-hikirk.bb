@@ -55,26 +55,22 @@ require recipes-kernel/linux/linux-yocto.inc
 # Override SRC_URI in a bbappend file to point at a different source
 # tree if you do not want to build from Linus' tree.
 SRC_URI = " \
-	git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git;protocol=git;nocheckout=1;name=machine \
+	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git;protocol=git;branch=${SRCBRANCH};name=machine \
 	file://defconfig \
 	file://kirkwood-hikirk.dts \
 	file://m25p80-noBP.patch \
-	file://Add-Telit-modem-support.patch \
 	file://gadgetfs-fmode_can_read.patch \
-	file://net2280-fix-request-completion.patch \
-	file://gadgetfs-free-memory-allocated-by-memdup_user.patch \
-	file://0001-usb-gadget-f_fs-virtual-endpoint-address-mapping.patch \
 	file://0001-usb-gadget-composite-os-descriptor-specific-fix.patch \
 "
 
-LINUX_VERSION ?= "3.17"
+LINUX_VERSION ?= "3.19.8"
 LINUX_VERSION_EXTENSION ?= "-hikirk"
 
 # Override SRCREV to point to a different commit in a bbappend file to
 # build a different release of the Linux kernel.
 # tag: v3.4 76e10d158efb6d4516018846f60c2ab5501900bc
-SRCREV_machine="bfe01a5ba2490f299e1d2d5508cbbbadd897bbe9"
-
+SRCREV_machine="v3.19.8"
+SRCBRANCH_machine = "linux-3.19.y"
 PR = "r1"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
