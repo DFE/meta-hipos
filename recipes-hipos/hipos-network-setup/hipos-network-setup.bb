@@ -7,7 +7,7 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = " ethtool bash "
 
-PR = "r18"
+PR = "r19"
 
 SRC_URI = " file://hipos-network-setup.service  \
             file://hipos-network-setup.sh \
