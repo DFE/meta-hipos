@@ -1,9 +1,9 @@
 [Unit]
 Description=hipos network setup service
+Requires=network.target
+After=network.target
 Requires=hipos-device-info.service
 After=hipos-device-info.service
-# HYP-11339
-Before=networking.service
 
 [Service]
 Type=oneshot
