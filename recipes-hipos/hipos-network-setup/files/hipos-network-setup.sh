@@ -5,16 +5,6 @@ if [ -a /etc/hydraip-devid ]
                 . /etc/hydraip-devid
 fi
 
-if [ -a "/etc/hip-activate-config.d/${device}/net_config.py" ]
-        then
-                /etc/hip-activate-config.d/${device}/net_config.py
-                if [ -a /etc/drconfig/post_config.sh ]
-                        then
-                                rm /etc/drconfig/post_config.sh
-                                /bin/systemctl restart networking.service
-                        fi
-fi
-
 if [ -z ${lanspeed} ]
         then
 	        lanspeed=ff
@@ -38,6 +28,17 @@ do
                         ethtool -s eth$i advertise 0xF
         fi
 done
+
+if [ -a "/etc/hip-activate-config.d/${device}/net_config.py" ]
+        then
+                /etc/hip-activate-config.d/${device}/net_config.py
+                if [ -a /etc/drconfig/post_config.sh ]
+                        then
+                                rm /etc/drconfig/post_config.sh
+                        fi
+fi
+
+/bin/systemctl restart networking.service
 
 exit 0
 

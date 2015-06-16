@@ -1,6 +1,5 @@
 [Unit]
 Description=hipos network setup service
-After=network.target
 Requires=hipos-device-info.service
 After=hipos-device-info.service
 
