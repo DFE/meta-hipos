@@ -16,10 +16,6 @@ do_install_append() {
 }
 
 pkg_postinst_${PN}() {
-    if [ -z "$D" ]; then
-                update-rc.d networking defaults
-        else
-                exit 1
-    fi
+	update-rc.d networking defaults
 }
 
