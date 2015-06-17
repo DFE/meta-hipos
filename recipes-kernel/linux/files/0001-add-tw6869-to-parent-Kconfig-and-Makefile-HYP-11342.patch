@@ -1,0 +1,38 @@
+From 47c835511beff204c18d4a6032735165f999d688 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Wed, 17 Jun 2015 12:55:10 +0200
+Subject: [PATCH] add tw6869 to parent Kconfig and Makefile, HYP-11342
+
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
+---
+ drivers/media/pci/Kconfig  | 1 +
+ drivers/media/pci/Makefile | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/media/pci/Kconfig b/drivers/media/pci/Kconfig
+index 0e75c97..9c2ca7f 100644
+--- a/drivers/media/pci/Kconfig
++++ b/drivers/media/pci/Kconfig
+@@ -20,6 +20,7 @@ source "drivers/media/pci/ivtv/Kconfig"
+ source "drivers/media/pci/zoran/Kconfig"
+ source "drivers/media/pci/saa7146/Kconfig"
+ source "drivers/media/pci/TW68/Kconfig"
++source "drivers/media/pci/tw6869/Kconfig"
+ endif
+ 
+ if MEDIA_ANALOG_TV_SUPPORT || MEDIA_DIGITAL_TV_SUPPORT
+diff --git a/drivers/media/pci/Makefile b/drivers/media/pci/Makefile
+index 3734de9..77b4d9c 100644
+--- a/drivers/media/pci/Makefile
++++ b/drivers/media/pci/Makefile
+@@ -16,6 +16,7 @@ obj-y        +=	ttpci/		\
+ obj-$(CONFIG_VIDEO_IVTV) += ivtv/
+ obj-$(CONFIG_VIDEO_ZORAN) += zoran/
+ obj-$(CONFIG_VIDEO_TW68) += TW68/
++obj-$(CONFIG_VIDEO_TW6869) += tw6869/
+ obj-$(CONFIG_VIDEO_CX18) += cx18/
+ obj-$(CONFIG_VIDEO_CX23885) += cx23885/
+ obj-$(CONFIG_VIDEO_CX25821) += cx25821/
+-- 
+2.4.3
+

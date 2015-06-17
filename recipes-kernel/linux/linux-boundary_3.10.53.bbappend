@@ -3,6 +3,16 @@ COMPATIBLE_MACHINE = "(himx0294|himx0280|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
+# use HEAD revision of special tw6869 driver
+SRCREV_FORMAT = "tw6869"
+SRCREV_tw6869 = "${AUTOREV}"
+PV_append = "+tw6869gitr${SRCPV}"
+
+SRC_URI_append = " \
+	git://github.com/FrankBau/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869 \
+	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
+"
+
 SRC_URI_append_himx0280 =  " \
 	file://defconfig \
 	file://imx6qdl-himx0280.dtsi \
@@ -24,6 +34,12 @@ SRC_URI_append_himx0294 = " \
 	file://0002-igb-intel-i210-skip-eprom-error-HYP-11312.patch \
 	file://bpp-default-device-tree.patch \
 "
+
+do_configure_prepend() {
+	# copy tw6869 driver code into kernel tree
+	mkdir -p ${S}/drivers/media/pci/tw6869
+	cd ${S}/drivers/media/pci/tw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
+}
 
 do_configure_prepend_himx0280() {
 	cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0280_defconfig
