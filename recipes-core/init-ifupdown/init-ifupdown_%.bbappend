@@ -14,3 +14,12 @@ do_install_append() {
 	install -d ${D}${sysconfdir}/network/if-post-down.d
 	install -m 0755 ${S}/systemd-kill ${D}${sysconfdir}/network/if-post-down.d
 }
+
+pkg_postinst_${PN}() {
+    if [ -z "$D" ]; then
+                update-rc.d networking defaults
+        else
+                exit 1
+    fi
+}
+
