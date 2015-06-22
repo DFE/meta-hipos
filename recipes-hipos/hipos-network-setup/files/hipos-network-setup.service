@@ -3,6 +3,8 @@ Description=hipos network setup service
 Requires=hipos-device-info.service
 After=hipos-device-info.service
 Before=networking.service
+Wants=network.target
+Before=network.target network-online.target
 
 [Service]
 Type=oneshot
