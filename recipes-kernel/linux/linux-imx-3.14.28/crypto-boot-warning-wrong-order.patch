@@ -1,0 +1,128 @@
+From 64496c69ec32bdcd690c7b958f4406af7991cb51 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 22 Jun 2015 08:53:25 +0200
+Subject: [PATCH] crypto: Fix boot warning "wrong order"
+
+Correct order by algorithm name to avoid boot warning:
+
+[    0.174670] WARNING: CPU: 3 PID: 680 at /home/schuknecht/hipos-dfe-fido-himx/hipos-dfe/build-closed/tmp-glibc/work-shared/himx0294/kernel-source/crypto/ testmgr.c:3334 alg_test+0x80/0x288()
+[    0.174676] Modules linked in:
+[    0.174689] CPU: 3 PID: 680 Comm: cryptomgr_test Not tainted 3.14.28-1.0.0_ga+g91cf351 #1
+[    0.174725] [<8001510c>] (unwind_backtrace) from [<80011478>] (show_stack+0x10/0x14)
+[    0.174749] [<80011478>] (show_stack) from [<8066bd60>] (dump_stack+0x80/0x90)
+[    0.174767] [<8066bd60>] (dump_stack) from [<8002c708>] (warn_slowpath_common+0x70/0x8c)
+[    0.174780] [<8002c708>] (warn_slowpath_common) from [<8002c7c0>] (warn_slowpath_null+0x1c/0x24)
+[    0.174793] [<8002c7c0>] (warn_slowpath_null) from [<801eb128>] (alg_test+0x80/0x288)
+[    0.174807] [<801eb128>] (alg_test) from [<801e8828>] (cryptomgr_test+0x40/0x48)
+[    0.174827] [<801e8828>] (cryptomgr_test) from [<800484c8>] (kthread+0xcc/0xe4)
+[    0.174842] [<800484c8>] (kthread) from [<8000e2b8>] (ret_from_fork+0x14/0x3c)
+[    0.174866] ---[ end trace df49fd993968e5e4 ]---
+[    0.174872] testmgr: alg_test_descs entries in wrong order: 'authenc(hmac(sha512),cbc(aes))' before 'authenc(hmac(md5),cbc(aes))'
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ crypto/testmgr.c | 60 ++++++++++++++++++++++++++++----------------------------
+ 1 file changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/crypto/testmgr.c b/crypto/testmgr.c
+index 0d9a4d2..b4f4766 100644
+--- a/crypto/testmgr.c
++++ b/crypto/testmgr.c
+@@ -1853,50 +1853,26 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 			}
+ 		}
+ 	}, {
+-		.alg = "authenc(hmac(sha1),cbc(aes))",
+-		.test = alg_test_aead,
+-		.fips_allowed = 1,
+-		.suite = {
+-			.aead = {
+-				.enc = {
+-					.vecs = hmac_sha1_aes_cbc_enc_tv_template,
+-					.count = HMAC_SHA1_AES_CBC_ENC_TEST_VECTORS
+-				}
+-			}
+-		}
+-	}, {
+-		.alg = "authenc(hmac(sha256),cbc(aes))",
+-		.test = alg_test_aead,
+-		.fips_allowed = 1,
+-		.suite = {
+-			.aead = {
+-				.enc = {
+-					.vecs = hmac_sha256_aes_cbc_enc_tv_template,
+-					.count = HMAC_SHA256_AES_CBC_ENC_TEST_VECTORS
+-				}
+-			}
+-		}
+-	}, {
+-		.alg = "authenc(hmac(sha512),cbc(aes))",
++		.alg = "authenc(hmac(md5),cbc(aes))",
+ 		.test = alg_test_aead,
+ 		.fips_allowed = 1,
+ 		.suite = {
+ 			.aead = {
+ 				.enc = {
+-					.vecs = hmac_sha512_aes_cbc_enc_tv_template,
+-					.count = HMAC_SHA512_AES_CBC_ENC_TEST_VECTORS
++				  .vecs = hmac_md5_aes_cbc_enc_tv_template,
++				  .count = HMAC_MD5_AES_CBC_ENC_TEST_VECTORS
+ 				}
+ 			}
+ 		}
+ 	}, {
+-		.alg = "authenc(hmac(md5),cbc(aes))",
++		.alg = "authenc(hmac(sha1),cbc(aes))",
+ 		.test = alg_test_aead,
+ 		.fips_allowed = 1,
+ 		.suite = {
+ 			.aead = {
+ 				.enc = {
+-				  .vecs = hmac_md5_aes_cbc_enc_tv_template,
+-				  .count = HMAC_MD5_AES_CBC_ENC_TEST_VECTORS
++					.vecs = hmac_sha1_aes_cbc_enc_tv_template,
++					.count = HMAC_SHA1_AES_CBC_ENC_TEST_VECTORS
+ 				}
+ 			}
+ 		}
+@@ -1949,6 +1925,18 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 			}
+ 		}
+ 	}, {
++		.alg = "authenc(hmac(sha256),cbc(aes))",
++		.test = alg_test_aead,
++		.fips_allowed = 1,
++		.suite = {
++			.aead = {
++				.enc = {
++					.vecs = hmac_sha256_aes_cbc_enc_tv_template,
++					.count = HMAC_SHA256_AES_CBC_ENC_TEST_VECTORS
++				}
++			}
++		}
++	}, {
+ 		.alg = "authenc(hmac(sha256),cbc(des))",
+ 		.test = alg_test_aead,
+ 		.fips_allowed = 1,
+@@ -1997,6 +1985,18 @@ static const struct alg_test_desc alg_test_descs[] = {
+ 			}
+ 		}
+ 	}, {
++		.alg = "authenc(hmac(sha512),cbc(aes))",
++		.test = alg_test_aead,
++		.fips_allowed = 1,
++		.suite = {
++			.aead = {
++				.enc = {
++					.vecs = hmac_sha512_aes_cbc_enc_tv_template,
++					.count = HMAC_SHA512_AES_CBC_ENC_TEST_VECTORS
++				}
++			}
++		}
++	}, {
+ 		.alg = "authenc(hmac(sha512),cbc(des))",
+ 		.test = alg_test_aead,
+ 		.fips_allowed = 1,
+-- 
+2.1.4
+

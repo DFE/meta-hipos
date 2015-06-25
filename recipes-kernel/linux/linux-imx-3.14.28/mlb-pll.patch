@@ -1,0 +1,114 @@
+From 25202ba21632ac6a655d6761d07d091cc3c2b018 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 19 Jun 2015 15:58:29 +0200
+Subject: [PATCH] imx6: Enable mlb pll
+
+Enable mlb8_pll.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/mach-imx/clk-imx6q.c             | 5 +++++
+ arch/arm/mach-imx/clk-pllv3.c             | 8 ++++++++
+ arch/arm/mach-imx/clk.h                   | 1 +
+ include/dt-bindings/clock/imx6qdl-clock.h | 4 +++-
+ 4 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-imx/clk-imx6q.c b/arch/arm/mach-imx/clk-imx6q.c
+index cf060a9..06f8210 100644
+--- a/arch/arm/mach-imx/clk-imx6q.c
++++ b/arch/arm/mach-imx/clk-imx6q.c
+@@ -84,6 +84,7 @@ static const char *pll4_bypass_sels[] = { "pll4", "pll4_bypass_src", };
+ static const char *pll5_bypass_sels[] = { "pll5", "pll5_bypass_src", };
+ static const char *pll6_bypass_sels[] = { "pll6", "pll6_bypass_src", };
+ static const char *pll7_bypass_sels[] = { "pll7", "pll7_bypass_src", };
++static const char *pll8_bypass_sels[] = { "pll8", "pll8_bypass_src", };
+  
+ static struct clk *clk[IMX6QDL_CLK_END];
+ static struct clk_onecell_data clk_data;
+@@ -167,6 +168,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
+ 	clk[IMX6QDL_CLK_PLL5] = imx_clk_pllv3(IMX_PLLV3_AV,      "pll5", "pll5_bypass_src", base + 0xa0, 0x7f);
+ 	clk[IMX6QDL_CLK_PLL6] = imx_clk_pllv3(IMX_PLLV3_ENET,    "pll6", "pll6_bypass_src", base + 0xe0, 0x3);
+ 	clk[IMX6QDL_CLK_PLL7] = imx_clk_pllv3(IMX_PLLV3_USB,     "pll7", "pll7_bypass_src", base + 0x20, 0x3);
++	clk[IMX6QDL_CLK_PLL8] = imx_clk_pllv3(IMX_PLLV3_MLB,     "pll8", "pll8_bypass_src", base + 0xd0, 0x0);
+ 
+ 	clk[IMX6QDL_PLL1_BYPASS] = imx_clk_mux_flags("pll1_bypass", base + 0x00, 16, 1, pll1_bypass_sels, ARRAY_SIZE(pll1_bypass_sels), CLK_SET_RATE_PARENT);
+ 	clk[IMX6QDL_PLL2_BYPASS] = imx_clk_mux_flags("pll2_bypass", base + 0x30, 16, 1, pll2_bypass_sels, ARRAY_SIZE(pll2_bypass_sels), CLK_SET_RATE_PARENT);
+@@ -175,6 +177,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
+ 	clk[IMX6QDL_PLL5_BYPASS] = imx_clk_mux_flags("pll5_bypass", base + 0xa0, 16, 1, pll5_bypass_sels, ARRAY_SIZE(pll5_bypass_sels), CLK_SET_RATE_PARENT);
+ 	clk[IMX6QDL_PLL6_BYPASS] = imx_clk_mux_flags("pll6_bypass", base + 0xe0, 16, 1, pll6_bypass_sels, ARRAY_SIZE(pll6_bypass_sels), CLK_SET_RATE_PARENT);
+ 	clk[IMX6QDL_PLL7_BYPASS] = imx_clk_mux_flags("pll7_bypass", base + 0x20, 16, 1, pll7_bypass_sels, ARRAY_SIZE(pll7_bypass_sels), CLK_SET_RATE_PARENT);
++	clk[IMX6QDL_PLL8_BYPASS] = imx_clk_mux_flags("pll8_bypass", base + 0xd0, 16, 1, pll8_bypass_sels, ARRAY_SIZE(pll8_bypass_sels), CLK_SET_RATE_PARENT);
+ 
+ 	/* Do not bypass PLLs initially */
+ 	imx_clk_set_parent(clk[IMX6QDL_PLL1_BYPASS], clk[IMX6QDL_CLK_PLL1]);
+@@ -184,6 +187,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
+ 	imx_clk_set_parent(clk[IMX6QDL_PLL5_BYPASS], clk[IMX6QDL_CLK_PLL5]);
+ 	imx_clk_set_parent(clk[IMX6QDL_PLL6_BYPASS], clk[IMX6QDL_CLK_PLL6]);
+ 	imx_clk_set_parent(clk[IMX6QDL_PLL7_BYPASS], clk[IMX6QDL_CLK_PLL7]);
++	imx_clk_set_parent(clk[IMX6QDL_PLL8_BYPASS], clk[IMX6QDL_CLK_PLL8]);
+ 
+ 	clk[IMX6QDL_CLK_PLL1_SYS]      = imx_clk_fixed_factor("pll1_sys",      "pll1_bypass", 1, 1);
+ 	clk[IMX6QDL_CLK_PLL2_BUS]      = imx_clk_gate("pll2_bus",      "pll2_bypass", base + 0x30, 13);
+@@ -192,6 +196,7 @@ static void __init imx6q_clocks_init(struct device_node *ccm_node)
+ 	clk[IMX6QDL_CLK_PLL5_VIDEO]    = imx_clk_gate("pll5_video",    "pll5_bypass", base + 0xa0, 13);
+ 	clk[IMX6QDL_CLK_PLL6_ENET]     = imx_clk_gate("pll6_enet",     "pll6_bypass", base + 0xe0, 13);
+ 	clk[IMX6QDL_CLK_PLL7_USB_HOST] = imx_clk_gate("pll7_usb_host", "pll7_bypass", base + 0x20, 13);
++	clk[IMX6QDL_CLK_PLL8_MLB]      = imx_clk_gate("pll8_mlb",      "pll8_bypass", base + 0xd0, 13);
+  
+ 	/*
+ 	 * Bit 20 is the reserved and read-only bit, we do this only for:
+diff --git a/arch/arm/mach-imx/clk-pllv3.c b/arch/arm/mach-imx/clk-pllv3.c
+index 728280e..07f006c 100644
+--- a/arch/arm/mach-imx/clk-pllv3.c
++++ b/arch/arm/mach-imx/clk-pllv3.c
+@@ -319,6 +319,11 @@ static const struct clk_ops clk_pllv3_enet_ops = {
+ 	.recalc_rate	= clk_pllv3_enet_recalc_rate,
+ };
+ 
++static const struct clk_ops clk_pllv3_mlb_ops = {
++	.prepare	= clk_pllv3_prepare,
++	.unprepare	= clk_pllv3_unprepare,
++};
++
+ struct clk *imx_clk_pllv3(enum imx_pllv3_type type, const char *name,
+ 			  const char *parent_name, void __iomem *base,
+ 			  u32 div_mask)
+@@ -346,6 +351,9 @@ struct clk *imx_clk_pllv3(enum imx_pllv3_type type, const char *name,
+ 	case IMX_PLLV3_ENET:
+ 		ops = &clk_pllv3_enet_ops;
+ 		break;
++	case IMX_PLLV3_MLB:
++		ops = &clk_pllv3_mlb_ops;
++		break;
+ 	default:
+ 		ops = &clk_pllv3_ops;
+ 	}
+diff --git a/arch/arm/mach-imx/clk.h b/arch/arm/mach-imx/clk.h
+index 043bd6a..f902224 100644
+--- a/arch/arm/mach-imx/clk.h
++++ b/arch/arm/mach-imx/clk.h
+@@ -22,6 +22,7 @@ enum imx_pllv3_type {
+ 	IMX_PLLV3_USB,
+ 	IMX_PLLV3_AV,
+ 	IMX_PLLV3_ENET,
++	IMX_PLLV3_MLB,
+ };
+ 
+ #define MAX_SHARED_CLK_NUMBER		100
+diff --git a/include/dt-bindings/clock/imx6qdl-clock.h b/include/dt-bindings/clock/imx6qdl-clock.h
+index 4bd9d6e..7664f5f 100644
+--- a/include/dt-bindings/clock/imx6qdl-clock.h
++++ b/include/dt-bindings/clock/imx6qdl-clock.h
+@@ -256,6 +256,8 @@
+ #define IMX6QDL_CAAM_ACLK			247
+ #define IMX6QDL_CAAM_IPG			248
+ #define IMX6QDL_CLK_SPDIF_GCLK			249
+-#define IMX6QDL_CLK_END				250
++#define IMX6QDL_CLK_PLL8			250
++#define IMX6QDL_PLL8_BYPASS			251
++#define IMX6QDL_CLK_END				252
+  
+ #endif /* __DT_BINDINGS_CLOCK_IMX6QDL_H */
+-- 
+2.1.4
+
