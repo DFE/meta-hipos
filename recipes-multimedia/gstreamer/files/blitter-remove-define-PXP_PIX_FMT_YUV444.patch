@@ -1,0 +1,30 @@
+From 2b72fcd116e0b16b0185412cce160e281946d559 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 25 Jun 2015 16:55:55 +0200
+Subject: [PATCH] blitter: Remove define PXP_PIX_FMT_YUV444
+
+freescale kernel 3.14.28 does not define PXP_PIX_FMT_YUV444.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ src/pxp/blitter.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/pxp/blitter.c b/src/pxp/blitter.c
+index b96b3b9..da88318 100644
+--- a/src/pxp/blitter.c
++++ b/src/pxp/blitter.c
+@@ -391,7 +391,10 @@ static GstImxPxPFormatDetails const * gst_imx_pxp_blitter_get_pxp_format_details
+ 		case GST_VIDEO_FORMAT_YUY2: FORMAT_DETAILS(PXP_PIX_FMT_YUYV, 16);
+ 		case GST_VIDEO_FORMAT_UYVY: FORMAT_DETAILS(PXP_PIX_FMT_UYVY, 16);
+ 		case GST_VIDEO_FORMAT_YVYU: FORMAT_DETAILS(PXP_PIX_FMT_YVYU, 16);
++/*
++	freescale kernel 3.14.28 does not define PXP_PIX_FMT_YUV444
+ 		case GST_VIDEO_FORMAT_v308: FORMAT_DETAILS(PXP_PIX_FMT_YUV444, 24);
++*/
+ 		case GST_VIDEO_FORMAT_IYU1: FORMAT_DETAILS(PXP_PIX_FMT_Y41P, 12);
+ 
+ 		/* planar formats; bits per pixel is always 8 for these */
+-- 
+2.1.4
+

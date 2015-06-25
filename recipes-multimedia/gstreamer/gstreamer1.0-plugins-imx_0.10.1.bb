@@ -8,7 +8,9 @@ DEPENDS = "gstreamer1.0 gstreamer1.0-plugins-base libfslvpuwrap virtual/kernel v
 SRCBRANCH ?= "master"
 SRCREV = "355ea981c570ed8cdd0646c1c4c22040d8a017f8"
 SRC_URI = "git://github.com/Freescale/gstreamer-imx.git;branch=${SRCBRANCH} \
-           file://gst1-plugins-imx-tw6869-sk.patch"
+           file://gst1-plugins-imx-tw6869-sk.patch \
+           file://blitter-remove-define-PXP_PIX_FMT_YUV444.patch \
+"
 
 S = "${WORKDIR}/git"
 
