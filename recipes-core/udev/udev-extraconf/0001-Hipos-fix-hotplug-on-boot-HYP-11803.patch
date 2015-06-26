@@ -1,0 +1,41 @@
+From 76c4b6e6b4746675a63875cb4e6adfe0b86b37a6 Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Fri, 26 Jun 2015 10:28:26 +0200
+Subject: [PATCH] Hipos: fix hotplug on boot HYP-11803
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ network.sh | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/network.sh b/network.sh
+index 3ee9271..5a2fc22 100644
+--- a/network.sh
++++ b/network.sh
+@@ -1,7 +1,12 @@
+ #!/bin/sh
+ 
+-# We get two "add" events for hostap cards due to wifi0
+-echo "$INTERFACE" | grep -q wifi && exit 0
++# do not ifup before config is ready
++/bin/systemctl status networking
++while [ $? -ne 0 ]
++do
++        /bin/sleep 5
++        /bin/systemctl status networking
++done
+ 
+ # udevd does clearenv(). Export shell PATH to children.
+ export PATH
+@@ -40,7 +45,7 @@ fi
+ 
+ # if this interface has an entry in /etc/network/interfaces, let ifupdown
+ # handle it
+-if grep -q "iface \+$INTERFACE" /etc/network/interfaces; then
++if grep "allow-hotplug" /etc/network/interfaces | grep -q "$INTERFACE"; then
+   case $ACTION in
+     add)
+     	ifconfig | grep -q "^$INTERFACE" || ifup $INTERFACE
+-- 
+2.4.3
+
