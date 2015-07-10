@@ -17,6 +17,7 @@ IMAGE_INSTALL += "          \
   python-subprocess         \
   udev-extraconf            \
   hip-udev-extra-rules      \
+  iptables		    \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
