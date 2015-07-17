@@ -37,7 +37,6 @@ SRC_URI_append_himx0294 = " \
 	file://mlb-pll.patch \
 	file://0001-quirks-for-pci-driver-for-tw6869.patch \
 	file://add-only_cea-parameter-to-mxc_hdmi-module.patch \
-	file://mxc_ipuv3_fb-unblank-displays-at-init.patch \
 "
 
 do_configure_prepend() {
