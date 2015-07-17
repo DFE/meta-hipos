@@ -11,6 +11,7 @@ IMAGE_INSTALL += "          \
   kernel-modules            \
   kernel-devicetree         \
   linux-firmware-ralink     \
+  linux-firmware-CC2564B    \
   htop                      \
   bash                      \
   python-netserver          \

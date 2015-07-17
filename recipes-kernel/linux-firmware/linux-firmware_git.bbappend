@@ -1,4 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+PACKAGES =+ " ${PN}-CC2564B \
+            "
 
 TI_FWDIR = "/lib/firmware"
 
