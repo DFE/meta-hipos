@@ -18,7 +18,7 @@ IMAGE_INSTALL += "          \
   udev-extraconf            \
   hip-udev-extra-rules      \
   iptables		    \
-  bluez5		    \
+  bluez4		    \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
