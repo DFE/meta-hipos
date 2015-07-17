@@ -1,3 +1,5 @@
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
 TI_FWDIR = "/lib/firmware"
 
 SRC_URI_append = " \
