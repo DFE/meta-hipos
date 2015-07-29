@@ -364,7 +364,7 @@ int board_phy_config(struct phy_device *phydev)
 	unsigned short val;
 	const char* devname = miiphy_get_current_dev();
 
-	phy_speed();
+	//	phy_speed();
 	/* Enable Tx and Rx RGMII delay on CPU port. */
 	/* Enable Forced Flow Control on CPU port. */
 	miiphy_read(devname, 0x15, 0x1, &val);
