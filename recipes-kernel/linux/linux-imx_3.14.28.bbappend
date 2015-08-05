@@ -42,18 +42,12 @@ SRC_URI_append_himx0294 = " \
 SRC_URI_append_himx0322 = " \
         file://imx6qdl-himx0294.dtsi \
         file://imx6q-himx0294.dts \
+        file://0001-net-core-tso.c-implicit-declaration-of-function-tcp_.patch \
         file://iio-tsl2x7x-fix-trigger.patch \
-        file://fec-main-simulate-phy.patch \
-        file://rafi-touchscreen-support.patch \
-        file://rafi-touchscreen-event-report.patch \
         file://bpp-default-device-tree.patch \
         file://arm-dts-imx-fix-invalid-address-cells.patch \
         file://crypto-boot-warning-wrong-order.patch \
-        file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
-        file://0002-igb-intel-i210-skip-eprom-error-HYP-11312.patch \
         file://mlb-pll.patch \
-        file://0001-quirks-for-pci-driver-for-tw6869.patch \
-        file://add-only_cea-parameter-to-mxc_hdmi-module.patch \
 "
 
 do_configure_prepend() {
