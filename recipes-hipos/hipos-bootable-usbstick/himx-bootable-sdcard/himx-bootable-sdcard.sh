@@ -43,6 +43,7 @@ umount ${DRIVE}2
 set -e
 
 dd if=/dev/zero of=$DRIVE bs=1024 count=1024
+sync
 
 SIZE=`fdisk -l $DRIVE | grep Disk | awk '{print $5}'`
 
@@ -51,7 +52,9 @@ echo DISK SIZE - $SIZE bytes
 CYLINDERS=`echo $SIZE/255/63/512 | bc`
 
 echo -e "----\nCreating Partitions\n--"
-
+sleep 1
+partprobe $DRIVE
+sleep 1
 fdisk -c=dos -H 255 -S 63 -C $CYLINDERS $DRIVE << EOF
 o
 n
@@ -66,12 +69,16 @@ p
 
 w
 EOF
+sync
+sleep 1
+partprobe $DRIVE
+sleep 1
 
 echo -e "----\nFormatting EXT4 (rootfs1) Partition\n--"
-mkfs.ext4 -L "rootfs1" ${DRIVE}1
+mkfs.ext4 -F -L "rootfs1" ${DRIVE}1
 
 echo -e "----\nFormatting EXT4 (rootfs2) Partition\n--"
-mkfs.ext4 -L "rootfs2" ${DRIVE}2
+mkfs.ext4 -F -L "rootfs2" ${DRIVE}2
 
 echo -e "----\nCopying rootfs-files (rootfs2)\n--"
 mkdir -p tmp_mnt
