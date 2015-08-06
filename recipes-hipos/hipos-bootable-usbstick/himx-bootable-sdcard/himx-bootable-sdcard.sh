@@ -67,12 +67,13 @@ p
 w
 EOF
 
-echo -e "----\nFormatting FAT Partition\n--"
+echo -e "----\nFormatting EXT4 (rootfs1) Partition\n--"
 mkfs.ext4 -L "rootfs1" ${DRIVE}1
 
-echo -e "----\nFormatting EXT4 (root) Partition\n--"
+echo -e "----\nFormatting EXT4 (rootfs2) Partition\n--"
 mkfs.ext4 -L "rootfs2" ${DRIVE}2
 
+echo -e "----\nCopying rootfs-files (rootfs2)\n--"
 mkdir -p tmp_mnt
 mount ${1}2 tmp_mnt
 pushd tmp_mnt > /dev/null
@@ -80,21 +81,19 @@ tar xjf ../$2-*.tar.bz2
 popd > /dev/null
 umount tmp_mnt
 rm -rf tmp_mnt
-echo -e "----\nFlushing changes to device\n--"
-blockdev --flushbufs "${DRIVE}"
 
-echo -e "----\nCopying kernel\n--"
+echo -e "----\nCopying rootfs-files (rootfs1)\n--"
 mkdir -p tmp_mnt
 mount ${1}1 tmp_mnt
 pushd tmp_mnt > /dev/null
 tar xjf ../$2-*.tar.bz2
 popd > /dev/null
 umount tmp_mnt || umount -l tmp_mnt
+echo -e "----\nCopying bootloader\n--"
 dd if=u-boot.imx of=${DRIVE} seek=2 bs=512
 rm -rf tmp_mnt
-sync
 echo -e "----\nFlushing changes to device\n--"
-blockdev --flushbufs "${DRIVE}"
 sync
+blockdev --flushbufs "${DRIVE}"
 
 echo -e "----\nDONE."
