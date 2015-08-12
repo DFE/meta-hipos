@@ -48,6 +48,7 @@ SRC_URI_append_himx0322 = " \
         file://arm-dts-imx-fix-invalid-address-cells.patch \
         file://crypto-boot-warning-wrong-order.patch \
         file://mlb-pll.patch \
+	file://0001-LVDS-force-LDB_BIT_MAP_CH0_JEIDA-HYP-12003.patch \
 "
 
 do_configure_prepend() {

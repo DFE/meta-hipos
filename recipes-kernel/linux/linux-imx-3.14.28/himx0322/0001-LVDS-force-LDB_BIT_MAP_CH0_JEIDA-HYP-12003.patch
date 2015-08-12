@@ -1,0 +1,33 @@
+From e265f5f4782e370d652e506b55312e9e9fcd9778 Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Wed, 12 Aug 2015 16:15:47 +0200
+Subject: [PATCH] LVDS: force LDB_BIT_MAP_CH0_JEIDA HYP-12003
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ drivers/video/mxc/ldb.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/video/mxc/ldb.c b/drivers/video/mxc/ldb.c
+index 4739df7..625e9be 100644
+--- a/drivers/video/mxc/ldb.c
++++ b/drivers/video/mxc/ldb.c
+@@ -474,6 +474,7 @@ static int ldb_setup(struct mxc_dispdrv_handle *mddh,
+ 		regmap_update_bits(ldb->regmap, bus_mux.reg,
+ 				   bus_mux.mask, mux_val);
+ 
++	ldb->ctrl |= LDB_BIT_MAP_CH0_JEIDA;
+ 	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
+ 
+ 	/* disable channel for correct sequence */
+@@ -526,6 +527,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+ 					    LDB_CH0_MODE_EN_TO_DI0;
+ 	}
+ 
++	ldb->ctrl |= LDB_BIT_MAP_CH0_JEIDA;
+ 	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
+ 	return 0;
+ }
+-- 
+2.4.3
+
