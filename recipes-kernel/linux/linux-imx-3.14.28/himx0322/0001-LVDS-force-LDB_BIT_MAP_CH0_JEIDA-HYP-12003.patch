@@ -12,18 +12,22 @@ diff --git a/drivers/video/mxc/ldb.c b/drivers/video/mxc/ldb.c
 index 4739df7..625e9be 100644
 --- a/drivers/video/mxc/ldb.c
 +++ b/drivers/video/mxc/ldb.c
-@@ -474,6 +474,7 @@ static int ldb_setup(struct mxc_dispdrv_handle *mddh,
+@@ -474,6 +476,9 @@ static int ldb_setup(struct mxc_dispdrv_handle *mddh,
  		regmap_update_bits(ldb->regmap, bus_mux.reg,
  				   bus_mux.mask, mux_val);
- 
+
++	/* HACK: fix wrong probing of AUO-G101EVN01.0 display (HYP-12003) */
++	/*       force JEIDA bit order on LVDS CH0                        */
 +	ldb->ctrl |= LDB_BIT_MAP_CH0_JEIDA;
  	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
  
  	/* disable channel for correct sequence */
-@@ -526,6 +527,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+@@ -528,6 +531,9 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
  					    LDB_CH0_MODE_EN_TO_DI0;
  	}
  
++       /* HACK: fix wrong probing of AUO-G101EVN01.0 display (HYP-12003) */
++       /*       force JEIDA bit order on LVDS CH0                        */
 +	ldb->ctrl |= LDB_BIT_MAP_CH0_JEIDA;
  	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
  	return 0;
