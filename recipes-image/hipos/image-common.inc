@@ -19,6 +19,7 @@ IMAGE_INSTALL += "          \
   hip-udev-extra-rules      \
   iptables		    \
   bluez4		    \
+  openvpn		    \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
