@@ -10,4 +10,8 @@ if [ -f "/var/run/wpa_supplicant.$IFACE.pid" ]; then
 	/bin/cat /var/run/wpa_supplicant.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
 fi
 
+if [ -f "/var/run/zeroconf.$IFACE.pid" ]; then
+        /bin/cat /var/run/zeroconf.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+fi
+
 exit 0

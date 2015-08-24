@@ -10,4 +10,8 @@ if [ -f "/var/run/wpa_supplicant.$IFACE.pid" ]; then
         /bin/kill -15 `cat /var/run/wpa_supplicant.$IFACE.pid`
 fi
 
+if [ -f "/var/run/zeroconf.$IFACE.pid" ]; then
+        /bin/kill -15 `cat /var/run/zeroconf.$IFACE.pid`
+fi
+
 exit 0
