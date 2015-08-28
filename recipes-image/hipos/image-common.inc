@@ -54,6 +54,18 @@ IMAGE_INSTALL_append_himx0294 += " \
   fsl-alsa-plugins \
 "
 
+IMAGE_INSTALL_append_himx0322 += " \
+  packagegroup-hipos-qt     \
+  packagegroup-hipos-qt-examples \
+  packagegroup-fsl-gstreamer \
+  packagegroup-hipos-gstreamer \
+  gstreamer1.0-plugins-imx \
+  eglinfo-fb \
+  packagegroup-fslc-gstreamer1.0 \
+  gst-fsl-plugin \
+  fsl-alsa-plugins \
+"
+
 # profiling
 IMAGE_INSTALL += "  \
   systemd-analyze   \
