@@ -19,8 +19,8 @@
 #include "imx6qdl-himx0322.dtsi"
 
 / {
-	model = "DResearch Fahrzeugelektronik GmbH himx0294";
-	compatible = "dfe,himx0294", "fsl,imx6q";
+	model = "DResearch Fahrzeugelektronik GmbH himx0322";
+	compatible = "dfe,himx0322", "fsl,imx6q";
 };
 
 &mxcfb1 {
