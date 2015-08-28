@@ -40,8 +40,8 @@ SRC_URI_append_himx0294 = " \
 "
 
 SRC_URI_append_himx0322 = " \
-        file://imx6qdl-himx0294.dtsi \
-        file://imx6q-himx0294.dts \
+        file://imx6qdl-himx0322.dtsi \
+        file://imx6q-himx0322.dts \
         file://0001-net-core-tso.c-implicit-declaration-of-function-tcp_.patch \
         file://iio-tsl2x7x-fix-trigger.patch \
         file://bpp-default-device-tree.patch \
@@ -71,8 +71,8 @@ do_configure_prepend_himx0294() {
 
 do_configure_prepend_himx0322() {
         cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0294_defconfig
-        cp ${WORKDIR}/imx6qdl-himx0294.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294.dtsi
-        cp ${WORKDIR}/imx6q-himx0294.dts ${S}/arch/arm/boot/dts/imx6q-himx0294.dts
+        cp ${WORKDIR}/imx6qdl-himx0322.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0322.dtsi
+        cp ${WORKDIR}/imx6q-himx0322.dts ${S}/arch/arm/boot/dts/imx6q-himx0322.dts
 }
 
 do_configure_prepend_nitrogen6x() {
