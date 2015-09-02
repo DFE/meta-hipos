@@ -399,7 +399,7 @@
 
 	lvds-channel@0 {
 		crtc = "ipu1-di1";
-		fsl,data-mapping = "spwg";
+		fsl,data-mapping = "jeida";
 		fsl,data-width = <24>;
 		primary;
 		status = "okay";
