@@ -27,10 +27,6 @@
 	status = "okay";
 };
 
-&mxcfb2 {
-	status = "okay";
-};
-
 &sata {
 	status = "okay";
 };
