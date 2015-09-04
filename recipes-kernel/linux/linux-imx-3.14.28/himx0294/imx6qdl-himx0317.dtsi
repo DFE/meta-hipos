@@ -132,6 +132,26 @@
 		compatible = "gpio-poweroff";
 		gpios = <&gpio7 12 GPIO_ACTIVE_LOW>;
 	};
+
+	sound {
+		compatible = "fsl,imx6q-sabrelite-sgtl5000",
+			     "fsl,imx-audio-sgtl5000";
+		model = "imx6q-sabrelite-sgtl5000";
+		cpu-dai = <&ssi1>;
+		audio-codec = <&codec>;
+		audio-routing =
+			"MIC_IN", "Mic Jack",
+			"Mic Jack", "Mic Bias",
+			"Headphone Jack", "HP_OUT";
+		mux-int-port = <1>;
+		mux-ext-port = <4>;
+	};
+};
+
+&audmux {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_audmux>;
 };
 
 &ecspi1 {
@@ -205,6 +225,14 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1>;
 	status = "okay";
+
+	codec: sgtl5000@0a {
+		compatible = "fsl,sgtl5000";
+		reg = <0x0a>;
+		clocks = <&clks 201>;
+		VDDA-supply = <&reg_2p5v>;
+		VDDIO-supply = <&reg_3p3v>;
+	};
 };
 
 &i2c2 {
@@ -256,6 +284,15 @@
 		/*		MX6QDL_PAD_SD4_DAT5__GPIO2_IO13		0x1b0b0	*/	/* WLAN_ON */
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* /SD4_WP */
+			>;
+		};
+
+		pinctrl_audmux: audmuxgrp {
+			fsl,pins = <
+				MX6QDL_PAD_SD2_DAT0__AUD4_RXD		0x130b0
+				MX6QDL_PAD_SD2_DAT3__AUD4_TXC		0x130b0
+				MX6QDL_PAD_SD2_DAT2__AUD4_TXD		0x110b0
+				MX6QDL_PAD_SD2_DAT1__AUD4_TXFS		0x130b0
 			>;
 		};
 
@@ -451,6 +488,11 @@
 &pwm4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm4_2>;
+	status = "okay";
+};
+
+&ssi1 {
+	fsl,mode = "i2s-slave";
 	status = "okay";
 };
 
