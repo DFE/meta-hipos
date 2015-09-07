@@ -266,7 +266,7 @@
 	imx6q-nitrogen6x {
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
-		/*		MX6QDL_PAD_GPIO_0__GPIO1_IO00		0x1b0b0 */	/* AUD_MCK */
+				MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x130b0		/* AUD_MCK */
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x0b868		/* LTE_ON_OFF */
 				MX6QDL_PAD_GPIO_3__XTALOSC_REF_CLK_24M	0x00068		/* USB 24MHz CLK */
 		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* /RST_USB_HUB */
