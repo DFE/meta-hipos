@@ -350,6 +350,7 @@ static void phy_speed(void)
 	int i;
 	char *lanspeed = getenv("lanspeed");
 
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 	for(i=0; i<2; ++i) {
 		if(lanspeed && strlen(lanspeed)>i && lanspeed[i]=='g') {
 			set_phy_speed(i, PHY_SPEED_1000);
@@ -357,6 +358,12 @@ static void phy_speed(void)
 			set_phy_speed(i, PHY_SPEED_100);
 		}
 	}
+#elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
+	set_phy_speed(0, PHY_SPEED_100);
+	set_phy_speed(1, PHY_SPEED_100);
+	set_phy_speed(2, PHY_SPEED_100);
+	set_phy_speed(4, PHY_SPEED_100);
+#endif
 }
 
 int board_phy_config(struct phy_device *phydev)
@@ -364,7 +371,10 @@ int board_phy_config(struct phy_device *phydev)
 	unsigned short val;
 	const char* devname = miiphy_get_current_dev();
 
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC) || \
+	defined(CONFIG_BOARD_IS_HIMX_IVAP)
 	phy_speed();
+#endif
 	/* Enable Tx and Rx RGMII delay on CPU port. */
 	/* Enable Forced Flow Control on CPU port. */
 	miiphy_read(devname, 0x15, 0x1, &val);
