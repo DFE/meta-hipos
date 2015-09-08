@@ -27,6 +27,8 @@ SRC_URI_append_himx0294 = " \
 	file://imx6q-himx0294.dts \
 	file://imx6qdl-himx0317.dtsi \
 	file://imx6q-himx0317.dts \
+        file://imx6qdl-himx0322.dtsi \
+        file://imx6q-himx0322.dts \
 	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-simulate-phy.patch \
 	file://rafi-touchscreen-support.patch \
@@ -67,6 +69,8 @@ do_configure_prepend_himx0294() {
 	cp ${WORKDIR}/imx6q-himx0294.dts ${S}/arch/arm/boot/dts/imx6q-himx0294.dts
 	cp ${WORKDIR}/imx6qdl-himx0317.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0317.dtsi
 	cp ${WORKDIR}/imx6q-himx0317.dts ${S}/arch/arm/boot/dts/imx6q-himx0317.dts
+        cp ${WORKDIR}/imx6qdl-himx0322.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0322.dtsi
+        cp ${WORKDIR}/imx6q-himx0322.dts ${S}/arch/arm/boot/dts/imx6q-himx0322.dts
 }
 
 do_configure_prepend_himx0322() {
