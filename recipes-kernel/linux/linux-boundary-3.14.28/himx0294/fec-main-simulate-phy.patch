@@ -1,6 +1,6 @@
-From 4c00ac28d5d68a5056662bfffd769d9bdbd7bbba Mon Sep 17 00:00:00 2001
+From 62f03cb2253fd92139e9287f5b06ee191b26b2a2 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 18 Jun 2015 09:00:36 +0200
+Date: Tue, 8 Sep 2015 12:22:08 +0200
 Subject: [PATCH] net: fec_main: Simulate phy
 
 On himx0294 board fec is direct connected with a switch. And there is not phy.
@@ -8,14 +8,14 @@ Add a fixed phy, which simulate a 1000Mbit/s full duplex connection.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/net/ethernet/freescale/fec_main.c | 73 ++++++++++++++++++++++++++++++-
- 1 file changed, 71 insertions(+), 2 deletions(-)
+ drivers/net/ethernet/freescale/fec_main.c | 91 ++++++++++++++++++++++++++++++-
+ 1 file changed, 89 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
-index 7be5761..afbf5e6 100644
+index 3e56492..d16a45e 100644
 --- a/drivers/net/ethernet/freescale/fec_main.c
 +++ b/drivers/net/ethernet/freescale/fec_main.c
-@@ -1826,6 +1826,75 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
+@@ -1845,6 +1845,85 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
  	return 0;
  }
  
@@ -23,6 +23,8 @@ index 7be5761..afbf5e6 100644
 +#define SMI_PHY_DATA_REGISTER    0x19
 +#define MARVELL_GLOBAL2_ADDR 0x1C
 +#define SMI_BUSY_BIT 15
++
++static int is_direct_switch = 0;
 +
 +static u16 fixed_regs[32] = {
 +       0x1140, /* 0x0 MII_BMCR */
@@ -41,6 +43,10 @@ index 7be5761..afbf5e6 100644
 +static int my_fec_enet_mdio_read(struct mii_bus *bus, int phyaddr, int phyreg)
 +{
 +       int data = 0;
++
++       if(!is_direct_switch) {
++               return fec_enet_mdio_read(bus, phyaddr, phyreg);
++       }
 +
 +       if(0 == phyaddr) {
 +               /* PHY fake */
@@ -66,6 +72,10 @@ index 7be5761..afbf5e6 100644
 +
 +static int my_fec_enet_mdio_write(struct mii_bus *bus, int phyaddr, int phyreg, u16 phydata)
 +{
++       if(!is_direct_switch) {
++               return fec_enet_mdio_write(bus, phyaddr, phyreg, phydata);
++       }
++
 +       if(0 == phyaddr) {
 +               /* PHY fake: nothing to do */
 +       } else if(phyaddr & 0x8000) {
@@ -91,7 +101,7 @@ index 7be5761..afbf5e6 100644
  static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
  {
  	struct fec_enet_private *fep = netdev_priv(ndev);
-@@ -2033,8 +2102,8 @@ static int fec_enet_mii_init(struct platform_device *pdev)
+@@ -2054,8 +2133,8 @@ static int fec_enet_mii_init(struct platform_device *pdev, int phy_irq)
  	}
  
  	fep->mii_bus->name = "fec_enet_mii_bus";
@@ -102,6 +112,21 @@ index 7be5761..afbf5e6 100644
  	snprintf(fep->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
  		pdev->name, fep->dev_id + 1);
  	fep->mii_bus->priv = fep;
+@@ -3336,6 +3415,14 @@ fec_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, ndev);
+ 
++	if (of_get_property(np, "direct-switch", NULL)) {
++		is_direct_switch = 1;
++		pr_info("fec: direct-switch\n");
++	} else { 
++		is_direct_switch = 0;
++		pr_info("fec: NO direct-switch\n");
++	}
++
+ 	if (of_get_property(np, "fsl,magic-packet", NULL))
+ 		fep->wol_flag |= FEC_WOL_HAS_MAGIC_PACKET;
+ 
 -- 
 2.1.4
 
