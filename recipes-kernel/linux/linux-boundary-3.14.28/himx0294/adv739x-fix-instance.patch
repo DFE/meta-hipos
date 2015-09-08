@@ -1,0 +1,29 @@
+From d7450253dc210613ba4990691972e43dade00267 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 8 Sep 2015 13:04:40 +0200
+Subject: [PATCH] adv739x: Fix instance
+
+This commit sets the ipu_id as instance. Now it is possible to instantiate more
+than one instance.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/video/mxc/mxcfb_adv739x.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/video/mxc/mxcfb_adv739x.c b/drivers/video/mxc/mxcfb_adv739x.c
+index 74204a0..f859539 100644
+--- a/drivers/video/mxc/mxcfb_adv739x.c
++++ b/drivers/video/mxc/mxcfb_adv739x.c
+@@ -328,7 +328,7 @@ static int adv739x_disp_init(struct mxc_dispdrv_handle *disp,
+ 	adv739x->enabled = 0;
+ 	adv739x->cur_mode = ADV739X_MODE_NTSC;  //default mode
+ 
+-	adv739x->pdev = platform_device_register_simple("mxc_adv739x", 0, NULL, 0);
++	adv739x->pdev = platform_device_register_simple("mxc_adv739x", adv739x->ipu_id, NULL, 0);
+ 	if (IS_ERR(adv739x->pdev)) {
+ 		dev_err(dev, "Unable to register adv739x as a platform device\n");
+ 		ret = PTR_ERR(adv739x->pdev);
+-- 
+2.1.4
+

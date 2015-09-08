@@ -38,6 +38,8 @@ SRC_URI_append_himx0294 = " \
 	file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
 	file://0002-igb-intel-i210-skip-eprom-error-HYP-11312.patch \
 	file://mlb-pll.patch \
+	file://bt565-start-pin.patch \
+	file://adv739x-fix-instance.patch \
 "
 
 SRC_URI_append_himx0322 = " \

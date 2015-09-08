@@ -1,0 +1,28 @@
+From 98cfb2a440c881c581bc95c772ab256a55b0cd0e Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 8 Sep 2015 13:00:31 +0200
+Subject: [PATCH] ipu_disp: Set BT656 start PIN
+
+Set BT656 start PIN according our boards.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mxc/ipu3/ipu_disp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mxc/ipu3/ipu_disp.c b/drivers/mxc/ipu3/ipu_disp.c
+index f24c213..f391235 100644
+--- a/drivers/mxc/ipu3/ipu_disp.c
++++ b/drivers/mxc/ipu3/ipu_disp.c
+@@ -69,7 +69,7 @@ struct dp_csc_param_t {
+ #define DC_MCODE_BT656_DATA_W		173
+ #define DC_MCODE_BT656_NL				179
+ 
+-#define BT656_IF_DI_MSB			23  /* For 8 bits BT656: 23 for DISP_DAT23 ~ DISP_DAT16; 7 for DISP_DAT7 ~ DISP_DAT0 */
++#define BT656_IF_DI_MSB			19  /* For 8 bits BT656: 23 for DISP_DAT23 ~ DISP_DAT16; 7 for DISP_DAT7 ~ DISP_DAT0 */
+ 								      /* For 16 bits BT1120: 23 for DISP_DAT23 ~ DISP_DAT8; 15 for DISP_DAT15 ~ DISP_DAT0 */
+ 
+ int dmfc_type_setup;
+-- 
+2.1.4
+
