@@ -15,9 +15,9 @@ SRC_URI_append_himx0294 = " \
 	file://clocks.cfg \
 	file://1066mhz_4x128mx16.cfg \
 	file://1066mhz_4x256mx16.cfg \
-	file://himx0294_defconfig \
-	file://himx0317_defconfig \
-	file://himx0322_defconfig \
+	file://himx0294_imoc_defconfig \
+	file://himx0294_ivap_defconfig \
+	file://himx0294_dvmon_defconfig \
 	file://himx0294.h \
 "
 
@@ -33,9 +33,9 @@ do_configure_prepend() {
 	cp ${WORKDIR}/1066mhz_4x256mx16.cfg ${B}/board/freescale/himx0294/
 	cp ${WORKDIR}/clocks.cfg ${B}/board/freescale/himx0294/
 
-	cp ${WORKDIR}/himx0294_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0317_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0322_defconfig ${B}/configs/
+	cp ${WORKDIR}/himx0294_imoc_defconfig ${B}/configs/
+	cp ${WORKDIR}/himx0294_ivap_defconfig ${B}/configs/
+	cp ${WORKDIR}/himx0294_dvmon_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
 }
 
