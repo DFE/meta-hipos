@@ -19,7 +19,7 @@
 #include "imx6qdl-himx0317.dtsi"
 
 / {
-	model = "DResearch Fahrzeugelektronik GmbH himx0317";
+	model = "dfe,himx0294-ivap";
 	compatible = "dfe,himx0317", "fsl,imx6q";
 };
 

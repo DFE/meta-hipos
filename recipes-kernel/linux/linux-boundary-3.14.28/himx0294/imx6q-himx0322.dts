@@ -19,7 +19,7 @@
 #include "imx6qdl-himx0322.dtsi"
 
 / {
-	model = "DResearch Fahrzeugelektronik GmbH himx0322";
+	model = "dfe,himx0294-dvmon";
 	compatible = "dfe,himx0322", "fsl,imx6q";
 };
 
