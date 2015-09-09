@@ -584,7 +584,15 @@ int board_init(void)
 
 int checkboard(void)
 {
-	puts("Board: himx0294\n");
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC)
+	puts("Board: himx0294-imoc\n");
+#elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
+	puts("Board: himx0294-ivap\n");
+#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
+	puts("Board: himx0294-dvmon\n");
+#else
+	puts("Board: himx0294-???\n");
+#endif
 	return 0;
 }
 
