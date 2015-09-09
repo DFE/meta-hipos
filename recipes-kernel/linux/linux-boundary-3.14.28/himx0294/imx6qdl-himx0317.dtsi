@@ -75,8 +75,8 @@
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "adv739x";
 		interface_pix_fmt = "BT656";
-		mode_str ="BT656-NTSC";
-		default_bpp = <16>;
+		mode_str ="BT656-PAL";
+		default_bpp = <32>;
 		int_clk = <0>;
 		late_init = <0>;
 		status = "disabled";
@@ -86,8 +86,8 @@
 		compatible = "fsl,mxc_sdc_fb";
 		disp_dev = "adv739x";
 		interface_pix_fmt = "BT656";
-		mode_str ="BT656-NTSC";
-		default_bpp = <16>;
+		mode_str ="BT656-PAL";
+		default_bpp = <32>;
 		int_clk = <0>;
 		late_init = <0>;
 		status = "disabled";
@@ -460,7 +460,6 @@ MST
 				MX6QDL_PAD_DISP0_DAT18__GPIO5_IO12	0x0b0b0
 				MX6QDL_PAD_DISP0_DAT19__GPIO5_IO13	0x0b0b0
 #if 0
-MST
 #define GP_ADV7391_RESET	<&gpio4 20 GPIO_ACTIVE_LOW>
 				MX6QDL_PAD_DI0_PIN4__GPIO4_IO20		0x000b0		/* reset */
 #endif
