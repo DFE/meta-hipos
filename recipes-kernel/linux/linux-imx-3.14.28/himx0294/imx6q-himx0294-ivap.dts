@@ -16,13 +16,14 @@
 
 #include <dt-bindings/interrupt-controller/irq.h>
 #include "imx6q.dtsi"
-#include "imx6qdl-himx0294.dtsi"
+#include "imx6qdl-himx0294-ivap.dtsi"
 
 / {
-	model = "dfe,himx0294-imoc";
-	compatible = "dfe,himx0294", "fsl,imx6q";
+	model = "DResearch Fahrzeugelektronik GmbH himx0317";
+	compatible = "dfe,himx0317", "fsl,imx6q";
 };
 
+#if 0
 &mxcfb1 {
 	status = "okay";
 };
@@ -30,8 +31,10 @@
 &mxcfb2 {
 	status = "okay";
 };
+#endif
 
 &sata {
 	status = "okay";
 };
+
 

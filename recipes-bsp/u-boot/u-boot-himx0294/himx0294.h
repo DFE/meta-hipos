@@ -182,7 +182,7 @@
 	"kernel_addr=0x12000000\0" \
 	"kernel_file=/boot/uImage\0" \
 	"fdt_addr=0x22000000\0" \
-	"fdt_file=/boot/imx6q-himx0294.dtb\0" \
+	"fdt_file=/boot/imx6q-himx0294-imoc.dtb\0" \
 	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm ${kernel_addr} - ${fdt_addr}\0" \

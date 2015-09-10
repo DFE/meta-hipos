@@ -16,11 +16,11 @@
 
 #include <dt-bindings/interrupt-controller/irq.h>
 #include "imx6q.dtsi"
-#include "imx6qdl-himx0317.dtsi"
+#include "imx6qdl-himx0294-imoc.dtsi"
 
 / {
-	model = "dfe,himx0294-ivap";
-	compatible = "dfe,himx0317", "fsl,imx6q";
+	model = "DResearch Fahrzeugelektronik GmbH himx0294";
+	compatible = "dfe,himx0294", "fsl,imx6q";
 };
 
 &mxcfb1 {
@@ -33,19 +33,5 @@
 
 &sata {
 	status = "okay";
-};
-
-&pinctrl_adv7391_2 {
-	fsl,pins = <
-		MX6QDL_PAD_DI0_DISP_CLK__IPU2_DI0_DISP_CLK 0x10		/* Pixclk */
-		MX6QDL_PAD_DISP0_DAT12__IPU2_DISP0_DATA12  0x10
-		MX6QDL_PAD_DISP0_DAT13__IPU2_DISP0_DATA13  0x10
-		MX6QDL_PAD_DISP0_DAT14__IPU2_DISP0_DATA14  0x10
-		MX6QDL_PAD_DISP0_DAT15__IPU2_DISP0_DATA15  0x10
-		MX6QDL_PAD_DISP0_DAT16__IPU2_DISP0_DATA16  0x10
-		MX6QDL_PAD_DISP0_DAT17__IPU2_DISP0_DATA17  0x10
-		MX6QDL_PAD_DISP0_DAT18__IPU2_DISP0_DATA18  0x10
-		MX6QDL_PAD_DISP0_DAT19__IPU2_DISP0_DATA19	0x10
-	>;
 };
 
