@@ -175,6 +175,20 @@
 
 #define CONFIG_BOOTCOMMAND	"run x_bootA"
 
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC)
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
+#define CONFIG_DEFAULT_FDT_HIGH ""
+#elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
+#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"
+#define CONFIG_DEFAULT_FDT_HIGH ""
+#else
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
+#define CONFIG_DEFAULT_FDT_HIGH ""
+#endif
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
 		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
@@ -182,17 +196,8 @@
 	"kernel_addr=0x12000000\0" \
 	"kernel_file=/boot/uImage\0" \
 	"fdt_addr=0x22000000\0" \
-#if defined(CONFIG_BOARD_IS_HIMX_IMOC)
-	"fdt_file=/boot/imx6q-himx0294-imoc.dtb\0" \
-#elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
-	"fdt_file=/boot/imx6q-himx0294-ivap.dtb\0" \
-	"fdt_high=4f539000\0" \
-#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
-	"fdt_file=/boot/imx6q-himx0294-dvmod.dtb\0" \
-#else
-	"fdt_file=/boot/imx6q-himx0294-imoc.dtb\0" \
-#endif
-	"fdt_file=/boot/imx6q-himx0294-imoc.dtb\0" \
+	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
+	CONFIG_DEFAULT_FDT_HIGH \
 	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm ${kernel_addr} - ${fdt_addr}\0" \
