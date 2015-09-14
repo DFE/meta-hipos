@@ -125,14 +125,10 @@
 		compatible = "fsl,mxc_v4l2_output";
 		status = "okay";
 	};
+};
 
-#if 0
-	gpio-poweroff {
-		compatible = "gpio-poweroff";
-		gpios = <&gpio7 12 GPIO_ACTIVE_LOW>;
-	};
-#endif
-
+&snvs_poweroff {
+	status = "okay";
 };
 
 &ecspi1 {
