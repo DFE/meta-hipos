@@ -149,6 +149,13 @@
 		};
 	};
 
+	ir_recv: ir-receiver {
+		compatible = "gpio-ir-receiver";
+		gpios = <&gpio4 5 1>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_ir_receiver_gpio4_5>;
+	};
+
 	v4l2_out {
 		compatible = "fsl,mxc_v4l2_output";
 		status = "okay";
@@ -285,6 +292,12 @@
 				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* /SD3_WP*/
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* /SD4_WP */
+			>;
+		};
+
+		pinctrl_ir_receiver_gpio4_5: ir_receiver-gpio4_5 {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_19__GPIO4_IO05 0x80000000
 			>;
 		};
 
