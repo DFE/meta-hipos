@@ -121,6 +121,34 @@
 		default-brightness-level = <7>;
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		down {
+			label = "down";
+			gpios = <&gpio4 6 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_DOWN>;
+		};
+
+		up {
+			label = "Up";
+			gpios = <&gpio4 8 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_UP>;
+		};
+
+		left {
+			label = "Left";
+			gpios = <&gpio4 10 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_LEFT>;
+		};
+
+		right {
+			label = "Right";
+			gpios = <&gpio4 14 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RIGHT>;
+		};
+	};
+
 	v4l2_out {
 		compatible = "fsl,mxc_v4l2_output";
 		status = "okay";
@@ -242,6 +270,10 @@
 				MX6QDL_PAD_KEY_ROW0__GPIO4_IO07		0x1b0b0		/* GPI 1 */
 				MX6QDL_PAD_KEY_ROW1__GPIO4_IO09		0x1b0b0		/* GPI 2 */
 				MX6QDL_PAD_KEY_ROW2__GPIO4_IO11		0x1b0b0		/* GPI 3 */
+				MX6QDL_PAD_KEY_COL0__GPIO4_IO06		0x1b0b0		/* Key 1 */
+				MX6QDL_PAD_KEY_COL1__GPIO4_IO08		0x1b0b0		/* Key 2 */
+				MX6QDL_PAD_KEY_COL2__GPIO4_IO10		0x1b0b0		/* Key 3 */
+				MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0x1b0b0		/* Key black */
 		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* /RST_USB_HUB */
 		/*		MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x000b0	*/	/* /INIC_INT */
 		/*		MX6QDL_PAD_GPIO_9__GPIO1_IO09		0x80000000 */	/* MOST PWR EN */
