@@ -395,6 +395,13 @@ int board_phy_config(struct phy_device *phydev)
 	val |= 0xC0C0;
 	miiphy_write(devname, 0x15, 0x1, val);
 
+#if defined(CONFIG_BOARD_IS_HIMX_IVAP)
+	/* Same for port 6 with real external PHY. */
+	miiphy_read(devname, 0x16, 0x1, &val);
+	val |= 0xC0C0;
+	miiphy_write(devname, 0x16, 0x1, val);
+#endif
+
 	if (phydev->drv->config)
 		phydev->drv->config(phydev);
 
