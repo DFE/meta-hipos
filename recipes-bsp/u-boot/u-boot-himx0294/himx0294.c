@@ -336,6 +336,10 @@ static void marvell_phy_write(int phyaddr, int phyreg, int phydata)
 static void set_phy_speed(int phyaddr, int phydata)
 {
 	marvell_phy_write(phyaddr, MII_CTRL1000, phydata);
+
+	// On port 6 is a real external phy. No reset
+	if(6 == phyaddr) { return; }
+
 	// reset to take effect
 	int ctrl = marvell_phy_read(phyaddr, MII_BMCR);
 	marvell_phy_write(phyaddr, MII_BMCR, ctrl|BMCR_RESET);
@@ -359,10 +363,20 @@ static void phy_speed(void)
 		}
 	}
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
-	set_phy_speed(0, PHY_SPEED_100);
-	set_phy_speed(1, PHY_SPEED_100);
-	set_phy_speed(2, PHY_SPEED_100);
-	set_phy_speed(4, PHY_SPEED_100);
+	for(i=0; i<6; ++i) {
+		int port;
+		switch (i) {
+		case 3: port = 4; break;
+		case 4: port = 3; break;
+		case 5: port = 6; break;
+		default: port = i; break;
+		}
+		if(lanspeed && strlen(lanspeed)>i && lanspeed[i]=='g') {
+			set_phy_speed(port, PHY_SPEED_1000);
+		} else {
+			set_phy_speed(port, PHY_SPEED_100);
+		}
+	}
 #endif
 }
 
