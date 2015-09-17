@@ -154,6 +154,7 @@
 		gpios = <&gpio4 5 1>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_ir_receiver_gpio4_5>;
+		linux,rc-map-name = "rc-rc6-mce";
 	};
 
 	v4l2_out {
