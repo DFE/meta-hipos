@@ -42,6 +42,7 @@ SRC_URI_append_himx0294 = " \
 	file://adv739x-fix-instance.patch \
 	file://imx-snvs-poweroff.patch \
 	file://imx-power-down-device-tree.patch \
+	file://imx-poweroff-restart.patch \
 "
 
 do_configure_prepend() {
