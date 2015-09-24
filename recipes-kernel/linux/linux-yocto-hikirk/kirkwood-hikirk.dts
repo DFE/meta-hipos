@@ -14,7 +14,7 @@
 #include "kirkwood-6282.dtsi"
 
 / {
-	model = "DResearch Fahrzeugelektronik GmbH Hikirk";
+	model = "dfe,hikirk";
 	compatible = "dfe,hikirk", "marvell,kirkwood-88f6282", "marvell,kirkwood";
 
 	memory {
