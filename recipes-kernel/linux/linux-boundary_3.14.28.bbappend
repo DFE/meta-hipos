@@ -43,6 +43,7 @@ SRC_URI_append_himx0294 = " \
 	file://imx-snvs-poweroff.patch \
 	file://imx-power-down-device-tree.patch \
 	file://imx-poweroff-restart.patch \
+	file://0001-imx6-IPU-remove-dmsg-ipu-warnings-8byte-aligned-HYP-.patch \
 "
 
 do_configure_prepend() {
