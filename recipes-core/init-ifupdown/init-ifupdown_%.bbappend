@@ -1,9 +1,9 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/init-ifupdown:"
+# look for files in the layer first
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += " file://99-ifupdown.conf \
              file://systemd-nokill \
              file://systemd-kill \
-             file://0001-Hipos-new-default-etc-network-interfaces.patch \
 "
 
 do_install_append() {
