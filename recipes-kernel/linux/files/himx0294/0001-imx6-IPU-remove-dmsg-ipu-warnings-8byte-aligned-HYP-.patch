@@ -17,11 +17,11 @@ index 2ff622b5..22d48ed 100644
  	ipu_ch_param_set_field(&params, 1, 29, 29, addr1 >> 3);
  	if (addr0%8)
 -		dev_warn(ipu->dev,
-+		dev_info(ipu->dev,
++		//dev_info(ipu->dev,
  			 "IDMAC%d's EBA0 is not 8-byte aligned\n", ch);
  	if (addr1%8)
 -		dev_warn(ipu->dev,
-+		dev_info(ipu->dev,
++		//dev_info(ipu->dev,
  			 "IDMAC%d's EBA1 is not 8-byte aligned\n", ch);
  
  	switch (pixel_fmt) {
