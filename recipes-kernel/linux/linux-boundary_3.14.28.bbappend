@@ -9,7 +9,7 @@ SRCREV_tw6869 = "${AUTOREV}"
 PV_append = "+tw6869gitr${SRCPV}"
 
 SRC_URI_append = " \
-	git://github.com/FrankBau/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869 \
+	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869 \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 "
 
