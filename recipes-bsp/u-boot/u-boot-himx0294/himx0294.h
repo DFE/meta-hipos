@@ -173,7 +173,9 @@
 #define CONFIG_AUTOBOOT_PROMPT \
                         "Press . to abort autoboot in %d seconds\n",bootdelay
 
-#define CONFIG_BOOTCOMMAND	"run x_bootA"
+/* This boot command stores the environment persistently. This ensures that the "fdt_file"
+   variable is set and u-boot and kernel use the same variable. HYP-12761 */
+#define CONFIG_BOOTCOMMAND	"setenv bootcmd run x_bootA; saveenv; boot"
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
