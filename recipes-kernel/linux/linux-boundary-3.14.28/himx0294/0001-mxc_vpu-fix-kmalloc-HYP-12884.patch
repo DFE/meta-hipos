@@ -1,0 +1,34 @@
+From 9feccb54ab757d6da677c39e55dd5ac0906a2268 Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Wed, 28 Oct 2015 13:45:07 +0100
+Subject: [PATCH] mxc_vpu: fix kmalloc HYP-12884
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ drivers/media/platform/mxc/output/mxc_vout.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/media/platform/mxc/output/mxc_vout.c b/drivers/media/platform/mxc/output/mxc_vout.c
+index 3bfa4a6..7605eb4 100644
+--- a/drivers/media/platform/mxc/output/mxc_vout.c
++++ b/drivers/media/platform/mxc/output/mxc_vout.c
+@@ -2214,9 +2214,13 @@ static int mxc_vout_probe(struct platform_device *pdev)
+ 		return -ENOMEM;
+ 
+ 	dev->dev = &pdev->dev;
+-	dev->dev->dma_mask = kmalloc(sizeof(*dev->dev->dma_mask), GFP_KERNEL);
+-	*dev->dev->dma_mask = DMA_BIT_MASK(32);
+-	dev->dev->coherent_dma_mask = DMA_BIT_MASK(32);
++
++	if (!dev->dev->dma_mask) {
++		dev->dev->dma_mask = kmalloc(sizeof(*dev->dev->dma_mask), GFP_KERNEL);
++		if (dev->dev->dma_mask)
++			*dev->dev->dma_mask = DMA_BIT_MASK(32);
++		dev->dev->coherent_dma_mask = DMA_BIT_MASK(32);
++	}
+ 
+ 	ret = v4l2_device_register(dev->dev, &dev->v4l2_dev);
+ 	if (ret) {
+-- 
+2.4.3
+
