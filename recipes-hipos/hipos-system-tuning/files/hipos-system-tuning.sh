@@ -26,13 +26,10 @@ while [ true ]
 do
 	/bin/sleep 10
 	# use "sync" to get free buffers
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 1 ){printf("%s-%s:\t", $3,$4); print("sync"); system("/bin/sync");} }'
-	/bin/sleep 10
-	# compact memory to get more big continuous free memory  
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }'
+	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 2 ){printf("%s-%s:\t", $3,$4); print("sync"); system("/bin/sync");} }'
 	/bin/sleep 10
 	# drop caches to collect unused buffers
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 4 ){printf("%s-%s:\t", $3,$4); print("drop_caches"); system("/bin/echo 3 > /proc/sys/vm/drop_caches");} }'
+	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("drop_caches"); system("/bin/echo 3 > /proc/sys/vm/drop_caches");} }'
 	/bin/sleep 10
 	# compact memory to get more big continuous free memory  
 	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }'
