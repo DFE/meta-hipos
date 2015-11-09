@@ -27,7 +27,7 @@ change_count=0;
 
 while [ true ]
 do
-	buffers_count1="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }'`"
+	buffers_count1="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }' | head -n 1`";
 
 	/bin/sleep $((10-change_count))
 	# use "sync" to get free buffers
@@ -39,11 +39,11 @@ do
 	# compact memory to get more big continuous free memory  
 	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }'
 
-	buffers_count2="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }'`"
-	if [ ${buffers_count1} -gt ${buffers_count2} ]
+	buffers_count2="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }' | head -n 1`";
+	if [ $buffers_count1 -gt $buffers_count2 ]
 	then
-		change_count=$((buffers_count1-buffers_count2))
-		if [ $change_count > 9 ]
+		change_count=$((buffers_count1-buffers_count2));
+		if [ $change_count -gt 9 ]
 		then
 			change_count=9;
 		fi
