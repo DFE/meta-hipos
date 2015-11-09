@@ -20,6 +20,7 @@ IMAGE_INSTALL += "          \
   iptables		    \
   bluez4		    \
   openvpn		    \
+  hipos-system-tuning	    \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \

@@ -1,0 +1,10 @@
+[Unit]
+Description=hipos system tuning
+
+[Service]
+ExecStart=/bin/bash /etc/hipos/hipos-system-tuning.sh
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
