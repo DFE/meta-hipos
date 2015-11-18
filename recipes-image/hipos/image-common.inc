@@ -21,6 +21,7 @@ IMAGE_INSTALL += "          \
   bluez4		    \
   openvpn		    \
   hipos-system-tuning	    \
+  tzdata tzdata-misc tzdata-posix tzdata-right tzdata-africa tzdata-americas tzdata-antarctica tzdata-arctic tzdata-asia tzdata-atlantic tzdata-australia tzdata-europe tzdata-pacific \
 "
 
 IMAGE_INSTALL_append_hikirk += "   \
