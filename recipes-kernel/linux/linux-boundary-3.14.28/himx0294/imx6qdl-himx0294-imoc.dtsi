@@ -405,6 +405,10 @@
 		fsl,data-width = <24>;
 		primary;
 		status = "okay";
+		vcc-gpio = <&gpio4 7 GPIO_ACTIVE_LOW>;
+		vcc-powerup-delay-ms = <1>;
+		backlight-gpio = <&gpio4 6 GPIO_ACTIVE_HIGH>;
+		backlight-powerup-delay-ms = <200>;
 
 		display-timings {
 			native-mode = <&timing0>;
