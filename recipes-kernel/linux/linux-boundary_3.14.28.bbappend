@@ -46,6 +46,7 @@ SRC_URI_append_himx0294 = " \
 	file://imx-poweroff-restart.patch \
 	file://0001-imx6-IPU-remove-dmsg-ipu-warnings-8byte-aligned-HYP-.patch \
 	file://0001-mxc_vpu-fix-kmalloc-HYP-12884.patch \
+	file://ldb-lvds-power-up-down-sequence.patch \
 "
 
 do_configure_prepend() {
