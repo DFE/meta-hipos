@@ -61,6 +61,7 @@ SRC_URI = " \
 	file://m25p80-noBP.patch \
 	file://gadgetfs-fmode_can_read.patch \
 	file://0001-usb-gadget-composite-os-descriptor-specific-fix.patch \
+	file://0001-fixed-hikirk-PHY-driver-issue-see-HYP-11185.patch \
 "
 
 LINUX_VERSION ?= "3.19.8"
