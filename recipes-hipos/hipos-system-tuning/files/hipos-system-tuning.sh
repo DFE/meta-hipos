@@ -23,33 +23,18 @@ if [ ${cores} -eq 4 ]
 fi
 
 
-change_count=0;
+wait_sec=0;
 
 while [ true ]
 do
-	buffers_count1="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }' | head -n 1`";
-
-	/bin/sleep $((10-change_count))
+	/bin/sleep $((wait_sec))
+	buffers_count="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-2)+($(NF-1)*2)+(($NF)*4)) }' | head -n 1`";
+	wait_sec=$((buffers_count/4))
+	
 	# use "sync" to get free buffers
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 2 ){printf("%s-%s:\t", $3,$4); print("sync"); system("/bin/sync");} }'
-	/bin/sleep $((10-change_count))
+	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 4 ){printf("%s-%s:\t", $3,$4); print("sync"); system("/bin/sync");} }'
 	# drop caches to collect unused buffers
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("drop_caches"); system("/bin/echo 3 > /proc/sys/vm/drop_caches");} }'
-	/bin/sleep $((10-change_count))
+	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 8 ){printf("%s-%s:\t", $3,$4); print("drop_caches"); system("/bin/echo 3 > /proc/sys/vm/drop_caches");} }'
 	# compact memory to get more big continuous free memory  
-	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-1)+(($NF)*2)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }'
-
-	buffers_count2="`/bin/cat /proc/buddyinfo | awk '{ print ($(NF-1)+(($NF)*2)) }' | head -n 1`";
-	if [ $buffers_count1 -gt $buffers_count2 ]
-	then
-		change_count=$((buffers_count1-buffers_count2));
-		if [ $change_count -gt 9 ]
-		then
-			change_count=9;
-		fi
-	else
-		change_count=0;
-	fi
-
+	/bin/cat /proc/buddyinfo | awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }'
 done
-
