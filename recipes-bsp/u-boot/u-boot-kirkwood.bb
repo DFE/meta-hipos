@@ -1,4 +1,4 @@
-require recipes-bsp/u-boot/u-boot_2015.01.bb
+require recipes-bsp/u-boot/u-boot_2015.07.bb
 
 COMPATIBLE_MACHINE = "hikirk"
 

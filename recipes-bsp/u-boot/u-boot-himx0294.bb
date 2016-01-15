@@ -1,4 +1,4 @@
-require recipes-bsp/u-boot/u-boot-fslc_2015.04.bb
+require recipes-bsp/u-boot/u-boot-fslc_2015.10.bb
 
 COMPATIBLE_MACHINE = "himx0294"
 
