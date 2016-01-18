@@ -17,7 +17,9 @@ RDEPENDS_gstreamer1.0-plugins-imx-imxvpu = "gstreamer1.0-plugins-bad-videoparser
 
 SRCBRANCH ?= "master"
 SRCREV = "f8ad953c458be6a89f474a948b6401664a6a1745"
-SRC_URI = "git://github.com/Freescale/gstreamer-imx.git;branch=${SRCBRANCH}"
+SRC_URI = "git://github.com/Freescale/gstreamer-imx.git;branch=${SRCBRANCH} \
+           file://0001-tw6869-phys-memory-address-patch-HACK.patch \
+"
 
 S = "${WORKDIR}/git"
 
