@@ -25,8 +25,8 @@ do_install(){
 	install -m 0644 ${S}/imxvpuapi/imxvpuapi.h ${D}/usr/include/imxvpuapi
 	install -d ${D}/usr/lib/pkgconfig
 	install -m 0755 ${S}/build/libimxvpuapi.so.0.10.1  ${D}/usr/lib/
-	ln -s ${S}/build/libimxvpuapi.so.0.10.1 ${S}/build/libimxvpuapi.so.0
-	ln -s ${S}/build/libimxvpuapi.so.0.10.1 ${S}/build/libimxvpuapi.so
+	ln -s libimxvpuapi.so.0.10.1 ${D}/usr/lib/libimxvpuapi.so.0
+	ln -s libimxvpuapi.so.0.10.1 ${D}/usr/lib/libimxvpuapi.so
 	install -m 0755 ${S}/build/libimxvpuapi.pc ${D}/usr/lib/pkgconfig/
 }
 
