@@ -1,4 +1,4 @@
-From 00a91cd890f5dda658b8620c4bfb5750d65ff0f8 Mon Sep 17 00:00:00 2001
+From 12d54996dd1bde5cf1b44e587dd20795522de566 Mon Sep 17 00:00:00 2001
 From: Steffen Sledz <sledz@dresearch-fe.de>
 Date: Mon, 18 Jan 2016 15:51:56 +0100
 Subject: [PATCH] hikirk: add hikirk board
@@ -13,8 +13,8 @@ Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
  board/Marvell/hikirk/Makefile     |  14 ++++
  board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
  configs/hikirk_defconfig          |  47 +++++++++++
- include/configs/hikirk.h          | 151 +++++++++++++++++++++++++++++++++
- 7 files changed, 410 insertions(+)
+ include/configs/hikirk.h          | 156 ++++++++++++++++++++++++++++++++++
+ 7 files changed, 415 insertions(+)
  create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
@@ -335,10 +335,10 @@ index 0000000..5644b83
 +# CONFIG_EXPERT is not set
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..6de13cc
+index 0000000..658234d
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,156 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -488,6 +488,11 @@ index 0000000..6de13cc
 +#define CONFIG_CMD_EXT2
 +#define CONFIG_CMD_EXT4
 +#define CONFIG_CMD_FS_GENERIC
++
++/*
++ * FAT Access
++ */
++#define CONFIG_CMD_FAT
 +
 +#endif /* _CONFIG_HIKIRK_H */
 -- 
