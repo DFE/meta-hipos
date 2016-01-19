@@ -1,50 +1,28 @@
-From b049f5dc502b02bd29fb9af68d628dc10284be40 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 8 Jun 2015 10:24:19 +0200
+From 00a91cd890f5dda658b8620c4bfb5750d65ff0f8 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Mon, 18 Jan 2016 15:51:56 +0100
 Subject: [PATCH] hikirk: add hikirk board
 
 Add support for hikirk board.
 
-Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- arch/arm/cpu/arm926ejs/kirkwood/Kconfig |   4 +
- arch/arm/include/asm/mach-types.h       |   1 +
- board/Marvell/hikirk/Kconfig            |  23 +++++
- board/Marvell/hikirk/Makefile           |  14 +++
- board/Marvell/hikirk/hikirk.c           | 170 ++++++++++++++++++++++++++++++++
- configs/hikirk_defconfig                |   4 +
- include/configs/hikirk.h                | 154 +++++++++++++++++++++++++++++
- 7 files changed, 370 insertions(+)
+ arch/arm/include/asm/mach-types.h |   1 +
+ arch/arm/mach-kirkwood/Kconfig    |   4 +
+ board/Marvell/hikirk/Kconfig      |  23 ++++++
+ board/Marvell/hikirk/Makefile     |  14 ++++
+ board/Marvell/hikirk/hikirk.c     | 170 ++++++++++++++++++++++++++++++++++++++
+ configs/hikirk_defconfig          |  47 +++++++++++
+ include/configs/hikirk.h          | 151 +++++++++++++++++++++++++++++++++
+ 7 files changed, 410 insertions(+)
  create mode 100644 board/Marvell/hikirk/Kconfig
  create mode 100644 board/Marvell/hikirk/Makefile
  create mode 100644 board/Marvell/hikirk/hikirk.c
  create mode 100644 configs/hikirk_defconfig
  create mode 100644 include/configs/hikirk.h
 
-diff --git a/arch/arm/cpu/arm926ejs/kirkwood/Kconfig b/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
-index 6c037a1..53bc464 100644
---- a/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
-+++ b/arch/arm/cpu/arm926ejs/kirkwood/Kconfig
-@@ -3,6 +3,9 @@ if KIRKWOOD
- choice
- 	prompt "Marvell Kirkwood board select"
- 
-+config TARGET_HIKIRK
-+	bool "Marvell hikirk Board"
-+
- config TARGET_OPENRD
- 	bool "Marvell OpenRD Board"
- 
-@@ -63,6 +66,7 @@ config SYS_SOC
- 	default "kirkwood"
- 
- source "board/Marvell/openrd/Kconfig"
-+source "board/Marvell/hikirk/Kconfig"
- source "board/Marvell/mv88f6281gtw_ge/Kconfig"
- source "board/Marvell/rd6281a/Kconfig"
- source "board/Marvell/dreamplug/Kconfig"
 diff --git a/arch/arm/include/asm/mach-types.h b/arch/arm/include/asm/mach-types.h
-index d4a447b..41d9a7b 100644
+index 5afe791..a2251bf 100644
 --- a/arch/arm/include/asm/mach-types.h
 +++ b/arch/arm/include/asm/mach-types.h
 @@ -1108,6 +1108,7 @@ extern unsigned int __machine_arch_type;
@@ -52,9 +30,31 @@ index d4a447b..41d9a7b 100644
  #define MACH_TYPE_COLIBRI_T30          4493
  #define MACH_TYPE_APALIS_T30           4513
 +#define MACH_TYPE_HIKIRK               4745
+ #define MACH_TYPE_OMAPL138_LCDK        2495
  
  #ifdef CONFIG_ARCH_EBSA110
- # ifdef machine_arch_type
+diff --git a/arch/arm/mach-kirkwood/Kconfig b/arch/arm/mach-kirkwood/Kconfig
+index 1261885..1a529d4 100644
+--- a/arch/arm/mach-kirkwood/Kconfig
++++ b/arch/arm/mach-kirkwood/Kconfig
+@@ -4,6 +4,9 @@ choice
+ 	prompt "Marvell Kirkwood board select"
+ 	optional
+ 
++config TARGET_HIKIRK
++	bool "DResearch hikirk Board"
++
+ config TARGET_OPENRD
+ 	bool "Marvell OpenRD Board"
+ 
+@@ -66,6 +69,7 @@ endchoice
+ config SYS_SOC
+ 	default "kirkwood"
+ 
++source "board/Marvell/hikirk/Kconfig"
+ source "board/Marvell/openrd/Kconfig"
+ source "board/Marvell/mv88f6281gtw_ge/Kconfig"
+ source "board/Marvell/rd6281a/Kconfig"
 diff --git a/board/Marvell/hikirk/Kconfig b/board/Marvell/hikirk/Kconfig
 new file mode 100644
 index 0000000..0d7b8d7
@@ -282,20 +282,63 @@ index 0000000..cd484a0
 +#endif /* CONFIG_RESET_PHY_R */
 diff --git a/configs/hikirk_defconfig b/configs/hikirk_defconfig
 new file mode 100644
-index 0000000..e907c2b
+index 0000000..5644b83
 --- /dev/null
 +++ b/configs/hikirk_defconfig
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,47 @@
 +CONFIG_SYS_EXTRA_OPTIONS="BOARD_IS_HIKIRK"
 +CONFIG_ARM=y
 +CONFIG_KIRKWOOD=y
 +CONFIG_TARGET_HIKIRK=y
++CONFIG_SYS_NO_FLASH=y
++CONFIG_SYS_MVFS=y
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_ENV=y
++CONFIG_CMD_MII=y
++CONFIG_CMD_SPI=y
++CONFIG_CMD_SF=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_IDE=y
++CONFIG_CMD_EXT4=y
++CONFIG_AUTOBOOT_KEYED=y
++CONFIG_AUTOBOOT_PROMPT="Press . to abort autoboot in %d seconds.\n"
++CONFIG_AUTOBOOT_STOP_STR="."
++CONFIG_SPI_FLASH=y
++CONFIG_SPI_FLASH_MTD=y
++CONFIG_CMD_BDI=y
++CONFIG_CMD_CONSOLE=y
++CONFIG_CMD_BOOTD=y
++CONFIG_CMD_RUN=y
++CONFIG_CMD_IMI=y
++CONFIG_CMD_XIMG=y
++CONFIG_CMD_EDITENV=y
++CONFIG_CMD_SAVEENV=y
++CONFIG_CMD_MEMORY=y
++CONFIG_CMD_LOADB=y
++CONFIG_CMD_LOADS=y
++CONFIG_CMD_ECHO=y
++CONFIG_CMD_ITEST=y
++CONFIG_CMD_SOURCE=y
++CONFIG_CMD_NET=y
++CONFIG_CMD_NFS=y
++CONFIG_CMD_MISC=y
++CONFIG_NET=y
++# CONFIG_NET_RANDOM_ETHADDR is not set
++# CONFIG_NETDEVICES is not set
++# CONFIG_CMD_ENV_EXISTS is not set
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_FPGA is not set
++# CONFIG_CMD_IMLS is not set
++# CONFIG_CMD_NAND is not set
++# CONFIG_CMD_SETEXPR is not set
++# CONFIG_EXPERT is not set
 diff --git a/include/configs/hikirk.h b/include/configs/hikirk.h
 new file mode 100644
-index 0000000..74c12ce
+index 0000000..6de13cc
 --- /dev/null
 +++ b/include/configs/hikirk.h
-@@ -0,0 +1,154 @@
+@@ -0,0 +1,151 @@
 +/*
 + * Based on openrd.h:
 + * (C) Copyright 2009
@@ -347,20 +390,8 @@ index 0000000..74c12ce
 + * Commands configuration
 + */
 +#define CONFIG_SYS_NO_FLASH		/* Declare no flash (NOR/SPI) */
-+#define CONFIG_SYS_MVFS
-+#include <config_cmd_default.h>
-+#define CONFIG_CMD_DHCP
-+#define CONFIG_CMD_ENV
-+#define CONFIG_CMD_MII
-+#define CONFIG_CMD_MMC
-+#define CONFIG_CMD_SPI
-+#define CONFIG_CMD_SF
 +#define CONFIG_SF_DEFAULT_SPEED  80000000
 +#define CONFIG_ENV_SPI_MAX_HZ CONFIG_SF_DEFAULT_SPEED 
-+#define CONFIG_CMD_PING
-+#define CONFIG_CMD_USB
-+#define CONFIG_CMD_IDE
-+#define CONFIG_CMD_EXT4
 +
 +/*
 + * mv-common.h should be defined after CMD configs since it used them
@@ -397,13 +428,13 @@ index 0000000..74c12ce
 +/*
 + * auto boot
 + */
-+#define CONFIG_AUTOBOOT_KEYED
-+#define CONFIG_AUTOBOOT_STOP_STR "."
++/*#define CONFIG_AUTOBOOT_KEYED*/
++/*#define CONFIG_AUTOBOOT_STOP_STR "."*/
 +#define CONFIG_ZERO_BOOTDELAY_CHECK
 +#undef CONFIG_BOOTDELAY
 +#define CONFIG_BOOTDELAY 0
-+#define CONFIG_AUTOBOOT_PROMPT \
-+                        "Press . to abort autoboot in %d seconds\n",bootdelay
++/*#define CONFIG_AUTOBOOT_PROMPT					\
++  "Press . to abort autoboot in %d seconds\n",bootdelay*/
 +
 +/*
 + * Default environment variables
@@ -442,6 +473,7 @@ index 0000000..74c12ce
 +#define CONFIG_SYS_ATA_IDE1_OFFSET	MV_SATA_PORT1_OFFSET
 +#endif /*CONFIG_MVSATA_IDE*/
 +
++#define CONFIG_CMD_MMC
 +#ifdef CONFIG_CMD_MMC
 +#define CONFIG_MMC
 +#define CONFIG_GENERIC_MMC
@@ -449,7 +481,15 @@ index 0000000..74c12ce
 +#define CONFIG_SYS_MMC_BASE KW_SDIO_BASE
 +#endif /* CONFIG_CMD_MMC */
 +
++/*
++ * Ext4 Access
++ */
++#define CONFIG_FS_EXT4
++#define CONFIG_CMD_EXT2
++#define CONFIG_CMD_EXT4
++#define CONFIG_CMD_FS_GENERIC
++
 +#endif /* _CONFIG_HIKIRK_H */
 -- 
-2.1.4
+2.7.0
 

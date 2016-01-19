@@ -11,9 +11,8 @@ SRC_URI_append_hikirk = " \
 	file://kwbimage_uart.hdr \
 	file://kwbimage_sata.hdr \
 	file://kwbimage_spi.hdr \
-	file://hikirk-board-support.patch \
+	file://0001-hikirk-add-hikirk-board.patch \
 	file://fix-mmc-high-capacity.patch \
-	file://env_sf-fix-recovery-default.patch \
 "
 
 do_compile_append_hikirk () {
