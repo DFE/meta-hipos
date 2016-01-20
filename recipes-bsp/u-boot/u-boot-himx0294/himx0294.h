@@ -11,7 +11,6 @@
 #define __CONFIG_H
 
 #include "mx6_common.h"
-#define CONFIG_MX6
 #define CONFIG_DISPLAY_CPUINFO
 #define CONFIG_DISPLAY_BOARDINFO
 
@@ -101,7 +100,6 @@
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_MII
-#define CONFIG_CMD_NET
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
 #define IMX_FEC_BASE			ENET_BASE_ADDR
@@ -130,7 +128,6 @@
 
 /* Miscellaneous commands */
 #define CONFIG_CMD_BMODE
-#define CONFIG_CMD_SETEXPR
 
 /* Framebuffer and LCD */
 #define CONFIG_VIDEO
@@ -154,8 +151,6 @@
 #define CONFIG_BAUDRATE			       115200
 
 /* Command definition */
-#include <config_cmd_default.h>
-
 #undef CONFIG_CMD_IMLS
 
 #define CONFIG_PREBOOT                 ""
@@ -166,12 +161,9 @@
 /*
  * auto boot
  */
-#define CONFIG_AUTOBOOT_KEYED
-#define CONFIG_AUTOBOOT_STOP_STR "."
 #define CONFIG_ZERO_BOOTDELAY_CHECK
+#undef CONFIG_BOOTDELAY
 #define CONFIG_BOOTDELAY 0
-#define CONFIG_AUTOBOOT_PROMPT \
-                        "Press . to abort autoboot in %d seconds\n",bootdelay
 
 /* This boot command stores the environment persistently. This ensures that the "fdt_file"
    variable is set and u-boot and kernel use the same variable. HYP-12761 */
@@ -216,12 +208,15 @@
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
 #define CONFIG_SYS_HUSH_PARSER
+#undef CONFIG_SYS_PROMPT
 #define CONFIG_SYS_PROMPT	       "U-Boot > "
 #define CONFIG_AUTO_COMPLETE
+#undef CONFIG_SYS_CBSIZE
 #define CONFIG_SYS_CBSIZE	       1024
 
 /* Print Buffer Size */
 #define CONFIG_SYS_PBSIZE (CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
+#undef CONFIG_SYS_MAXARGS
 #define CONFIG_SYS_MAXARGS	       48
 #define CONFIG_SYS_BARGSIZE CONFIG_SYS_CBSIZE
 
@@ -297,8 +292,8 @@
 
 #define CONFIG_USB_GADGET
 #define CONFIG_CMD_USB_MASS_STORAGE
-#define CONFIG_USB_GADGET_MASS_STORAGE
-#define CONFIG_USBDOWNLOAD_GADGET
+#define CONFIG_USB_FUNCTION_MASS_STORAGE
+#define CONFIG_USB_GADGET_DOWNLOAD
 #define CONFIG_USB_GADGET_VBUS_DRAW	2
 
 /* Netchip IDs */
@@ -306,9 +301,10 @@
 #define CONFIG_G_DNL_PRODUCT_NUM 0xa4a5
 #define CONFIG_G_DNL_MANUFACTURER "Boundary"
 
+#define CONFIG_USB_FUNCTION_FASTBOOT
 #define CONFIG_CMD_FASTBOOT
 #define CONFIG_ANDROID_BOOT_IMAGE
-#define CONFIG_USB_FASTBOOT_BUF_ADDR   CONFIG_SYS_LOAD_ADDR
-#define CONFIG_USB_FASTBOOT_BUF_SIZE   0x07000000
+#define CONFIG_FASTBOOT_BUF_ADDR   CONFIG_SYS_LOAD_ADDR
+#define CONFIG_FASTBOOT_BUF_SIZE   0x07000000
 
 #endif	       /* __CONFIG_H */

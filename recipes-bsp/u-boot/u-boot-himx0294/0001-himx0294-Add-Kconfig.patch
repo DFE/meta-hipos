@@ -1,38 +1,38 @@
-From 15948ba5d4226195f8d9f0c8213f2a10d9038810 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 11 May 2015 12:44:46 +0200
+From 837e2bd785ec0afc7b02b4ad8a617a342c8c7198 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Wed, 20 Jan 2016 11:44:35 +0100
 Subject: [PATCH] himx0294: Add Kconfig
 
 Add Kconfig support for himx0294 board.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- arch/arm/Kconfig | 5 +++++
- 1 file changed, 5 insertions(+)
+ arch/arm/cpu/armv7/mx6/Kconfig | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 7c383cb..5c2169d 100644
---- a/arch/arm/Kconfig
-+++ b/arch/arm/Kconfig
-@@ -498,6 +498,10 @@ config TARGET_NITROGEN6X
- 	bool "Support nitrogen6x"
- 	select CPU_V7
+diff --git a/arch/arm/cpu/armv7/mx6/Kconfig b/arch/arm/cpu/armv7/mx6/Kconfig
+index 8489182..c9860f1 100644
+--- a/arch/arm/cpu/armv7/mx6/Kconfig
++++ b/arch/arm/cpu/armv7/mx6/Kconfig
+@@ -113,6 +113,9 @@ config TARGET_MX6UL_14X14_EVK
+ config TARGET_NITROGEN6X
+ 	bool "nitrogen6x"
  
 +config TARGET_HIMX0294
-+	bool "Support himx0294"
-+	select CPU_V7
++	bool "himx0294"
 +
- config TARGET_CGTQMX6EVAL
- 	bool "Support cgtqmx6eval"
- 	select CPU_V7
-@@ -798,6 +802,7 @@ source "board/barco/platinum/Kconfig"
+ config TARGET_OT1200
+ 	bool "Bachmann OT1200"
+ 	select SUPPORT_SPL
+@@ -158,6 +161,7 @@ source "board/bachmann/ot1200/Kconfig"
+ source "board/barco/platinum/Kconfig"
  source "board/barco/titanium/Kconfig"
- source "board/bluegiga/apx4devkit/Kconfig"
  source "board/boundary/nitrogen6x/Kconfig"
 +source "board/freescale/himx0294/Kconfig"
- source "board/broadcom/bcm28155_ap/Kconfig"
- source "board/broadcom/bcmcygnus/Kconfig"
- source "board/broadcom/bcmnsp/Kconfig"
+ source "board/compulab/cm_fx6/Kconfig"
+ source "board/congatec/cgtqmx6eval/Kconfig"
+ source "board/embest/mx6boards/Kconfig"
 -- 
-2.1.4
+2.7.0
 
