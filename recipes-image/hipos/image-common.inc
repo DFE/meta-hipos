@@ -18,7 +18,7 @@ IMAGE_INSTALL += "          \
   udev-extraconf            \
   hip-udev-extra-rules      \
   iptables		    \
-  bluez4		    \
+  bluez5		    \
   openvpn		    \
   hipos-system-tuning	    \
   tzdata tzdata-misc tzdata-posix tzdata-right tzdata-africa tzdata-americas tzdata-antarctica tzdata-arctic tzdata-asia tzdata-atlantic tzdata-australia tzdata-europe tzdata-pacific \
