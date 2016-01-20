@@ -1,4 +1,4 @@
-# based on linux-yocto-custom.bb:
+# linux-yocto-custom.bb:
 #
 #   An example kernel recipe that uses the linux-yocto and oe-core
 #   kernel classes to apply a subset of yocto kernel management to git
@@ -11,8 +11,8 @@
 #
 #   You must also provide a Linux kernel configuration. The most direct
 #   method is to copy your .config to files/defconfig in your layer,
-#   in the same directory as the bbappend and add file://defconfig to
-#   your SRC_URI.
+#   in the same directory as the copy (and rename) of this recipe and
+#   add file://defconfig to your SRC_URI.
 #
 #   To use the yocto kernel tooling to generate a BSP configuration
 #   using modular configuration fragments, see the yocto-bsp and
@@ -43,39 +43,38 @@
 #   
 #   example configuration addition:
 #            SRC_URI += "file://smp.cfg"
-#   example patch addition (for kernel v3.4 only):
-#            SRC_URI += "file://0001-linux-version-tweak.patch
-#   example feature addition (for kernel v3.4 only):
+#   example patch addition (for kernel v4.x only):
+#            SRC_URI += "file://0001-linux-version-tweak.patch"
+#   example feature addition (for kernel v4.x only):
 #            SRC_URI += "file://feature.scc"
 #
 
 inherit kernel
 require recipes-kernel/linux/linux-yocto.inc
 
-# Override SRC_URI in a bbappend file to point at a different source
+# Override SRC_URI in a copy of this recipe to point at a different source
 # tree if you do not want to build from Linus' tree.
 SRC_URI = " \
-	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git;protocol=git;branch=${SRCBRANCH};name=machine \
+	git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git;protocol=git;nocheckout=1;name=machine \
 	file://defconfig \
 	file://kirkwood-hikirk.dts \
-	file://m25p80-noBP.patch \
-	file://gadgetfs-fmode_can_read.patch \
+	file://0001-Disable-spi-nor-protecton.patch \
 	file://0001-usb-gadget-composite-os-descriptor-specific-fix.patch \
 	file://0001-fixed-hikirk-PHY-driver-issue-see-HYP-11185.patch \
 "
 
-LINUX_VERSION ?= "3.19.8"
-LINUX_VERSION_EXTENSION ?= "-hikirk"
+LINUX_VERSION ?= "4.2"
+LINUX_VERSION_EXTENSION_append = "-hikirk"
 
-# Override SRCREV to point to a different commit in a bbappend file to
+# Modify SRCREV to a different commit hash in a copy of this recipe to
 # build a different release of the Linux kernel.
-# tag: v3.4 76e10d158efb6d4516018846f60c2ab5501900bc
-SRCREV_machine="v3.19.8"
-SRCBRANCH_machine = "linux-3.19.y"
+# tag: v4.2 64291f7db5bd8150a74ad2036f1037e6a0428df2
+SRCREV_machine="64291f7db5bd8150a74ad2036f1037e6a0428df2"
+
 PR = "r1"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
-# Override COMPATIBLE_MACHINE to include your machine in a bbappend
+# Override COMPATIBLE_MACHINE to include your machine in a copy of this recipe
 # file. Leaving it empty here ensures an early explicit build failure.
 COMPATIBLE_MACHINE = "(hikirk)"
 

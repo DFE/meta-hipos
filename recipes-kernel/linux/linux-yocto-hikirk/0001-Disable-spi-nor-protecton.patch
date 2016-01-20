@@ -1,20 +1,21 @@
-From 8376f1bb2abe42fb1763f71a4096ef0ae0932c34 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 11 Jun 2015 15:36:36 +0200
+From e41ec12845285662732b21f973215fe7e9391fb0 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Wed, 20 Jan 2016 14:56:18 +0100
 Subject: [PATCH] Disable spi nor protecton
 
 Disable protection support, because it is used with not supported chip m25p80.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
  drivers/mtd/spi-nor/spi-nor.c | 4 ++++
  1 file changed, 4 insertions(+)
 
 diff --git a/drivers/mtd/spi-nor/spi-nor.c b/drivers/mtd/spi-nor/spi-nor.c
-index 0f8ec3c..8bebae4 100644
+index d78831b..e32d143 100644
 --- a/drivers/mtd/spi-nor/spi-nor.c
 +++ b/drivers/mtd/spi-nor/spi-nor.c
-@@ -996,11 +996,15 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
+@@ -1073,11 +1073,15 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
  	mtd->_erase = spi_nor_erase;
  	mtd->_read = spi_nor_read;
  
@@ -23,13 +24,13 @@ index 0f8ec3c..8bebae4 100644
 +	   not supported chips. */
  	/* nor protection support for STmicro chips */
  	if (JEDEC_MFR(info) == CFI_MFR_ST) {
- 		mtd->_lock = spi_nor_lock;
- 		mtd->_unlock = spi_nor_unlock;
+ 		nor->flash_lock = stm_lock;
+ 		nor->flash_unlock = stm_unlock;
  	}
 +#endif
  
- 	/* sst nor chips use AAI word program */
- 	if (info->flags & SST_WRITE)
+ 	if (nor->flash_lock && nor->flash_unlock) {
+ 		mtd->_lock = spi_nor_lock;
 -- 
-2.1.4
+2.7.0
 
