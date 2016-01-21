@@ -382,24 +382,30 @@ static void phy_speed(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC) || \
+	defined(CONFIG_BOARD_IS_HIMX_IVAP)
 	unsigned short val;
 	const char* devname = miiphy_get_current_dev();
 
-#if defined(CONFIG_BOARD_IS_HIMX_IMOC) || \
-	defined(CONFIG_BOARD_IS_HIMX_IVAP)
-	phy_speed();
-#endif
-	/* Enable Tx and Rx RGMII delay on CPU port. */
-	/* Enable Forced Flow Control on CPU port. */
-	miiphy_read(devname, 0x15, 0x1, &val);
-	val |= 0xC0C0;
-	miiphy_write(devname, 0x15, 0x1, val);
+	miiphy_read(devname, 0x10, 0x3, &val);
+	if ((val & 0xFFF0) == 0x1760) {
+		printf("Marvell Switch 0x176 detected\n");
+
+		phy_speed();
+
+		/* Enable Tx and Rx RGMII delay on CPU port. */
+		/* Enable Forced Flow Control on CPU port. */
+		miiphy_read(devname, 0x15, 0x1, &val);
+		val |= 0xC0C0;
+		miiphy_write(devname, 0x15, 0x1, val);
 
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
-	/* Same for port 6 with real external PHY. */
-	miiphy_read(devname, 0x16, 0x1, &val);
-	val |= 0xC0C0;
-	miiphy_write(devname, 0x16, 0x1, val);
+		/* Same for port 6 with real external PHY. */
+		miiphy_read(devname, 0x16, 0x1, &val);
+		val |= 0xC0C0;
+		miiphy_write(devname, 0x16, 0x1, val);
+#endif
+	}
 #endif
 
 	if (phydev->drv->config)
