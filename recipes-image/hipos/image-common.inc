@@ -47,12 +47,11 @@ IMAGE_INSTALL_append_himx0294 += " \
   tslib-tests \
   packagegroup-hipos-qt     \
   packagegroup-hipos-qt-examples \
-  packagegroup-fsl-gstreamer \
+  packagegroup-fsl-gstreamer1.0 \
   packagegroup-hipos-gstreamer \
   gstreamer1.0-plugins-imx \
   eglinfo-fb \
-  packagegroup-fslc-gstreamer1.0 \
-  gst-fsl-plugin \
+  gst1.0-fsl-plugin \
   fsl-alsa-plugins \
 "
 
