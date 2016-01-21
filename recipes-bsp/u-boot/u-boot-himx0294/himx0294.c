@@ -397,7 +397,7 @@ int board_phy_config(struct phy_device *phydev)
 		/* Enable Forced Flow Control on CPU port. */
 		miiphy_read(devname, 0x15, 0x1, &val);
 		val |= 0xC0C0;
-		miiphy_write(devname, 0x15, 0x1, val)
+		miiphy_write(devname, 0x15, 0x1, val);
 
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
 		/* Same for port 6 with real external PHY. */
