@@ -34,7 +34,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
 
 SRC_URI_append_hikirk +=  " file://fw_env.config \
-	      file://hikirk-board-support.patch \
+	      file://0001-hikirk-add-hikirk-board.patch \
 	    "
 
 do_install_append_hikirk () {
