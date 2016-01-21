@@ -46,10 +46,3 @@ IMAGE_INSTALL += " \
   v4l-utils \
   live555 \
 "
-
-IMAGE_INSTALL_append_himx0280 += " \
-  opencv \
-  opencv-dev \
-  gst-fsl-plugin \
-  fsl-alsa-plugins \
-"
