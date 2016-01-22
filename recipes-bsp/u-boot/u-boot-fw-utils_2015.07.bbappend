@@ -1,10 +1,6 @@
 # we've problems with parallel make when building for multiconfig
 PARALLEL_MAKE = ""
 
-SRC_URI_himx0294 = "git://github.com/Freescale/u-boot-imx.git;branch=${SRCBRANCH}"
-SRCREV_himx0294 = "75ce95e627609c9b9e537e935e69c4ecef26c8f7"
-SRCBRANCH_himx0294 = "patches-2014.10"
-
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
 	file://himx0294.c \
