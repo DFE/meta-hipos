@@ -18,10 +18,28 @@ index f47a85d..b8edc60 100644
  	else
  	{
 -		g_assert(phys_mem->mapping_flags == flags);
-+		g_assert(phys_mem->mapping_flags == GST_MAP_WRITE || flags == GST_MAP_READ);
++		g_assert((phys_mem->mapping_flags & GST_MAP_WRITE) || !(flags & GST_MAP_WRITE));
  		return phys_mem->mapped_virt_addr;
  	}
  }
+@@ -234,13 +234,15 @@ static GstMemory* gst_imx_phys_mem_allocator_copy(GstMemory *mem, gssize offset,
+		gpointer srcptr, destptr;
+		GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(mem->allocator));
+
+-		srcptr = klass->map_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem, mem->maxsize, GST_MAP_READ);
++		//srcptr = klass->map_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem, mem->maxsize, GST_MAP_READ);
++		srcptr = gst_imx_phys_mem_allocator_map(mem, mem->maxsize, GST_MAP_READ);
+		destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
+
+		memcpy(destptr, srcptr, mem->maxsize);
+
+		klass->unmap_phys_mem(phys_mem_alloc, copy);
+-		klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
++		//klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
++		gst_imx_phys_mem_allocator_unmap(mem);
+	}
+
+        GST_INFO_OBJECT(
 diff --git a/src/ipu/allocator.c b/src/ipu/allocator.c
 index c4d1580..075ab7b 100644
 --- a/src/ipu/allocator.c
