@@ -1,0 +1,40 @@
+From 235089334c4f9c7f839a20fee5223b950910fdbc Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Wed, 27 Jan 2016 15:17:32 +0100
+Subject: [PATCH] phys_mem_allocator refcountig mmap fix, HYP-12917
+
+Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+---
+ src/common/phys_mem_allocator.c | 2 +-
+ src/ipu/allocator.c             | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/src/common/phys_mem_allocator.c b/src/common/phys_mem_allocator.c
+index f47a85d..b8edc60 100644
+--- a/src/common/phys_mem_allocator.c
++++ b/src/common/phys_mem_allocator.c
+@@ -192,7 +192,7 @@ static gpointer gst_imx_phys_mem_allocator_map(GstMemory *mem, gsize maxsize, Gs
+ 	}
+ 	else
+ 	{
+-		g_assert(phys_mem->mapping_flags == flags);
++		g_assert(phys_mem->mapping_flags == GST_MAP_WRITE || flags == GST_MAP_READ);
+ 		return phys_mem->mapped_virt_addr;
+ 	}
+ }
+diff --git a/src/ipu/allocator.c b/src/ipu/allocator.c
+index c4d1580..075ab7b 100644
+--- a/src/ipu/allocator.c
++++ b/src/ipu/allocator.c
+@@ -101,8 +101,6 @@ static gpointer gst_imx_ipu_map_phys_mem(GstImxPhysMemAllocator *allocator, GstI
+ 	int prot = 0;
+ 	GstImxIpuAllocator *ipu_allocator = GST_IMX_IPU_ALLOCATOR(allocator);
+ 
+-	g_assert(phys_mem->mapped_virt_addr == NULL);
+-
+ 	/* As explained in gst_imx_phys_mem_allocator_map(), the flags are guaranteed to
+ 	 * be the same when a memory block is mapped multiple times, so the value of
+ 	 * "flags" will be identical if map() is called two times, for example. */
+-- 
+2.7.0
+
