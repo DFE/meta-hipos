@@ -17,6 +17,7 @@ BCTRL_DEV="/dev/ttydrbcc"
 DRBCC_BIN="/usr/bin/drbcc"
 DEVID_FILE="/etc/hydraip-devid"
 TMP_DEVID_FILE="/tmp/hipos-devid"
+FIX_DEVID_BIN="/usr/sbin/hip-fix-hydraip-devid"
 HOSTNAME_FILE="/etc/hostname"
 # existence of this is checked within systemd scripts to start services 
 # depending on device type e.g. hipos-device.nas or hipos-device.recorder
@@ -124,6 +125,9 @@ update_hostname()
 # access the actual device config
 # and actualize...
 fetch_info
+if [ -x ${FIX_DEVID_BIN} ]; then
+	${FIX_DEVID_BIN}
+fi
 . ${DEVID_FILE}
 update_device_type
 update_hostname
