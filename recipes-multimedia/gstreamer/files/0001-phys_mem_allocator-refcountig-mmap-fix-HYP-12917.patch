@@ -31,7 +31,8 @@ index f47a85d..b8edc60 100644
 +		srcptr = gst_imx_phys_mem_allocator_map(mem, mem->maxsize, GST_MAP_READ);
 		destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
 
-		memcpy(destptr, srcptr, mem->maxsize);
+-		memcpy(destptr, srcptr, mem->maxsize);
++		if (srcptr) { memcpy(destptr, srcptr, mem->maxsize); } else { memset(destptr, mem->maxsize, 0); }
 
 		klass->unmap_phys_mem(phys_mem_alloc, copy);
 -		klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
