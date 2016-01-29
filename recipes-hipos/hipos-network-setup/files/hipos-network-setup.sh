@@ -1,18 +1,30 @@
 #!/bin/bash
 
+MACHINE=`hip-machinfo -a`
+
 if [ -a /etc/hydraip-devid ]
 then
 	. /etc/hydraip-devid
 fi
 
+if [ \( ${MACHINE} == "himx0294-ivap" -a ${vout} -eq 2 \) -o \( ${MACHINE} == "himx0294-imoc" \) ]
+then
+	exit 0
+fi
+
 if [ -z ${lanspeed} ]
 then
-	lanspeed=ff
-else
-	if [ ${#lanspeed} = 1 ]
+	if [ ${MACHINE} == "hikirk" ]
 	then
-		lanspeed=${lanspeed}f
+		lanspeed=ff
+	else
+		lanspeed=f
 	fi
+fi
+
+if [ ${MACHINE} == "hikirk" -a ${#lanspeed} = 1 ]
+then
+	lanspeed=${lanspeed}f
 fi
 
 echo "lanspeed=$lanspeed"
@@ -29,7 +41,7 @@ do
 	fi
 done
 
-if [ -a "/etc/hip-activate-config.d/${device}/net_config.py" ]
+if [ ${MACHINE} == "hikirk" -a -a "/etc/hip-activate-config.d/${device}/net_config.py" ]
 then
 	/etc/hip-activate-config.d/${device}/net_config.py
 	if [ -a /etc/drconfig/post_config.sh ]
