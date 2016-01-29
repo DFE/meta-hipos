@@ -30,6 +30,7 @@ IMAGE_INSTALL_append_hikirk += "   \
   drbcc                     \
   hipos-device-info         \
   hipos-time                \
+  hip-machinfo              \
   hipos-network-setup       \
 "
 
@@ -39,6 +40,8 @@ IMAGE_INSTALL_append_himx0294 += "   \
   drbcc                     \
   hipos-device-info         \
   hipos-time                \
+  hip-machinfo              \
+  hipos-network-setup       \
 "
 
 IMAGE_INSTALL_append_himx0294 += " \
