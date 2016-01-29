@@ -1,0 +1,62 @@
+#!/bin/bash
+# vim:set ts=4 sw=4 noexpandtab:
+#
+# \brief obtain machine/submachine info
+#
+# (C) 2015 DResearch Fahrzeugelektonik GmbH
+#set -x
+
+NAME="`basename $0`"
+GET_MACHINE=false;
+GET_SUBMACHINE=false;
+MACHINE="unknown"
+SUBMACHINE="unknown"
+
+# Option evaluation
+while [ "$#" -gt 0 ]; do
+	case $1 in
+		-m|--machine)    GET_MACHINE=true;;
+		-s|--submachine) GET_SUBMACHINE=true;;
+		-a|--all)        GET_MACHINE=true; GET_SUBMACHINE=true;;
+		*) 
+			echo "Use $NAME to obtain information about machine and/or submachine type."
+			echo "    -m|--machine       return machine name"
+			echo "    -s|--submachine    return submachine name"
+			echo "    -a|--all           return machine-submachine name"
+			echo "    -h|--help          get this little help"
+			exit 1
+			;;
+	esac
+	shift
+done
+
+# check for hipox or hikirk
+case `cat /proc/cpuinfo | grep Hardware | cut -d:  -f2` in
+	*Kirkwood* | *hikirk*) MACHINE="hikirk"; SUBMACHINE=""; GET_SUBMACHINE=false;;
+	*OXE810*   | *hipox*)  MACHINE="hipox";  SUBMACHINE=""; GET_SUBMACHINE=false;;
+esac
+
+# check for devices with kernel device tree, HYP-12510
+case `cat /proc/device-tree/model 2> /dev/null` in
+	DResearch\ Fahrzeugelektronik\ GmbH\ himx0294) MACHINE="himx0294"; SUBMACHINE="imoc";;
+	dfe,himx0294-imoc)   MACHINE="himx0294"; SUBMACHINE="imoc";;
+	dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
+	dfe,himx0294-dvmon)  MACHINE="himx0294"; SUBMACHINE="dvmon";;
+	dfe,hikirk)          MACHINE="hikirk";   SUBMACHINE=""; GET_SUBMACHINE=false;;
+	# add checks for other submachines here
+esac
+
+$GET_MACHINE && echo -n $MACHINE
+$GET_MACHINE && $GET_SUBMACHINE && echo -n "-"
+$GET_SUBMACHINE && echo -n $SUBMACHINE
+echo "" # new line
+
+# Editor hints for emacs
+#
+# Local Variables:
+# indent-tabs-mode:t
+# tab-width:4
+# End:
+#
+# NO CODE BELOW THIS!
+
