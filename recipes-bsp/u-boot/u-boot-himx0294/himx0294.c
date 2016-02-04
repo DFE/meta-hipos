@@ -388,8 +388,8 @@ int board_phy_config(struct phy_device *phydev)
 	const char* devname = miiphy_get_current_dev();
 
 	miiphy_read(devname, 0x10, 0x3, &val);
-	if ((val & 0xFFF0) == 0x1760) {
-		printf("Marvell Switch 0x176 detected\n");
+	if (((val & 0xFFF0) == 0x1760) || ((val & 0xFFF0) == 0x1720)) {
+		printf("Marvell Switch 0x176/0x172 detected\n");
 
 		phy_speed();
 
