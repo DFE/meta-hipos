@@ -110,8 +110,9 @@ update_hostname()
 	local ret=0
 	
 	if serial_valid "${serial}" ; then
-		if [[ ! -f "${HOSTNAME_FILE}" || "`cat ${HOSTNAME_FILE}`" == "hikirk" ]]; then
-			# update only if hostname file does not exist or contains default "hikirk"
+		if [[ ! -f "${HOSTNAME_FILE}" || "`cat ${HOSTNAME_FILE}`" == "hikirk" || "`cat ${HOSTNAME_FILE}`" == "4080-0-00000" ]]; then
+			# update only if hostname file does not exist, contains default "hikirk",
+			# or contains production dummy entry "4080-0-00000"
 			echo ${serial} > ${HOSTNAME_FILE}
 		fi
 	else
