@@ -1,0 +1,13 @@
+[Unit]
+Description=hipos mac consistency
+
+Requires=hipos-device-info.service
+After=hipos-device-info.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/hipos/mac_from_hd_to_uboot.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
