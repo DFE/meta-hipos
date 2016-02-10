@@ -7,7 +7,7 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = "python"
 
-PR = "r1"
+PR = "r2"
 
 SRC_URI = " file://hipos-mac-check.service  \
             file://hipos-mac-check.py \

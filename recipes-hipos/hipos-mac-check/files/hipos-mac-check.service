@@ -6,7 +6,7 @@ After=hipos-device-info.service
 
 [Service]
 Type=oneshot
-ExecStart=/etc/hipos/mac_from_hd_to_uboot.py
+ExecStart=/etc/hipos/hipos-mac-check.py
 RemainAfterExit=yes
 
 [Install]
