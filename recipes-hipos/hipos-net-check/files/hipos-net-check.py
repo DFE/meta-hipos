@@ -34,6 +34,7 @@ def main():
             if ubootvalue:
                 ubootvalue = ubootvalue.group(1).lower()
             if devidvalue != ubootvalue:
+                print "Update u-boot env: {} {}".format(p, devidvalue)
                 subprocess.check_output("fw_setenv {} {}".format(p, devidvalue), shell=True)
 
 
