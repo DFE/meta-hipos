@@ -37,6 +37,7 @@ IMAGE_INSTALL_append_hikirk += "   \
 IMAGE_INSTALL_append_himx0294 += "   \
   u-boot-fw-utils           \
   libdrbcc                  \
+  libdrtp                   \
   drbcc                     \
   hipos-device-info         \
   hipos-time                \
