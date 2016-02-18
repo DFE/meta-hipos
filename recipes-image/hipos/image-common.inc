@@ -42,6 +42,7 @@ IMAGE_INSTALL_append_himx0294 += "   \
   hipos-time                \
   hip-machinfo              \
   hipos-network-setup       \
+  hipos-net-check           \
 "
 
 IMAGE_INSTALL_append_himx0294 += " \

@@ -1,0 +1,13 @@
+[Unit]
+Description=hipos network parameters consistency
+
+Requires=hipos-device-info.service
+After=hipos-device-info.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/hipos/hipos-net-check.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
