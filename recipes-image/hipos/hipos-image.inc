@@ -9,6 +9,5 @@ IMAGE_INSTALL_append_hikirk += " \
 IMAGE_INSTALL_append_himx0294 += " \
   hipos-watchdog \
   libdrtp \
-  libdrtp-gst-demo \
 "
 
