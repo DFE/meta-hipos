@@ -1,0 +1,32 @@
+From 7adbb787b791c96d49ef823addc64c35040a6f9c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ralf=20Schr=C3=B6der?= <schroeder@dresearch-fe.de>
+Date: Thu, 25 Feb 2016 13:26:39 +0100
+Subject: [PATCH] HYP-13714 increase vpu instances from 32 to 64
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Ralf Schröder <schroeder@dresearch-fe.de>
+---
+ vpu/vpu_lib.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 vpu/vpu_lib.h
+
+diff --git a/vpu/vpu_lib.h b/vpu/vpu_lib.h
+old mode 100644
+new mode 100755
+index 3471293..ffd760f
+--- a/vpu/vpu_lib.h
++++ b/vpu/vpu_lib.h
+@@ -46,7 +46,7 @@ typedef Uint32 VirtualAddress;
+ #define PRJ_CODA7541			0xF012
+ #define PRJ_CODA_960			0xF020
+ 
+-#define MAX_NUM_INSTANCE		32
++#define MAX_NUM_INSTANCE		64
+ 
+ #define DC_TABLE_INDEX0		    0
+ #define AC_TABLE_INDEX0		    1
+-- 
+2.6.2
+

@@ -10,3 +10,4 @@ SRC_URI[sha256sum] = "a266ab317fbd866541eae506d68983bcd361f49d1162a66bb34cb8088c
 
 COMPATIBLE_MACHINE = "(mx6)"
 
+SRC_URI_append = " file://0001-HYP-13714-increase-vpu-instances-from-32-to-64.patch "
