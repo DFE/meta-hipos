@@ -27,11 +27,13 @@ index 5d1a585..532b21d 100644
 @@ -163,6 +163,10 @@ static void gst_imx_phys_mem_allocator_free(GstAllocator *allocator, GstMemory *
  	GstImxPhysMemAllocator *phys_mem_alloc = GST_IMX_PHYS_MEM_ALLOCATOR(allocator);
  	GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(allocator));
- 
-+	while (phys_mem->mapping_refcount)
+
++	while (g_atomic_int_dec_and_test(&phys_mem->mapping_refcount))
 +	{
-+		gst_imx_phys_mem_allocator_unmap(memory);
-+	}
++		GST_LOG_OBJECT(phys_mem_alloc, "unmapping memory block %p (phys addr %" GST_IMX_PHYS_ADDR_FORMAT "), current mapping refcount = %ld -> %ld", 
++			(gpointer)phys_mem, phys_mem->phys_addr, phys_mem->mapping_refcount, (phys_mem->mapping_refcount > 0) ? (phys_mem->mapping_refcount - 1) : 0);
++		klass->unmap_phys_mem(phys_mem_alloc, phys_mem);
++	} 
  	klass->free_phys_mem(phys_mem_alloc, phys_mem);
  
  	GST_INFO_OBJECT(allocator, "freed block %p at phys addr %" GST_IMX_PHYS_ADDR_FORMAT " with size: %u", (gpointer)memory, phys_mem->phys_addr, memory->size);
