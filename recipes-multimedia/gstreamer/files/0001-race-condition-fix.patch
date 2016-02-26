@@ -24,14 +24,13 @@ index 5d1a585..532b21d 100644
  	phys_mem->internal = NULL;
  
  	gst_memory_init(GST_MEMORY_CAST(phys_mem), flags, GST_ALLOCATOR_CAST(phys_mem_alloc), parent, maxsize, align, offset, size);
-@@ -163,6 +163,10 @@ static void gst_imx_phys_mem_allocator_free(GstAllocator *allocator, GstMemory *
+@@ -163,6 +163,11 @@ static void gst_imx_phys_mem_allocator_free(GstAllocator *allocator, GstMemory *
  	GstImxPhysMemAllocator *phys_mem_alloc = GST_IMX_PHYS_MEM_ALLOCATOR(allocator);
  	GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(allocator));
 
 +	while (g_atomic_int_dec_and_test(&phys_mem->mapping_refcount))
 +	{
-+		GST_LOG_OBJECT(phys_mem_alloc, "unmapping memory block %p (phys addr %" GST_IMX_PHYS_ADDR_FORMAT "), current mapping refcount = %ld -> %ld", 
-+			(gpointer)phys_mem, phys_mem->phys_addr, phys_mem->mapping_refcount, (phys_mem->mapping_refcount > 0) ? (phys_mem->mapping_refcount - 1) : 0);
++		GST_LOG_OBJECT(phys_mem_alloc, "unmapping memory block %p (phys addr %" GST_IMX_PHYS_ADDR_FORMAT "), current mapping refcount = %ld -> %ld",(gpointer)phys_mem, phys_mem->phys_addr, phys_mem->mapping_refcount, (phys_mem->mapping_refcount > 0) ? (phys_mem->mapping_refcount - 1) : 0);
 +		klass->unmap_phys_mem(phys_mem_alloc, phys_mem);
 +	} 
  	klass->free_phys_mem(phys_mem_alloc, phys_mem);
