@@ -74,34 +74,6 @@ index 5d1a585..532b21d 100644
  	GstImxPhysMemAllocator *phys_mem_alloc = (GstImxPhysMemAllocator*)(mem->allocator);
  
  	if (size == -1)
-@@ -234,15 +236,22 @@ static GstMemory* gst_imx_phys_mem_allocator_copy(GstMemory *mem, gssize offset,
- 		gpointer srcptr, destptr;
- 		GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(mem->allocator));
- 
--		//srcptr = klass->map_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem, mem->maxsize, GST_MAP_READ);
- 		srcptr = gst_imx_phys_mem_allocator_map(mem, mem->maxsize, GST_MAP_READ);
- 		destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
- 
--		if (srcptr) { memcpy(destptr, srcptr, mem->maxsize); } else { memset(destptr, mem->maxsize, 0); }
--
-+		g_assert(destptr != NULL);
-+
-+		if (srcptr == NULL)
-+		{
-+			memset(destptr, 0, mem->maxsize);
-+			GST_ERROR_OBJECT(phys_mem_alloc, "could not copy memory block - src mem == %p, refcount %i destptr == %p", mem, phys_mem->mapping_refcount, destptr);
-+		}
-+		else
-+		{
-+			memcpy(destptr, srcptr, mem->maxsize);
-+			gst_imx_phys_mem_allocator_unmap(mem);
-+		}
- 		klass->unmap_phys_mem(phys_mem_alloc, copy);
--		//klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
--		gst_imx_phys_mem_allocator_unmap(mem);
- 	}
- 
- 	GST_INFO_OBJECT(
 diff --git a/src/common/phys_mem_allocator.h b/src/common/phys_mem_allocator.h
 index 8097e56..4eddc68 100644
 --- a/src/common/phys_mem_allocator.h
@@ -119,17 +91,19 @@ diff --git a/src/ipu/allocator.c b/src/ipu/allocator.c
 index 075ab7b..5fce37d 100644
 --- a/src/ipu/allocator.c
 +++ b/src/ipu/allocator.c
-@@ -101,6 +101,10 @@ static gpointer gst_imx_ipu_map_phys_mem(GstImxPhysMemAllocator *allocator, GstI
- 	int prot = 0;
- 	GstImxIpuAllocator *ipu_allocator = GST_IMX_IPU_ALLOCATOR(allocator);
- 
+@@ -101,6 +101,12 @@ static gpointer gst_imx_ipu_map_phys_mem(GstImxPhysMemAllocator *allocator, GstI
+	int prot = 0;
+	GstImxIpuAllocator *ipu_allocator = GST_IMX_IPU_ALLOCATOR(allocator);
+
++	g_assert(1 == g_atomic_int_get(&phys_mem->mapping_refcount));
++
 +	if (phys_mem->mapped_virt_addr != NULL)
 +	{
 +		GST_WARNING_OBJECT(ipu_allocator, "memory-mapping: phys_mem->mapped_virt_addr != NULL %p refcount %i", phys_mem->mapped_virt_addr, phys_mem->mapping_refcount);
 +	}
- 	/* As explained in gst_imx_phys_mem_allocator_map(), the flags are guaranteed to
- 	 * be the same when a memory block is mapped multiple times, so the value of
- 	 * "flags" will be identical if map() is called two times, for example. */
+	/* As explained in gst_imx_phys_mem_allocator_map(), the flags are guaranteed to
+	 * be the same when a memory block is mapped multiple times, so the value of
+	 * "flags" will be identical if map() is called two times, for example. */
 @@ -115,9 +119,12 @@ static gpointer gst_imx_ipu_map_phys_mem(GstImxPhysMemAllocator *allocator, GstI
  	{
  		phys_mem->mapped_virt_addr = NULL;
@@ -143,6 +117,16 @@ index 075ab7b..5fce37d 100644
  	GST_LOG_OBJECT(ipu_allocator, "mapped IPU physmem memory:  virt addr %p  phys addr %" GST_IMX_PHYS_ADDR_FORMAT, phys_mem->mapped_virt_addr, phys_mem->phys_addr);
  
  	return phys_mem->mapped_virt_addr;
+@@ -128,6 +135,9 @@ static gpointer gst_imx_ipu_map_phys_mem(GstImxPhysMemAllocator *allocator, GstI
+
+ static void gst_imx_ipu_unmap_phys_mem(GstImxPhysMemAllocator *allocator, GstImxPhysMemory *memory)
+ {
++	g_assert(0 == g_atomic_int_get(&memory->mapping_refcount));
++	g_assert(memory->mapped_virt_addr != NULL);
++
+	if (memory->mapped_virt_addr != NULL)
+	{
+		if (munmap(memory->mapped_virt_addr, memory->mem.maxsize) == -1)
 diff --git a/src/v4l2src/v4l2_buffer_pool.c b/src/v4l2src/v4l2_buffer_pool.c
 index ebeafea..1424ee8 100644
 --- a/src/v4l2src/v4l2_buffer_pool.c

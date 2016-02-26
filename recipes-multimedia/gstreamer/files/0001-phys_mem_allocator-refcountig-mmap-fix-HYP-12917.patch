@@ -22,25 +22,46 @@ index f47a85d..b8edc60 100644
  		return phys_mem->mapped_virt_addr;
  	}
  }
-@@ -234,13 +234,15 @@ static GstMemory* gst_imx_phys_mem_allocator_copy(GstMemory *mem, gssize offset,
-		gpointer srcptr, destptr;
-		GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(mem->allocator));
-
+@@ -231,16 +232,31 @@ static GstMemory* gst_imx_phys_mem_allocator_copy(GstMemory *mem, gssize offset,
+ 	}
+ 
+ 	{
+-		gpointer srcptr, destptr;
++		gpointer srcptr, destptr = NULL;
+ 		GstImxPhysMemAllocatorClass *klass = GST_IMX_PHYS_MEM_ALLOCATOR_CLASS(G_OBJECT_GET_CLASS(mem->allocator));
+ 
 -		srcptr = klass->map_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem, mem->maxsize, GST_MAP_READ);
-+		//srcptr = klass->map_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem, mem->maxsize, GST_MAP_READ);
-+		srcptr = gst_imx_phys_mem_allocator_map(mem, mem->maxsize, GST_MAP_READ);
-		destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
-
+-		destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
+-
 -		memcpy(destptr, srcptr, mem->maxsize);
-+		if (srcptr) { memcpy(destptr, srcptr, mem->maxsize); } else { memset(destptr, mem->maxsize, 0); }
-
-		klass->unmap_phys_mem(phys_mem_alloc, copy);
+-
+-		klass->unmap_phys_mem(phys_mem_alloc, copy);
 -		klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
-+		//klass->unmap_phys_mem(phys_mem_alloc, (GstImxPhysMemory *)mem);
-+		gst_imx_phys_mem_allocator_unmap(mem);
-	}
-
-        GST_INFO_OBJECT(
++		srcptr = gst_imx_phys_mem_allocator_map(mem, mem->maxsize, GST_MAP_READ);
++
++		if (0 == g_atomic_int_add(&copy->mapping_refcount, 1))
++		{
++			copy->mapping_flags = GST_MAP_WRITE;
++			destptr = klass->map_phys_mem(phys_mem_alloc, copy, mem->maxsize, GST_MAP_WRITE);
++		}
++		else
++		{
++			g_assert(destptr != NULL);
++		}
++
++		if (srcptr == NULL)
++		{
++			memset(destptr, 0, mem->maxsize);
++			GST_ERROR_OBJECT(phys_mem_alloc, "could not copy memory block - src mem == %p, refcount %i destptr == %p", mem, phys_mem->mapping_refcount, destptr);
++		}
++		else
++		{
++			memcpy(destptr, srcptr, mem->maxsize);
++			gst_imx_phys_mem_allocator_unmap(mem);
++		}
+ 	}
+ 
+ 	GST_INFO_OBJECT(
 diff --git a/src/ipu/allocator.c b/src/ipu/allocator.c
 index c4d1580..075ab7b 100644
 --- a/src/ipu/allocator.c
