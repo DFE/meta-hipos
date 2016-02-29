@@ -20,7 +20,6 @@ SRCREV = "f8ad953c458be6a89f474a948b6401664a6a1745"
 SRC_URI = "git://github.com/Freescale/gstreamer-imx.git;branch=${SRCBRANCH} \
            file://0001-tw6869-phys-memory-address-patch-HACK.patch \
            file://0001-phys_mem_allocator-refcountig-mmap-fix-HYP-12917.patch \
-           file://0001-race-condition-fix.patch \
 "
 
 S = "${WORKDIR}/git"
