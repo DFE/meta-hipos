@@ -3,8 +3,14 @@ do_compile() {
 
     URI="http://package-feed.dresearch-fe.de/hipos/yocto-2.0-jethro"
 
-    for feed in all ${MACHINE} ${FEED_ARCH} ; do
+    echo "src/gz ${feed} ${URI}/all" > ${S}/${sysconfdir}/opkg/all-feed.conf
+    echo "src/gz ${feed} ${URI}/${MACHINE}" > ${S}/${sysconfdir}/opkg/${MACHINE}-feed.conf
+
+    for feed in ${FEED_ARCHS} ; do
         echo "src/gz ${feed} ${URI}/${feed}" > ${S}/${sysconfdir}/opkg/${feed}-feed.conf
+        for suffix in ${MACHINE_SOCARCH_SUFFIX} ; do
+            echo "src/gz ${feed} ${URI}/${feed}${suffix}" > ${S}/${sysconfdir}/opkg/${feed}${suffix}-feed.conf
+        done
     done
 }
 
@@ -14,16 +20,9 @@ do_install () {
 }
 
 
-FILES_${PN} = "${sysconfdir}/opkg/all-feed.conf \
-               ${sysconfdir}/opkg/${FEED_ARCH}-feed.conf \
-               ${sysconfdir}/opkg/${MACHINE}-feed.conf \
-               "
+FILES_${PN} = "${sysconfdir}/opkg/*-feed.conf"
 
-CONFFILES_${PN} = "${sysconfdir}/opkg/all-feed.conf \
-                   ${sysconfdir}/opkg/${FEED_ARCH}-feed.conf \
-                   ${sysconfdir}/opkg/${MACHINE}-feed.conf \
-                   "
-
+CONFFILES_${PN} = "${sysconfdir}/opkg/*-feed.conf"
 
 python populate_packages_prepend () {
     etcdir = bb.data.expand('${sysconfdir}/opkg', d)
