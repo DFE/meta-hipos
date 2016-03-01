@@ -1,5 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
+PACKAGECONFIG_remove = "networkd"
+
 SRC_URI_append = " \
 	       file://0001-systemd-halt.service-always-poweroff-on-halt.patch \
 	       file://0001-systemd-reboot.service-always-poweroff-on-reboot.patch \
