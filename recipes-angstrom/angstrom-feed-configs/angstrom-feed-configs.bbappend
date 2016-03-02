@@ -3,13 +3,13 @@ do_compile() {
 
     URI="http://package-feed.dresearch-fe.de/hipos/yocto-2.0-jethro"
 
-    echo "src/gz ${feed} ${URI}/all" > ${S}/${sysconfdir}/opkg/all-feed.conf
-    echo "src/gz ${feed} ${URI}/${MACHINE}" > ${S}/${sysconfdir}/opkg/${MACHINE}-feed.conf
+    echo "src/gz all ${URI}/all" > ${S}/${sysconfdir}/opkg/all-feed.conf
+    echo "src/gz ${MACHINE} ${URI}/${MACHINE}" > ${S}/${sysconfdir}/opkg/${MACHINE}-feed.conf
 
     for feed in ${FEED_ARCHS} ; do
         echo "src/gz ${feed} ${URI}/${feed}" > ${S}/${sysconfdir}/opkg/${feed}-feed.conf
         for suffix in ${MACHINE_SOCARCH_SUFFIX} ; do
-            echo "src/gz ${feed} ${URI}/${feed}${suffix}" > ${S}/${sysconfdir}/opkg/${feed}${suffix}-feed.conf
+            echo "src/gz ${feed}${suffix} ${URI}/${feed}${suffix}" > ${S}/${sysconfdir}/opkg/${feed}${suffix}-feed.conf
         done
     done
 }
