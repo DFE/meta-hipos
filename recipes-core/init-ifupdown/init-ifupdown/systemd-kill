@@ -14,4 +14,8 @@ if [ -f "/var/run/zeroconf.$IFACE.pid" ]; then
         /bin/kill -15 `cat /var/run/zeroconf.$IFACE.pid`
 fi
 
+if [ -f "/var/run/avahi-autoipd.$IFACE.pid" ]; then
+        /bin/kill -15 `cat /var/run/avahi-autoipd.$IFACE.pid`
+fi
+
 exit 0
