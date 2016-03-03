@@ -17,6 +17,7 @@ BCTRL_DEV="/dev/ttydrbcc"
 DRBCC_BIN="/usr/bin/drbcc"
 DEVID_FILE="/etc/hydraip-devid"
 TMP_DEVID_FILE="/tmp/hipos-devid"
+TMP_DEVID_FILE_SORT="/tmp/hipos-devid-sort"
 FIX_DEVID_BIN="/usr/sbin/hip-fix-hydraip-devid"
 HOSTNAME_FILE="/etc/hostname"
 # existence of this is checked within systemd scripts to start services 
@@ -56,6 +57,16 @@ fetch_info()
 			touch ${DEVID_FILE}
 		fi
 	else
+		# Fix dublicated entries
+		cat ${TMP_DEVID_FILE} | sort | uniq > ${TMP_DEVID_FILE_SORT}
+		if ! diff ${TMP_DEVID_FILE} ${TMP_DEVID_FILE_SORT} > /dev/null; then
+			loggerANDstdoutError "Fix dublicated entries in devid file"
+			mv ${TMP_DEVID_FILE_SORT} ${TMP_DEVID_FILE}
+			${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="pfiletype 0x50,${TMP_DEVID_FILE}" 2>&1
+		else
+			rm ${TMP_DEVID_FILE_SORT}
+		fi
+
 		. ${TMP_DEVID_FILE}
 		if [ -e ${DEVID_FILE} ]; then 
 			if ! serial_valid "${serial}"; then
