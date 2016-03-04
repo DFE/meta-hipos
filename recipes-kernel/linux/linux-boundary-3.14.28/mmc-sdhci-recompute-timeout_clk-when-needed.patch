@@ -1,0 +1,43 @@
+From ec6f7ef5fb30edfda566cc9e50c5298bb7bdc673 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 4 Mar 2016 12:01:34 +0100
+Subject: [PATCH] mmc: sdhci: recompute timeout_clk when needed
+
+This is a backport of mmc sdhci timeout_clk calculation.
+
+When SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set, timeout_clk is sdclk.
+We need to update it when we change sdclk in sdhci_set_clock.
+This allow to have a more precisse timeout and max_busy_timeout. This
+can help for command that need a big busy wait (erase, ...)
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mmc/host/sdhci.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ac9f1a2..63fa869 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1454,6 +1454,18 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 		sdhci_reinit(host);
+ 	}
+ 
++	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
++	    host->clock) {
++		host->timeout_clk = host->mmc->actual_clock ?
++					host->mmc->actual_clock / 1000 :
++					host->clock / 1000;
++		host->mmc->max_discard_to =
++			host->ops->get_max_timeout_counter ?
++			host->ops->get_max_timeout_counter(host) :
++			1 << 27;
++		host->mmc->max_discard_to /= host->timeout_clk;
++	}
++
+ 	if (host->version >= SDHCI_SPEC_300 &&
+ 		(ios->power_mode == MMC_POWER_UP) &&
+ 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
+-- 
+2.1.4
+
