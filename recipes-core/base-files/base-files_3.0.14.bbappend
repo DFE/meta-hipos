@@ -1,3 +1,5 @@
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
 # Original: volatiles = "cache run log lock tmp"
 # We don't any of those in volatiles, so:
 volatiles = ""
