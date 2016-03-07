@@ -1,0 +1,103 @@
+From 5638a6d5f1d1f62bc93bde01396532fa822f60d3 Mon Sep 17 00:00:00 2001
+From: Frank Bauernoeppel <frank@bauernoeppel.de>
+Date: Sun, 6 Mar 2016 19:56:28 +0100
+Subject: [PATCH] me-search-range property added for encoders
+
+---
+ src/vpu/encoder_base.c | 25 +++++++++++++++++++++++--
+ src/vpu/encoder_base.h |  1 +
+ 2 files changed, 24 insertions(+), 2 deletions(-)
+
+diff --git a/src/vpu/encoder_base.c b/src/vpu/encoder_base.c
+index 1f7faee..5982faf 100644
+--- a/src/vpu/encoder_base.c
++++ b/src/vpu/encoder_base.c
+@@ -36,7 +36,8 @@ enum
+ 	PROP_GOP_SIZE,
+ 	PROP_BITRATE,
+ 	PROP_SLICE_SIZE,
+-	PROP_INTRA_REFRESH
++	PROP_INTRA_REFRESH,
++	PROP_ME_SEARCH_RANGE
+ };
+ 
+ 
+@@ -44,7 +45,7 @@ enum
+ #define DEFAULT_BITRATE           0
+ #define DEFAULT_SLICE_SIZE        0
+ #define DEFAULT_INTRA_REFRESH     0
+-
++#define DEFAULT_ME_SEARCH_RANGE   0
+ 
+ #define GST_IMX_VPU_ENCODER_ALLOCATOR_MEM_TYPE "ImxVpuEncMemory2"
+ 
+@@ -163,6 +164,18 @@ static void gst_imx_vpu_encoder_base_class_init(GstImxVpuEncoderBaseClass *klass
+ 			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
+ 		)
+ 	);
++	g_object_class_install_property(
++		object_class,
++		PROP_ME_SEARCH_RANGE,
++		g_param_spec_uint(
++			"me-search-range",
++			"Mot. Est. Search Range",
++			"Search range for motion estimation (0 = maximum search range 256x128)",
++			0, 3,
++			DEFAULT_ME_SEARCH_RANGE,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
++		)
++	);
+ }
+ 
+ 
+@@ -188,6 +201,7 @@ static void gst_imx_vpu_encoder_base_init(GstImxVpuEncoderBase *vpu_encoder_base
+ 	vpu_encoder_base->bitrate          = DEFAULT_BITRATE;
+ 	vpu_encoder_base->slice_size       = DEFAULT_SLICE_SIZE;
+ 	vpu_encoder_base->intra_refresh    = DEFAULT_INTRA_REFRESH;
++	vpu_encoder_base->me_search_range  = DEFAULT_ME_SEARCH_RANGE;
+ }
+ 
+ 
+@@ -221,6 +235,9 @@ static void gst_imx_vpu_encoder_base_set_property(GObject *object, guint prop_id
+ 		case PROP_INTRA_REFRESH:
+ 			vpu_encoder_base->intra_refresh = g_value_get_uint(value);
+ 			break;
++		case PROP_ME_SEARCH_RANGE:
++			vpu_encoder_base->me_search_range = g_value_get_uint(value);
++			break;
+ 		default:
+ 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+ 			break;
+@@ -246,6 +263,9 @@ static void gst_imx_vpu_encoder_base_get_property(GObject *object, guint prop_id
+ 		case PROP_INTRA_REFRESH:
+ 			g_value_set_uint(value, vpu_encoder_base->intra_refresh);
+ 			break;
++		case PROP_ME_SEARCH_RANGE:
++			g_value_set_uint(value, vpu_encoder_base->me_search_range);
++			break;
+ 		default:
+ 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+ 			break;
+@@ -386,6 +406,7 @@ static gboolean gst_imx_vpu_encoder_base_set_format(GstVideoEncoder *encoder, Gs
+ 	}
+ 
+ 	vpu_encoder_base->open_params.min_intra_refresh_mb_count = vpu_encoder_base->intra_refresh;
++	vpu_encoder_base->open_params.me_search_range = vpu_encoder_base->me_search_range;
+ 
+ 	/* Give the derived class a chance to set params */
+ 	if (klass->set_open_params && !klass->set_open_params(vpu_encoder_base, state, &(vpu_encoder_base->open_params)))
+diff --git a/src/vpu/encoder_base.h b/src/vpu/encoder_base.h
+index 41b07a4..12cf8eb 100644
+--- a/src/vpu/encoder_base.h
++++ b/src/vpu/encoder_base.h
+@@ -93,6 +93,7 @@ struct _GstImxVpuEncoderBase
+ 	guint bitrate;
+ 	gint slice_size;
+ 	guint intra_refresh;
++	guint me_search_range;
+ 
+ 	/* These are used during the actual encoding. The output buffer
+ 	 * is allocated and mapped to receive the encoded data. */
+-- 
+1.9.1
+
