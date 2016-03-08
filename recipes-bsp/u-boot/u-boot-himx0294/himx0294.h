@@ -162,9 +162,13 @@
 /*
  * auto boot
  */
+#define CONFIG_AUTOBOOT_KEYED
+#define CONFIG_AUTOBOOT_STOP_STR "."
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 #undef CONFIG_BOOTDELAY
 #define CONFIG_BOOTDELAY 0
+#define CONFIG_AUTOBOOT_PROMPT \
+                        "Press . to abort autoboot in %d seconds\n",bootdelay
 
 /* This boot command stores the environment persistently. This ensures that the "fdt_file"
    variable is set and u-boot and kernel use the same variable. HYP-12761 */
