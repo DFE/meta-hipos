@@ -2618,7 +2618,7 @@ CONFIG_MEDIA_PCI_SUPPORT=y
 # CONFIG_VIDEO_HEXIUM_ORION is not set
 # CONFIG_VIDEO_MXB is not set
 # CONFIG_VIDEO_TW68 is not set
-CONFIG_VIDEO_TW6869=m
+CONFIG_VIDEO_DRTW6869=m
 
 #
 # Media capture/analog/hybrid TV support

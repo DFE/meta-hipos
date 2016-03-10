@@ -43,8 +43,9 @@ SRC_URI_append_himx0294 = " \
 
 do_configure_prepend() {
 	# copy tw6869 driver code into kernel tree
-	mkdir -p ${S}/drivers/media/pci/tw6869
-	cd ${S}/drivers/media/pci/tw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
+	mkdir -p ${S}/drivers/media/pci/drtw6869
+	cd ${S}/drivers/media/pci/drtw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
+	sed -i -e's/VIDEO_TW6869/VIDEO_DRTW6869/g' ${S}/drivers/media/pci/drtw6869/*
 }
 
 do_configure_prepend_himx0294() {
