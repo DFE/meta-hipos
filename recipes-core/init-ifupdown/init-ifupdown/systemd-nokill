@@ -16,6 +16,7 @@ fi
 
 if [ -f "/var/run/avahi-autoipd.$IFACE.pid" ]; then
         /bin/cat /var/run/avahi-autoipd.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+        /bin/echo $(/bin/ps axf  | /bin/grep "avahi-autoipd" | /bin/grep $IFACE | /bin/grep "callout dispatcher" | /usr/bin/awk '{print $1}') > /sys/fs/cgroup/systemd/tasks | /bin/true
 fi
 
 exit 0
