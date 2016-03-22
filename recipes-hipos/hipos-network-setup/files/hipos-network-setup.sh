@@ -41,12 +41,12 @@ do
 	fi
 done
 
-if [ ${MACHINE} == "hikirk" -a -a "/etc/hip-activate-config.d/${device}/net_config.py" ]
+if [ ${MACHINE} == "hikirk" -a -f "/etc/hip-activate-config.d/net_config.py" ]
 then
-	/etc/hip-activate-config.d/${device}/net_config.py
-	if [ -a /etc/drconfig/post_config.sh ]
+	/etc/hip-activate-config.d/net_config.py
+	if [ -f /etc/drconfig/post_config.sh ]
 	then
-	rm /etc/drconfig/post_config.sh
+		rm /etc/drconfig/post_config.sh
 	fi
 fi
 
