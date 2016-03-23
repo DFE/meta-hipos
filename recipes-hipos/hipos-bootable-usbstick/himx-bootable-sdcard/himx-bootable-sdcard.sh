@@ -4,7 +4,7 @@ export LANG=c
 
 function print_usage {
     echo -e "\nUsage: $0 <block device> <image>"
-    echo "Generate bootable USB stick using <image> on <block device>."
+    echo "Generate bootable sdcard using <image> on <block device>."
     echo -e "Valid images: hipos-devimage, hipos-prodimage\n"
 }
 
