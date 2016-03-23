@@ -3,10 +3,10 @@
 #
 # \brief obtain machine/submachine info
 #
-# (C) 2015 DResearch Fahrzeugelektonik GmbH
+# (C) 2015,2016 DResearch Fahrzeugelektonik GmbH
 #set -x
 
-NAME="`basename $0`"
+NAME=$(basename "$0")
 GET_MACHINE=false;
 GET_SUBMACHINE=false;
 MACHINE="unknown"
@@ -31,13 +31,13 @@ while [ "$#" -gt 0 ]; do
 done
 
 # check for hipox or hikirk
-case `cat /proc/cpuinfo | grep Hardware | cut -d:  -f2` in
+case $(grep Hardware /proc/cpuinfo | cut -d:  -f2) in
 	*Kirkwood* | *hikirk*) MACHINE="hikirk"; SUBMACHINE=""; GET_SUBMACHINE=false;;
 	*OXE810*   | *hipox*)  MACHINE="hipox";  SUBMACHINE=""; GET_SUBMACHINE=false;;
 esac
 
 # check for devices with kernel device tree, HYP-12510
-case `cat /proc/device-tree/model 2> /dev/null` in
+case $(cat /proc/device-tree/model 2> /dev/null) in
 	DResearch\ Fahrzeugelektronik\ GmbH\ himx0294) MACHINE="himx0294"; SUBMACHINE="imoc";;
 	dfe,himx0294-imoc)   MACHINE="himx0294"; SUBMACHINE="imoc";;
 	dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
