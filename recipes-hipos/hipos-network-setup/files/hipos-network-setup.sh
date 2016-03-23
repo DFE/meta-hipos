@@ -1,20 +1,20 @@
 #!/bin/bash
 
-MACHINE=`hip-machinfo -a`
+MACHINE="$(hip-machinfo -a)"
 
 if [ -a /etc/hydraip-devid ]
 then
 	. /etc/hydraip-devid
 fi
 
-if [ \( ${MACHINE} == "himx0294-ivap" -a ${vout} -eq 2 \) -o \( ${MACHINE} == "himx0294-imoc" \) ]
+if [[ ( "${MACHINE}" == "himx0294-ivap" && "${vout}" -eq 2 ) || ( "${MACHINE}" == "himx0294-imoc" ) ]]
 then
 	exit 0
 fi
 
-if [ -z ${lanspeed} ]
+if [ -z "${lanspeed}" ]
 then
-	if [ ${MACHINE} == "hikirk" ]
+	if [ "${MACHINE}" == "hikirk" ]
 	then
 		lanspeed=ff
 	else
@@ -22,9 +22,9 @@ then
 	fi
 fi
 
-if [ ${MACHINE} == "hikirk" -a ${#lanspeed} = 1 ]
+if [[ "${MACHINE}" == "hikirk" && "${#lanspeed}" = 1 ]]
 then
-	lanspeed=${lanspeed}f
+	lanspeed="${lanspeed}f"
 fi
 
 echo "lanspeed=$lanspeed"
@@ -41,15 +41,11 @@ do
 	fi
 done
 
-if [ ${MACHINE} == "hikirk" -a -f "/etc/hip-activate-config.d/net_config.py" ]
+if [[ ! -f /etc/drconfig/config-initial.ok && -f "/etc/hip-activate-config.d/net_config.py" ]]
 then
+  # ensure, the /etc/network/interfaces exists with correct data even if the initial hip-activate-config (called later) fails
 	/etc/hip-activate-config.d/net_config.py
-	if [ -f /etc/drconfig/post_config.sh ]
-	then
-		rm /etc/drconfig/post_config.sh
-	fi
 fi
-
 
 exit 0
 

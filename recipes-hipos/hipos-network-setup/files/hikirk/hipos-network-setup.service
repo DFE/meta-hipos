@@ -1,5 +1,5 @@
 [Unit]
-Description=hipos network setup service
+Description=hikirk network setup service
 Requires=hipos-device-info.service
 After=hipos-device-info.service
 Requires=sys-subsystem-net-devices-eth0.device
