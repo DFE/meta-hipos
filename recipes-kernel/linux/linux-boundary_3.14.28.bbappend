@@ -13,6 +13,7 @@ SRC_URI_append = " \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch \
 	file://mmc-sdhci-recompute-timeout_clk-when-needed.patch \
+	file://mmc-sd-show-ssr-in-sysfs.patch \
 "
 
 SRC_URI_append_himx0294 = " \
