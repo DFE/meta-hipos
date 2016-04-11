@@ -5,6 +5,8 @@ After=hipos-device-info.service
 Requires=sys-subsystem-net-devices-eth0.device
 After=sys-subsystem-net-devices-eth0.device
 
+Before=networking.service
+
 [Service]
 Type=oneshot
 ExecStart=/etc/hipos/hipos-network-setup.sh
