@@ -41,11 +41,5 @@ do
 	fi
 done
 
-if [[ ! -f /etc/drconfig/config-initial.ok && -f "/etc/hip-activate-config.d/net_config.py" ]]
-then
-  # ensure, the /etc/network/interfaces exists with correct data even if the initial hip-activate-config (called later) fails
-	/etc/hip-activate-config.d/net_config.py
-fi
-
 exit 0
 
