@@ -1,0 +1,27 @@
+From 49e1d0c0582e0135f0996eb05302db875bb5fe70 Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Thu, 14 Apr 2016 14:13:40 +0200
+Subject: [PATCH] udev: wait for ldconfig.service and opkg-configure.service
+ HYP-13876
+
+Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
+---
+ units/systemd-udev-trigger.service.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/units/systemd-udev-trigger.service.in b/units/systemd-udev-trigger.service.in
+index 1e04d11..ab6a13b 100644
+--- a/units/systemd-udev-trigger.service.in
++++ b/units/systemd-udev-trigger.service.in
+@@ -10,7 +10,7 @@ Description=udev Coldplug all Devices
+ Documentation=man:udev(7) man:systemd-udevd.service(8)
+ DefaultDependencies=no
+ Wants=systemd-udevd.service
+-After=systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-hwdb-update.service
++After=systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-hwdb-update.service ldconfig.service opkg-configure.service
+ Before=sysinit.target
+ ConditionPathIsReadWrite=/sys
+ 
+-- 
+2.5.5
+
