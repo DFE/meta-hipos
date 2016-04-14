@@ -1,0 +1,9 @@
+#!/bin/sh
+
+VERBOSITY=0
+
+if [ -f "/etc/hipos/hipos-network-setup.sh" ]; then
+. /etc/hipos/hipos-network-setup.sh >/dev/null
+fi
+
+exit 0
