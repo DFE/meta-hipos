@@ -12,7 +12,11 @@ PR = "r6"
 
 S = "${WORKDIR}/git"
 
-SRC_URI = "git://github.com/DFE/libdrbcc.git"
+# do not rename this variable because it will be processed by some
+# external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
+DRSRCBRANCH="master"
+
+SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH}"
 SRCREV_default_pn-libdrbcc = "e75d557a43658f95d672b2fe2101041e6df269eb"
 
 PACKAGES += " drbcc "

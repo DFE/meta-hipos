@@ -8,8 +8,12 @@ SRCREV_FORMAT = "tw6869"
 SRCREV_tw6869 = "${AUTOREV}"
 PV_append = "+tw6869gitr${SRCPV}"
 
+# do not rename this variable because it will be processed by some
+# external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
+DRSRCBRANCH="master"
+
 SRC_URI_append = " \
-	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869 \
+	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch \
 	file://mmc-sdhci-recompute-timeout_clk-when-needed.patch \
