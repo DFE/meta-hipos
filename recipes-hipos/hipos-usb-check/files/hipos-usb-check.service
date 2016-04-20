@@ -1,0 +1,10 @@
+[Unit]
+Description=hipos usb check
+
+[Service]
+ExecStart=/bin/bash /etc/hipos/hipos-usb-check.sh
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
