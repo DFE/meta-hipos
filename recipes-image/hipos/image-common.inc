@@ -20,7 +20,6 @@ IMAGE_INSTALL += "          \
   iptables		    \
   bluez5		    \
   openvpn		    \
-  gssdp			    \
   ntp ntp-utils     	    \
   hipos-system-tuning	    \
   hipos-usb-check	    \
