@@ -48,11 +48,25 @@ IMAGE_INSTALL_append_himx0294 += "   \
   hipos-net-check           \
 "
 
+
 IMAGE_INSTALL_append_himx0294 += " \
   tslib \
   tslib-calibrate \
   tslib-tests \
   packagegroup-hipos-qt     \
+  packagegroup-hipos-qt-examples \
+  packagegroup-fsl-gstreamer1.0 \
+  packagegroup-hipos-gstreamer \
+  gstreamer1.0-plugins-imx \
+  eglinfo-fb \
+  fsl-alsa-plugins \
+"
+
+IMAGE_INSTALL_append_imx6qsabrelite += " \
+  tslib \
+  tslib-calibrate \
+  tslib-tests \
+  packagegroup-hipos-qt \
   packagegroup-hipos-qt-examples \
   packagegroup-fsl-gstreamer1.0 \
   packagegroup-hipos-gstreamer \
