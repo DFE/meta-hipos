@@ -121,6 +121,14 @@
 		default-brightness-level = <7>;
 	};
 
+	ir_recv: ir-receiver {
+		compatible = "gpio-ir-receiver";
+		gpios = <&gpio1 19 1>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_ir_receiver_gpio1_19>;
+		linux,rc-map-name = "rc-rc6-mce";
+	};
+
 	v4l2_out {
 		compatible = "fsl,mxc_v4l2_output";
 		status = "okay";
@@ -267,6 +275,12 @@
 				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* /SD3_WP*/
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* /SD4_WP */
+			>;
+		};
+
+		pinctrl_ir_receiver_gpio1_19: ir_receiver-gpio1_19 {
+			fsl,pins = <
+				MX6QDL_PAD_SD1_DAT2__GPIO1_IO19 0x80000000
 			>;
 		};
 
