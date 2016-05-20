@@ -6,7 +6,7 @@ LICENSE = "GPLv3 & LGPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
 		    file://COPYING.LIB;md5=e6a600fd5e1d9cbde2d983680233ad02 "
 
-PR = "r4"
+PR = "r5"
 
 PE = "1"
 SRCREV="${AUTOREV}"
@@ -23,7 +23,7 @@ S = "${WORKDIR}/git"
 PACKAGES += " ${PN}-tst ${PN}-demo "
 
 FILES_${PN} = "${libdir}/*.so.*"
-FILES_${PN}-tst = "${bindir}/drtp_test"
+FILES_${PN}-tst = "${bindir}/drtp_tst"
 FILES_${PN}-demo = "${bindir}/drtp-gst-demo"
 
 EXTRA_OECONF = ""
