@@ -34,6 +34,7 @@ RDEPENDS_${PN} = "\
   python-compression \
   python-pkgutil \
   python-misc \
+  python-plistlib \
 "
 
 RDEPENDS_${PN}_class-native = "\
