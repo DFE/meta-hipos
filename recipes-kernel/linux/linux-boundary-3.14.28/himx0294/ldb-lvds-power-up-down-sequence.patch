@@ -1,6 +1,6 @@
-From 783605e6b6981d522c18d81415159154dec1e822 Mon Sep 17 00:00:00 2001
+From 6e15df71318eec0a2971faba1d4c0cc8ec02ae26 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 20 Nov 2015 10:07:00 +0100
+Date: Mon, 30 May 2016 15:20:06 +0200
 Subject: [PATCH] ldb: lvds power up/down sequence
 
 This commit implements a lvds power up and down sequence.
@@ -20,18 +20,18 @@ enable. Now this can be configured using following "lvds-channel" device tree
 elements:
 
 &ldb {
-	...
-	lvds-channel@0 {
-		...
-		vcc-gpio = <&gpio4 7 GPIO_ACTIVE_LOW>;
-		vcc-powerup-delay-ms = <1>;
-		backlight-gpio = <&gpio4 6 GPIO_ACTIVE_HIGH>;
-		backlight-powerup-delay-ms = <200>;
-		...
-	};
+        ...
+        lvds-channel@0 {
+                ...
+                vcc-gpios = <&gpio4 7 GPIO_ACTIVE_LOW>;
+                vcc-powerup-delay-ms = <1>;
+                backlight-gpio = <&gpio4 6 GPIO_ACTIVE_HIGH>;
+                backlight-powerup-delay-ms = <200>;
+                ...
+        };
 };
 
-"vcc-gpio" is the VCC GPIO.
+"vcc-gpios" are the VCC GPIOs.
 "vcc-powerup-delay-ms" is the delay between VCC and data in milliseconds during
 powerup.
 "backlight-gpio" is the backlight GPIO.
@@ -40,11 +40,11 @@ milliseconds during powerup.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/video/mxc/ldb.c | 98 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 98 insertions(+)
+ drivers/video/mxc/ldb.c | 130 +++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 128 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/video/mxc/ldb.c b/drivers/video/mxc/ldb.c
-index b54d729..8b0a0ed 100644
+index b54d729..22321cd 100644
 --- a/drivers/video/mxc/ldb.c
 +++ b/drivers/video/mxc/ldb.c
 @@ -32,6 +32,8 @@
@@ -60,8 +60,8 @@ index b54d729..8b0a0ed 100644
  	int chno;
  	bool is_used;
  	bool online;
-+	int vcc_gpio;
-+	int vcc_active_low;
++	int vcc_nr_gpios;
++	struct gpio * vcc_gpios;
 +	int vcc_powerup_delay_ms;
 +	int backlight_gpio;
 +	int backlight_active_low;
@@ -69,14 +69,26 @@ index b54d729..8b0a0ed 100644
  };
  
  struct ldb_data {
-@@ -563,7 +571,16 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+@@ -526,7 +534,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+ 	struct ldb_chan chan;
+ 	struct device *dev = ldb->dev;
+ 	struct bus_mux bus_mux;
+-	int ret = 0, id = 0, chno, other_chno;
++	int ret = 0, id = 0, chno, other_chno, i;
+ 
+ 	ret = find_ldb_chno(ldb, fbi, &chno);
+ 	if (ret < 0)
+@@ -563,7 +571,19 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
  					    LDB_CH0_MODE_EN_TO_DI0;
  	}
  
-+	if (gpio_is_valid(chan.vcc_gpio)) {
-+		gpio_set_value(chan.vcc_gpio, !chan.vcc_active_low);
-+		mdelay(chan.vcc_powerup_delay_ms);
++	for (i = 0; i < chan.vcc_nr_gpios; i++) {
++		if (gpio_is_valid(chan.vcc_gpios[i].gpio)) {
++			gpio_set_value(chan.vcc_gpios[i].gpio,
++				!(chan.vcc_gpios[i].flags & GPIO_ACTIVE_LOW));
++		}
 +	}
++	if (chan.vcc_nr_gpios > 0) { mdelay(chan.vcc_powerup_delay_ms); }
  	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
 +	if (gpio_is_valid(chan.backlight_gpio)) {
 +		mdelay(chan.backlight_powerup_delay_ms);
@@ -86,7 +98,16 @@ index b54d729..8b0a0ed 100644
  	return 0;
  }
  
-@@ -586,7 +603,15 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+@@ -571,7 +591,7 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+ 		       struct fb_info *fbi)
+ {
+ 	struct ldb_data *ldb = mxc_dispdrv_getdata(mddh);
+-	int ret, chno, other_chno;
++	int ret, chno, other_chno, i;
+ 
+ 	ret = find_ldb_chno(ldb, fbi, &chno);
+ 	if (ret < 0)
+@@ -586,7 +606,17 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
  				      LDB_CH0_MODE_MASK);
  	}
  
@@ -95,14 +116,16 @@ index b54d729..8b0a0ed 100644
 +			       ldb->chan[chno].backlight_active_low);
 +	}
  	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
-+	if (gpio_is_valid(ldb->chan[chno].vcc_gpio)) {
-+		gpio_set_value(ldb->chan[chno].vcc_gpio,
-+			       ldb->chan[chno].vcc_active_low);
++	for (i = 0; i < ldb->chan[chno].vcc_nr_gpios; i++) {
++		if (gpio_is_valid(ldb->chan[chno].vcc_gpios[i].gpio)) {
++			gpio_set_value(ldb->chan[chno].vcc_gpios[i].gpio,
++			       ldb->chan[chno].vcc_gpios[i].flags & GPIO_ACTIVE_LOW);
++		}
 +	}
  	return;
  }
  
-@@ -704,6 +729,77 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
+@@ -704,6 +734,100 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
  	return false;
  }
  
@@ -110,28 +133,45 @@ index b54d729..8b0a0ed 100644
 +			    struct ldb_chan *chan)
 +{
 +	int ret;
++	int i;
 +	enum of_gpio_flags flags;
 +
-+	chan->vcc_gpio = -1;
 +	chan->backlight_gpio = -1;
 +
-+	chan->vcc_gpio = of_get_named_gpio_flags(np, "vcc-gpio", 0, &flags);
-+	if (!gpio_is_valid(chan->vcc_gpio)) {
-+		dev_warn(dev, "vcc-gpio not valid");
++	chan->vcc_nr_gpios = of_gpio_named_count(np, "vcc-gpios");
++	if (0 >= chan->vcc_nr_gpios) {
++		chan->vcc_nr_gpios = 0;
++		dev_warn(dev, "No vcc-gpios in device tree");
 +		return;
 +	}
-+	dev_info(dev, "lvds vcc gpio: %d\n", chan->vcc_gpio);
-+	chan->vcc_active_low = flags & OF_GPIO_ACTIVE_LOW;
-+
-+	ret = gpio_request(chan->vcc_gpio, "lvds-vcc-gpio");
-+	if (ret) {
-+		dev_err(dev, "Could not get lvds-vcc-gpio %d", chan->vcc_gpio);
++	chan->vcc_gpios = devm_kzalloc(dev,
++			sizeof(struct gpio) * chan->vcc_nr_gpios,
++			GFP_KERNEL);
++	if (!chan->vcc_gpios) {
++		chan->vcc_nr_gpios = 0;
++		dev_warn(dev, "vcc-gpios no memory");
 +		return;
 +	}
++	memset(chan->vcc_gpios, -1, sizeof(struct gpio) * chan->vcc_nr_gpios);
 +
-+	if (gpio_direction_output(chan->vcc_gpio, chan->vcc_active_low)) {
-+		dev_err(dev, "Could not set direction of vcc gpio");
-+		goto err;
++	for (i = 0; i < chan->vcc_nr_gpios; i++) {
++		int gpio = of_get_named_gpio_flags(np, "vcc-gpios", i, &flags);
++		if (!gpio_is_valid(gpio))
++			continue;
++
++		dev_info(dev, "lvds vcc gpio: %d\n", gpio);
++		ret = gpio_request(gpio, "lvds-vcc-gpio");
++		if (ret) {
++			dev_err(dev, "Could not get lvds-vcc-gpio %d", gpio);
++			continue;
++		}
++		chan->vcc_gpios[i].gpio = gpio;
++		chan->vcc_gpios[i].flags = flags;
++
++		if (gpio_direction_output(gpio, flags & OF_GPIO_ACTIVE_LOW)) {
++			dev_err(dev, "Could not set direction of vcc gpio");
++			goto err;
++		}
 +	}
 +
 +	ret = of_property_read_u32(np, "vcc-powerup-delay-ms",
@@ -173,14 +213,20 @@ index b54d729..8b0a0ed 100644
 +	gpio_free(chan->backlight_gpio);
 +	chan->backlight_gpio = -1;
 +err:
-+	gpio_free(chan->vcc_gpio);
-+	chan->vcc_gpio = -1;
++	for (i = 0; i < chan->vcc_nr_gpios; i++) {
++		if(-1 != chan->vcc_gpios[i].gpio) {
++			gpio_free(chan->vcc_gpios[i].gpio);
++			chan->vcc_gpios[i].gpio = -1;
++		}
++	}
++	kfree(chan->vcc_gpios);
++	chan->vcc_nr_gpios = 0;
 +}
 +
  static int ldb_probe(struct platform_device *pdev)
  {
  	struct device *dev = &pdev->dev;
-@@ -804,6 +900,8 @@ static int ldb_probe(struct platform_device *pdev)
+@@ -804,6 +928,8 @@ static int ldb_probe(struct platform_device *pdev)
  		chan->ldb = ldb;
  		chan->online = true;
  
