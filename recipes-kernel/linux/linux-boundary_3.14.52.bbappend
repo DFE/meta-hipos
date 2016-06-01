@@ -1,7 +1,7 @@
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-3.14.28:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-3.14.52:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
@@ -16,8 +16,8 @@ SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch \
-	file://mmc-sdhci-recompute-timeout_clk-when-needed.patch \
 	file://mmc-sd-show-ssr-in-sysfs.patch \
+	file://0001-libahci_platform-add-missing-symbol-export.patch \
 "
 
 SRC_URI_append_himx0294 = " \

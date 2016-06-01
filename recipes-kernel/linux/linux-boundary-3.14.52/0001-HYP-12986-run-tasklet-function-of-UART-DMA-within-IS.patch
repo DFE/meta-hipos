@@ -1,0 +1,40 @@
+From e269d3847ffac0d98bb2798b7fed2d36b8256728 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Tue, 31 May 2016 14:32:29 +0200
+Subject: [PATCH] HYP-12986 run tasklet function of UART DMA within ISR
+
+This direct call ensure the correct buffer usage within the
+serial driver (imx.c). The handler in imx.c uses also a
+tasklet so the ISR performace should be ok.
+
+Signed-off-by: Ralf Schroeder <schroeder@dresearch-fe.de>
+---
+ drivers/dma/imx-sdma.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/dma/imx-sdma.c b/drivers/dma/imx-sdma.c
+index d89381c..7c48d7d 100644
+--- a/drivers/dma/imx-sdma.c
++++ b/drivers/dma/imx-sdma.c
+@@ -770,10 +770,14 @@ static irqreturn_t sdma_int_handler(int irq, void *dev_id)
+ 		int channel = fls(stat) - 1;
+ 		struct sdma_channel *sdmac = &sdma->channel[channel];
+ 
+-		spin_lock_irqsave(&sdmac->lock, flags);
+-		if (sdmac->status == DMA_IN_PROGRESS)
+-			tasklet_schedule(&sdmac->tasklet);
+-		spin_unlock_irqrestore(&sdmac->lock, flags);
++		if (sdmac->peripheral_type != IMX_DMATYPE_UART) {
++			spin_lock_irqsave(&sdmac->lock, flags);
++			if (sdmac->status == DMA_IN_PROGRESS)
++				tasklet_schedule(&sdmac->tasklet);
++			spin_unlock_irqrestore(&sdmac->lock, flags);
++		} else {
++			sdma_tasklet((unsigned long)sdmac);
++		}
+ 
+ 		__clear_bit(channel, &stat);
+ 	}
+-- 
+2.8.3
+
