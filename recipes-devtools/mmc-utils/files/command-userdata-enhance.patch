@@ -1,6 +1,6 @@
-From f0b9fe0b6b25ce1e957c3c31823703f3e8a414f6 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 17 Jun 2013 10:02:31 +0200
+From eca879ddfcd52291cd2960bade021e078d129e4a Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Thu, 2 Jun 2016 11:35:44 +0200
 Subject: [PATCH] Add command: userdata enhance
 
 Add command line parameter 'userdata enhance' which set Enhanced attribute
@@ -12,14 +12,13 @@ NOTE!  This command is a one-time programmable change.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- mmc.c      |    8 ++++
- mmc.h      |    1 +
- mmc_cmds.c |  129 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |    1 +
- 4 files changed, 139 insertions(+)
+ mmc.c      |   8 ++++
+ mmc_cmds.c | 129 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |   1 +
+ 3 files changed, 138 insertions(+)
 
 diff --git a/mmc.c b/mmc.c
-index a757c8f..62f0d3c 100644
+index a13d9ae..471a5d5 100644
 --- a/mmc.c
 +++ b/mmc.c
 @@ -50,6 +50,14 @@ static struct Command commands[] = {
@@ -37,23 +36,11 @@ index a757c8f..62f0d3c 100644
  	{ do_read_extcsd, -1,
  	  "extcsd read", "<device>\n"
  		"Print extcsd data from <device>.",
-diff --git a/mmc.h b/mmc.h
-index 5173d34..3bb1ee1 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -41,6 +41,7 @@
- #define EXT_CSD_SANITIZE_START		165
- #define EXT_CSD_BKOPS_EN		163	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
-+#define EXT_CSD_PARTITIONING_SUPPORT	160	/* R */
- #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
- #define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
- #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 5473a20..fd2dea2 100644
+index 77446b4..85f3005 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -795,3 +795,132 @@ int do_sanitize(int nargs, char **argv)
+@@ -1461,6 +1461,135 @@ int do_sanitize(int nargs, char **argv)
  
  }
  
@@ -186,8 +173,11 @@ index 5473a20..fd2dea2 100644
 +	return ret;
 +}
 +
+ #define DO_IO(func, fd, buf, nbyte)					\
+ 	({												\
+ 		ssize_t ret = 0, r;							\
 diff --git a/mmc_cmds.h b/mmc_cmds.h
-index ec22eee..2909b42 100644
+index 75d8f8c..9f3d946 100644
 --- a/mmc_cmds.h
 +++ b/mmc_cmds.h
 @@ -15,6 +15,7 @@
@@ -199,5 +189,5 @@ index ec22eee..2909b42 100644
  int do_write_extcsd(int nargs, char **argv);
  int do_writeprotect_get(int nargs, char **argv);
 -- 
-1.7.9.5
+2.8.3
 
