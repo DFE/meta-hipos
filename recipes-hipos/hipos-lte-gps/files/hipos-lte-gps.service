@@ -1,0 +1,9 @@
+[Unit]
+Description=hipos lte gps power on
+
+[Service]
+ExecStart=/bin/bash /etc/hipos/hipos-lte-gps.sh
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
