@@ -1,6 +1,6 @@
-From 6e15df71318eec0a2971faba1d4c0cc8ec02ae26 Mon Sep 17 00:00:00 2001
+From 793fbd6b594cde67d221f5fe8e5fdf7f527817e7 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 30 May 2016 15:20:06 +0200
+Date: Mon, 6 Jun 2016 14:27:33 +0200
 Subject: [PATCH] ldb: lvds power up/down sequence
 
 This commit implements a lvds power up and down sequence.
@@ -25,26 +25,29 @@ elements:
                 ...
                 vcc-gpios = <&gpio4 7 GPIO_ACTIVE_LOW>;
                 vcc-powerup-delay-ms = <1>;
+                vcc-down-delay-ms = <200>;
                 backlight-gpio = <&gpio4 6 GPIO_ACTIVE_HIGH>;
                 backlight-powerup-delay-ms = <200>;
                 ...
         };
 };
 
-"vcc-gpios" are the VCC GPIOs.
-"vcc-powerup-delay-ms" is the delay between VCC and data in milliseconds during
-powerup.
-"backlight-gpio" is the backlight GPIO.
+"vcc-gpios"                  are the VCC GPIOs.
+"vcc-powerup-delay-ms"       is the delay between VCC and data in milliseconds
+                             during powerup.
+"vcc-down-delay-ms"          is the delay between VCC down and next VCC up in
+                             milliseconds.
+"backlight-gpio"             is the backlight GPIO.
 "backlight-powerup-delay-ms" is the delay between data and backlight in
-milliseconds during powerup.
+                             milliseconds during powerup.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/video/mxc/ldb.c | 130 +++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 128 insertions(+), 2 deletions(-)
+ drivers/video/mxc/ldb.c | 138 +++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 136 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/video/mxc/ldb.c b/drivers/video/mxc/ldb.c
-index b54d729..22321cd 100644
+index b54d729..35b0d7e 100644
 --- a/drivers/video/mxc/ldb.c
 +++ b/drivers/video/mxc/ldb.c
 @@ -32,6 +32,8 @@
@@ -56,20 +59,21 @@ index b54d729..22321cd 100644
  #include "mxc_dispdrv.h"
  
  #define DRIVER_NAME	"ldb"
-@@ -90,6 +92,12 @@ struct ldb_chan {
+@@ -90,6 +92,13 @@ struct ldb_chan {
  	int chno;
  	bool is_used;
  	bool online;
 +	int vcc_nr_gpios;
 +	struct gpio * vcc_gpios;
 +	int vcc_powerup_delay_ms;
++	int vcc_down_delay_ms;
 +	int backlight_gpio;
 +	int backlight_active_low;
 +	int backlight_powerup_delay_ms;
  };
  
  struct ldb_data {
-@@ -526,7 +534,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+@@ -526,7 +535,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
  	struct ldb_chan chan;
  	struct device *dev = ldb->dev;
  	struct bus_mux bus_mux;
@@ -78,7 +82,7 @@ index b54d729..22321cd 100644
  
  	ret = find_ldb_chno(ldb, fbi, &chno);
  	if (ret < 0)
-@@ -563,7 +571,19 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+@@ -563,7 +572,19 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
  					    LDB_CH0_MODE_EN_TO_DI0;
  	}
  
@@ -98,7 +102,7 @@ index b54d729..22321cd 100644
  	return 0;
  }
  
-@@ -571,7 +591,7 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+@@ -571,7 +592,7 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
  		       struct fb_info *fbi)
  {
  	struct ldb_data *ldb = mxc_dispdrv_getdata(mddh);
@@ -107,7 +111,7 @@ index b54d729..22321cd 100644
  
  	ret = find_ldb_chno(ldb, fbi, &chno);
  	if (ret < 0)
-@@ -586,7 +606,17 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+@@ -586,7 +607,18 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
  				      LDB_CH0_MODE_MASK);
  	}
  
@@ -122,10 +126,11 @@ index b54d729..22321cd 100644
 +			       ldb->chan[chno].vcc_gpios[i].flags & GPIO_ACTIVE_LOW);
 +		}
 +	}
++	if (ldb->chan[chno].vcc_nr_gpios > 0) { mdelay(ldb->chan[chno].vcc_down_delay_ms); }
  	return;
  }
  
-@@ -704,6 +734,100 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
+@@ -704,6 +736,106 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
  	return false;
  }
  
@@ -180,6 +185,12 @@ index b54d729..22321cd 100644
 +		dev_info(dev, "Could not get 'vcc-powerup-delay-ms'");
 +	}
 +
++	ret = of_property_read_u32(np, "vcc-down-delay-ms",
++				   &chan->vcc_down_delay_ms);
++	if (ret) {
++		dev_info(dev, "Could not get 'vcc-down-delay-ms'");
++	}
++
 +	chan->backlight_gpio = of_get_named_gpio_flags(np, "backlight-gpio", 0,
 +						       &flags);
 +	if (!gpio_is_valid(chan->backlight_gpio)) {
@@ -226,7 +237,7 @@ index b54d729..22321cd 100644
  static int ldb_probe(struct platform_device *pdev)
  {
  	struct device *dev = &pdev->dev;
-@@ -804,6 +928,8 @@ static int ldb_probe(struct platform_device *pdev)
+@@ -804,6 +936,8 @@ static int ldb_probe(struct platform_device *pdev)
  		chan->ldb = ldb;
  		chan->online = true;
  
