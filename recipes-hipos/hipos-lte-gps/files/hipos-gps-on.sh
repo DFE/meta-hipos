@@ -1,6 +1,13 @@
 #!/bin/bash
 PORT=/dev/modem_at
 
+chat $CHAT_DBG_OPT \
+ABORT 'ERROR' \
+TIMEOUT 5 \
+'' 'AT$GPSNMUN=2,1,1,1,1,1,1' \
+'OK' '' \
+< $PORT > $PORT
+
 chat $CHAT_DBG_OPT -E \
 ABORT 'ERROR' \
 TIMEOUT 10 \
