@@ -1,0 +1,6 @@
+# ttymxc3 and ttymxc4 gps modem
+
+# create gps device link
+KERNEL=="ttymxc3", SUBSYSTEM=="tty", SYMLINK+="%c"
+KERNEL=="ttymxc4", SUBSYSTEM=="tty", SYMLINK+="%c"
+
