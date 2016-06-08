@@ -1,0 +1,13 @@
+[Unit]
+Description=Modem AT
+
+BindsTo=dev-modem_at.device
+Requires=dev-modem_ppp.device
+After=dev-modem_at.device
+After=dev-modem_ppp.device
+
+[Service]
+ExecStart=/etc/hipos/hipos-gps-on.sh
+
+[Install]
+WantedBy=dev-modem_at.device
