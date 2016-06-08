@@ -9,4 +9,4 @@ sleep 1.5
 echo 1 > value 
 sleep 1.5
 echo 0 > value
-
+sleep 1.5
