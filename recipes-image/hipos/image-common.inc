@@ -88,6 +88,7 @@ IMAGE_INSTALL += "  \
   screen            \
   file              \
   minicom           \
+  ppp		    \
 "
 
 # system / plumbing level tools
