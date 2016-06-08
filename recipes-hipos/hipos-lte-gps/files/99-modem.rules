@@ -1,7 +1,7 @@
 # usb LE910 modem
 
 # create Telit LE910 gps device link 
-SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v1BC7p1201*", ATTRS{bInterfaceNumber}=="03", SYMLINK+="%c"
+SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v1BC7p1201*", ATTRS{bInterfaceNumber}=="03", SYMLINK+="gps"
 SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v1BC7p1201*", ATTRS{bInterfaceNumber}=="04", SYMLINK+="modem_ppp"
 SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v1BC7p1201*", ATTRS{bInterfaceNumber}=="05", SYMLINK+="modem_at"
 
