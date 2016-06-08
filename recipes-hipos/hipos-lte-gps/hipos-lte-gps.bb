@@ -19,6 +19,7 @@ SRC_URI = " \
 
 FILES_${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/hipos/hipos-lte-gps.sh \
+               ${sysconfdir}/hipos/hipos-gps-on.sh \
 	       ${sysconfdir}/udev/rules.d/99-modem.rules \
 	       ${sysconfdir}/udev/rules.d/99-gps.rules "
 
