@@ -9,6 +9,8 @@ After=hipos-lte-gps.service
 [Service]
 EnvironmentFile=/etc/default/gpsd
 ExecStart=/usr/sbin/gpsd -N -n /dev/gps
+RestartSec=10
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
