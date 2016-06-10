@@ -1,6 +1,8 @@
 #!/bin/bash
 PORT=/dev/modem_at
 
+sleep 1.5
+
 chat $CHAT_DBG_OPT \
 ABORT 'ERROR' \
 TIMEOUT 5 \
