@@ -3,6 +3,7 @@ Description=hipos lte gps power on
 
 [Service]
 ExecStart=/bin/bash /etc/hipos/hipos-lte-gps.sh
+RemainAfterExit=yes
 KillMode=process
 
 [Install]
