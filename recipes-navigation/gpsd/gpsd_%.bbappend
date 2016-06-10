@@ -1,3 +1,5 @@
+FILESEXTRAPATHS_prepend := "${THISDIR}/gpsd:"
+
 # enable DBus Export
 EXTRA_OECONF = " dbus_export='true' "
 
@@ -5,3 +7,5 @@ EXTRA_OECONF = " dbus_export='true' "
 # cannot be fullfilled because 'x11' not in DISTRO_FEATURES
 PACKAGECONFIG ??= "${@base_contains('DISTRO_FEATURES', 'bluetooth', 'bluez', '', d)}"
 PACKAGECONFIG[bluez] = "bluez='true',bluez='false',${BLUEZ}"
+
+SYSTEMD_SERVICE_${PN} = "${PN}.service"
