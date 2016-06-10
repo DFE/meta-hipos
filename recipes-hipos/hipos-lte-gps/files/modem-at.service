@@ -10,6 +10,7 @@ After=dev-gps.device
 
 [Service]
 ExecStart=/etc/hipos/hipos-gps-on.sh
+RemainAfterExit=yes
 
 [Install]
 WantedBy=dev-modem_at.device

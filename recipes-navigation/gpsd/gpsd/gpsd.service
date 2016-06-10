@@ -1,10 +1,14 @@
 [Unit]
 Description=GPS (Global Positioning System) Daemon
 Requires=dev-gps.device
+Requires=modem-at.service
+Requires=hipos-lte-gps.service
+After=modem-at.service
+After=hipos-lte-gps.service
 
 [Service]
 EnvironmentFile=/etc/default/gpsd
-ExecStart=/usr/sbin/gpsd -N /dev/gps
+ExecStart=/usr/sbin/gpsd -N -n /dev/gps
 
 [Install]
 WantedBy=multi-user.target
