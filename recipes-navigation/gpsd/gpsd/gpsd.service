@@ -1,0 +1,10 @@
+[Unit]
+Description=GPS (Global Positioning System) Daemon
+Requires=dev-gps.device
+
+[Service]
+EnvironmentFile=/etc/default/gpsd
+ExecStart=/usr/sbin/gpsd -N /dev/gps
+
+[Install]
+WantedBy=multi-user.target

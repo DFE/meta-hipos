@@ -9,8 +9,7 @@ After=dev-modem_ppp.device
 After=dev-gps.device
 
 [Service]
-ExecStartPre=/etc/hipos/hipos-gps-on.sh
-ExecStart=/usr/sbin/gpsd -N -n /dev/gps
+ExecStart=/etc/hipos/hipos-gps-on.sh
 
 [Install]
 WantedBy=dev-modem_at.device
