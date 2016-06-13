@@ -1,10 +1,16 @@
 [Unit]
 Description=GPS (Global Positioning System) Daemon
+
+BindsTo=dev-gps.device
 Requires=dev-gps.device
 Requires=modem-at.service
 Requires=hipos-lte-gps.service
+Requires=dev-modem_ppp.device
 After=modem-at.service
 After=hipos-lte-gps.service
+After=dev-modem_at.device
+After=dev-modem_ppp.device
+After=dev-gps.device
 
 [Service]
 EnvironmentFile=/etc/default/gpsd
@@ -13,4 +19,5 @@ RestartSec=10
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=dev-gps.device
+
