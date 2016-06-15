@@ -176,7 +176,7 @@
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
-#define CONFIG_DEFAULT_FDT_HIGH ""
+#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
@@ -185,7 +185,7 @@
 #define CONFIG_DEFAULT_FDT_HIGH ""
 #else
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
-#define CONFIG_DEFAULT_FDT_HIGH ""
+#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #endif
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
