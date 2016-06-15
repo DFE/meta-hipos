@@ -2,7 +2,7 @@ require recipes-bsp/u-boot/u-boot_2016.03.bb
 
 COMPATIBLE_MACHINE = "himx0294"
 
-PR = "r2"
+PR = "r3"
 
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
