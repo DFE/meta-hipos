@@ -17,13 +17,20 @@ SRC_URI_append_himx0294 = " \
 	file://fw_env.config \
 "
 
+SRC_URI_append_hikirk = " \
+	file://fw_env.config \
+	file://0001-hikirk-Add-Kconfig.patch \
+	file://fix-mmc-high-capacity.patch \
+	file://Kconfig \
+	file://Makefile \
+	file://hikirk.c \
+	file://hikirk.h \
+	file://hikirk_defconfig \
+"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-
 FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
-
-SRC_URI_append_hikirk +=  " file://fw_env.config \
-	      file://0001-hikirk-add-hikirk-board.patch \
-	    "
+FILESEXTRAPATHS_prepend_hikirk := "${THISDIR}/u-boot-kirkwood:"
 
 do_install_append_hikirk () {
 	install -d ${D}/etc
@@ -44,6 +51,16 @@ do_configure_prepend_himx0294 () {
 	cp ${WORKDIR}/himx0294_ivap_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294_dvmon_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
+}
+
+do_configure_hikirk() {
+	mkdir -p ${S}/board/Marvell/hikirk
+	cp ${WORKDIR}/hikirk.c ${B}/board/Marvell/hikirk/
+	cp ${WORKDIR}/Makefile ${B}/board/Marvell/hikirk/
+	cp ${WORKDIR}/Kconfig ${B}/board/Marvell/hikirk/
+
+	cp ${WORKDIR}/hikirk_defconfig ${B}/configs/
+	cp ${WORKDIR}/hikirk.h ${B}/include/configs/
 }
 
 do_install_append_himx0294 () {
