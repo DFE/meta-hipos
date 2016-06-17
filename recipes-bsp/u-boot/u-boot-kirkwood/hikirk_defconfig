@@ -45,3 +45,4 @@ CONFIG_NET=y
 # CONFIG_CMD_NAND is not set
 # CONFIG_CMD_SETEXPR is not set
 # CONFIG_EXPERT is not set
+CONFIG_SYS_NS16550=y
