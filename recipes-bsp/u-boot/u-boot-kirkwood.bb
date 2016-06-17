@@ -11,9 +11,24 @@ SRC_URI_append_hikirk = " \
 	file://kwbimage_uart.hdr \
 	file://kwbimage_sata.hdr \
 	file://kwbimage_spi.hdr \
-	file://0001-hikirk-add-hikirk-board.patch \
+	file://0001-hikirk-Add-Kconfig.patch \
 	file://fix-mmc-high-capacity.patch \
+	file://Kconfig \
+	file://Makefile \
+	file://hikirk.c \
+	file://hikirk.h \
+	file://hikirk_defconfig \
 "
+
+do_configure_prepend() {
+	mkdir -p ${S}/board/Marvell/hikirk
+	cp ${WORKDIR}/hikirk.c ${B}/board/Marvell/hikirk/
+	cp ${WORKDIR}/Makefile ${B}/board/Marvell/hikirk/
+	cp ${WORKDIR}/Kconfig ${B}/board/Marvell/hikirk/
+
+	cp ${WORKDIR}/hikirk_defconfig ${B}/configs/
+	cp ${WORKDIR}/hikirk.h ${B}/include/configs/
+}
 
 do_compile_append_hikirk () {
 	UBOOT_VERSION=`basename ${UBOOT_IMAGE} .bin`
