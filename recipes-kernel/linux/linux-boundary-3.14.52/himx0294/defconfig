@@ -3433,8 +3433,7 @@ CONFIG_MXC_MIPI_CSI2=y
 #
 # MXC Media Local Bus Driver
 #
-CONFIG_MXC_MLB=y
-CONFIG_MXC_MLB150=y
+# CONFIG_MXC_MLB150 is not set
 
 #
 # MXC SIM Support
