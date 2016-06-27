@@ -1,0 +1,33 @@
+From d18e56a40317e377aa35b3385dfc46dada6f6653 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 27 Jun 2016 10:44:43 +0200
+Subject: [PATCH] imx-sdma: Update channel HYP-14823
+
+Sometimes no data are read from a serial port. For example, this behavior occurs
+when reading out GPS data. At least in one of 10 cases, no data are read.
+This commit updates the DMA channels inside the IRQ handler. This is the same
+behavior as in Kernel 3.14.28. And the error described no longer occurs.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/dma/imx-sdma.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/dma/imx-sdma.c b/drivers/dma/imx-sdma.c
+index 7c48d7d..a64ef7b 100644
+--- a/drivers/dma/imx-sdma.c
++++ b/drivers/dma/imx-sdma.c
+@@ -776,6 +776,10 @@ static irqreturn_t sdma_int_handler(int irq, void *dev_id)
+ 				tasklet_schedule(&sdmac->tasklet);
+ 			spin_unlock_irqrestore(&sdmac->lock, flags);
+ 		} else {
++			if ((sdmac->flags & IMX_DMA_SG_LOOP) &&
++				(sdmac->peripheral_type != IMX_DMATYPE_HDMI))
++				sdma_update_channel_loop(sdmac);
++
+ 			sdma_tasklet((unsigned long)sdmac);
+ 		}
+ 
+-- 
+2.1.4
+

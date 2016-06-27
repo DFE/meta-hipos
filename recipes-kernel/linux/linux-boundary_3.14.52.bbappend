@@ -16,6 +16,7 @@ SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch \
+	file://imx-sdma-update-channel.patch \
 	file://mmc-sd-show-ssr-in-sysfs.patch \
 	file://0001-libahci_platform-add-missing-symbol-export.patch \
 "
