@@ -1,0 +1,33 @@
+From e1b41fa1882561f07cea4225da21cdda153d7637 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 7 Jul 2016 15:13:50 +0200
+Subject: [PATCH] tty: imx: Disable DMA
+
+Disable imx UART DMA, because there are too many problems. HYP-14546, HYP-15101
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/tty/serial/imx.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index f03dfec..e1f8b71 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -1259,10 +1259,13 @@ static int imx_startup(struct uart_port *port)
+ 
+ 	writel(temp & ~UCR4_DREN, sport->port.membase + UCR4);
+ 
++#if 0
++Disable UART DMA, because too many problems. HYP-14546, HYP-15101
+ 	/* Can we enable the DMA support? */
+ 	if (is_imx6q_uart(sport) && !uart_console(port) &&
+ 	    !sport->dma_is_inited)
+ 		imx_uart_dma_init(sport);
++#endif
+ 
+ 	if (sport->dma_is_inited) {
+ 		INIT_DELAYED_WORK(&sport->tsk_dma_tx, dma_tx_work);
+-- 
+2.1.4
+

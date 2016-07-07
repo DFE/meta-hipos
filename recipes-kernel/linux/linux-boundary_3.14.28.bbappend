@@ -45,6 +45,8 @@ SRC_URI_append_himx0294 = " \
 	file://0001-mxc_vpu-fix-kmalloc-HYP-12884.patch \
 	file://ldb-lvds-power-up-down-sequence.patch \
 	file://0001-mcs7830-Fixed-MOSCHIP-driver-probe-error-110-HYP-132.patch \
+	file://serial-imx-reduce-irq-latency-after-rx-overflow.patch \
+	file://tty-imx-disable-dma.patch \
 "
 
 do_configure_prepend() {

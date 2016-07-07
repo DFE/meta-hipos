@@ -1,0 +1,39 @@
+From d6f174b761f5338ddd96b6cc63398fe8eed6cc43 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 7 Jul 2016 15:17:36 +0200
+Subject: [PATCH] serial: imx: reduce irq-latency after rx overflow
+
+To prevent problems with interrupt latency, and due to the fact, that
+the error will be counted anyway (icount.overrun), the dev_err is simply
+removed.
+
+Background:
+If an rx-fifo overflow occurs a dev_err message was called in interrupt
+context. Since dev_err messages are written to console in a synchronous way
+(unbuffered), and console may be a serial terminal, this leads to a
+highly increased interrupt-latency (several milliseconds).
+As a result of the high latency more rx-fifo overflows will happen, and
+therefore a feedback loop of errors is created.
+
+Signed-off-by: Manfred Schlaegl <manfred.schlaegl@gmx.at>
+Acked-By: Alexander Stein <alexander.stein@systec-electronic.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/tty/serial/imx.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index e1f8b71..2e41071 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -849,7 +849,6 @@ static irqreturn_t imx_int(int irq, void *dev_id)
+ 		writel(sts, sport->port.membase + USR1);
+ 
+ 	if (sts2 & USR2_ORE) {
+-		dev_err(sport->port.dev, "Rx FIFO overrun\n");
+ 		sport->port.icount.overrun++;
+ 		writel(USR2_ORE, sport->port.membase + USR2);
+ 	}
+-- 
+2.1.4
+
