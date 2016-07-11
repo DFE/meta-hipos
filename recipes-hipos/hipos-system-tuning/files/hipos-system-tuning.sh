@@ -29,12 +29,21 @@ while true
 do
 	/bin/sleep $((wait_sec))
 	buffers_count="$(awk '{ print ($(NF-2)+($(NF-1)*2)+(($NF)*4)) }' < /proc/buddyinfo | head -n 1)";
-	wait_sec=$((buffers_count/4))
-	
+	wait_sec=$((buffers_count/8))
+
 	# use "sync" to get free buffers
-	awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 4 ){printf("%s-%s:\t", $3,$4); print("sync"); system("/bin/sync");} }' < /proc/buddyinfo
+	if [ ${buffers_count} -le 8  ]; then
+		/bin/echo "DMA: sync";
+		/bin/sync;
+	fi
 	# drop caches to collect unused buffers
-	awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 8 ){printf("%s-%s:\t", $3,$4); print("drop_caches"); system("/bin/echo 3 > /proc/sys/vm/drop_caches");} }' < /proc/buddyinfo
-	# compact memory to get more big continuous free memory  
-	awk '{ if( ($(NF-2)+($(NF-1)*2)+(($NF)*4)) < 8 ){printf("%s-%s:\t", $3,$4); print("compact_memory"); system("/bin/echo 1 >/proc/sys/vm/compact_memory");} }' < /proc/buddyinfo
+	if [ ${buffers_count} -le 96 ]; then
+		/bin/echo "DMA: drop_caches"
+		/bin/echo 3 > /proc/sys/vm/drop_caches;
+	fi
+	# compact memory to get more big continuous free memory
+	if [ ${buffers_count} -le 16 ]; then
+		/bin/echo "DMA: compact_memory";
+		/bin/echo 1 >/proc/sys/vm/compact_memory;
+	fi
 done
