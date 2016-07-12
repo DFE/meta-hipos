@@ -6,10 +6,7 @@ After=hipos-device-info.service
 
 [Service]
 Type=oneshot
-# DRBCC_CMD is done in a roundabout way to handle the whitespace
-# simple use of "" within the ExecStart line did not work properly
-Environment="DRBCC_CMD=heartbeat 400"
-ExecStart=/usr/bin/drbcc --dev /dev/ttydrbcc --cmd=${DRBCC_CMD}
+ExecStart=/bin/bash /etc/hipos/hipos-watchdog.sh
 
 [Install]
 WantedBy=multi-user.target
