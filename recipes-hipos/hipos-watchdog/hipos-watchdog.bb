@@ -7,19 +7,23 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = " drbcc "
 
-PR = "r12"
+PR = "r13"
 
 SRC_URI = " \
         file://hipos-watchdog.service \
         file://hipos-watchdog.timer \
+        file://hipos-watchdog.sh \
 	    file://COPYING "
 
 FILES_${PN} = "${base_libdir}/systemd \
+               ${sysconfdir}/hipos/hipos-watchdog.sh \
                ${sysconfdir}/systemd "
 
 SYSTEMD_SERVICE_${PN} = "hipos-watchdog.service hipos-watchdog.timer"
 
 do_install () {
+  install -d ${D}${sysconfdir}/hipos
+  install -m 0755 ${WORKDIR}/hipos-watchdog.sh ${D}${sysconfdir}/hipos/
   install -d ${D}${base_libdir}/systemd/system
   install -m 0644 ${WORKDIR}/hipos-watchdog.service ${D}${base_libdir}/systemd/system/
   install -m 0644 ${WORKDIR}/hipos-watchdog.timer ${D}${base_libdir}/systemd/system/
