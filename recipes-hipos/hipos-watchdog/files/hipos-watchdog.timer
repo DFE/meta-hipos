@@ -4,8 +4,9 @@ Requires=dev-ttydrbcc.device
 After=dev-ttydrbcc.device
 
 [Timer]
-OnUnitInactiveSec=2s
+OnUnitInactiveSec=1s
 Unit=hipos-watchdog.service
 
 [Install]
 WantedBy=multi-user.target
+

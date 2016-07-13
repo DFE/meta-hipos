@@ -3,6 +3,8 @@ Description=hipos watchdog service
 Requires=dev-ttydrbcc.device
 After=dev-ttydrbcc.device
 After=hipos-device-info.service
+StartLimitIntervalSec=0
+StartLimitBurst=0
 
 [Service]
 Type=oneshot
@@ -10,3 +12,4 @@ ExecStart=/bin/bash /etc/hipos/hipos-watchdog.sh
 
 [Install]
 WantedBy=multi-user.target
+
