@@ -14,7 +14,7 @@ After=dev-gps.device
 
 [Service]
 EnvironmentFile=/etc/default/gpsd
-ExecStart=/usr/sbin/gpsd -N -n /dev/gps
+ExecStart=/usr/sbin/gpsd -N -n /dev/gps /dev/ttymxc3 /dev/ttymxc4
 RestartSec=10
 Restart=always
 
