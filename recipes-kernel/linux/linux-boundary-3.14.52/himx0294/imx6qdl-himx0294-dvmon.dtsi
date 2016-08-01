@@ -139,13 +139,13 @@
 		left {
 			label = "Left";
 			gpios = <&gpio4 10 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_LEFT>;
+			linux,code = <KEY_MENU>;
 		};
 
 		right {
 			label = "Right";
 			gpios = <&gpio4 14 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_RIGHT>;
+			linux,code = <KEY_POWER>;
 		};
 	};
 
