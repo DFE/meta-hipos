@@ -45,3 +45,8 @@ IMAGE_INSTALL += " \
   v4l-utils \
   live555 \
 "
+
+# machine specific
+IMAGE_INSTALL_append_himx0294 += " \
+  packagegroup-hipos-qt-examples \
+"
