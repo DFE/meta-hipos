@@ -53,7 +53,6 @@ IMAGE_INSTALL_append_himx0294 += " \
   tslib \
   tslib-calibrate \
   tslib-tests \
-  packagegroup-hipos-qt     \
   packagegroup-fsl-gstreamer1.0 \
   packagegroup-hipos-gstreamer \
   gstreamer1.0-plugins-imx \

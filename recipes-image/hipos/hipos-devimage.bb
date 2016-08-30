@@ -49,4 +49,5 @@ IMAGE_INSTALL += " \
 # machine specific
 IMAGE_INSTALL_append_himx0294 += " \
   packagegroup-hipos-qt-examples \
+  packagegroup-hipos-qt     \
 "
