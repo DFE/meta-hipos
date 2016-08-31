@@ -50,4 +50,5 @@ IMAGE_INSTALL += " \
 IMAGE_INSTALL_append_himx0294 += " \
   packagegroup-hipos-qt-examples \
   packagegroup-hipos-qt     \
+  packagegroup-hipos-gstreamer \
 "
