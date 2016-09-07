@@ -185,20 +185,18 @@
 	phy-mode = "rgmii";
 	direct-switch;
 #if 0
-	phy-reset-gpios = <&gpio1 27 0>;
+#define GP_ENET_PHY_RESET	<&gpio1 25 GPIO_ACTIVE_LOW>
+	phy-reset-gpios = GP_ENET_PHY_RESET;
 #endif
 	status = "okay";
 
 	#address-cells = <0>;
 	#size-cells = <1>;
-#if 0
-HYP-14551
 	phy_int {
 		reg = <0x6>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <28 IRQ_TYPE_LEVEL_LOW>;
+#define GPIRQ_ENET_PHY		<&gpio1 28 IRQ_TYPE_LEVEL_LOW>
+		interrupts-extended = GPIRQ_ENET_PHY;
 	};
-#endif
 };
 
 &flexcan1 {
@@ -365,7 +363,8 @@ HYP-14551
 				MX6QDL_PAD_RGMII_RD2__RGMII_RD2		0x1b0b0
 				MX6QDL_PAD_RGMII_RD3__RGMII_RD3		0x1b0b0
 				MX6QDL_PAD_RGMII_RX_CTL__RGMII_RX_CTL	0x1b0b0
-				MX6QDL_PAD_ENET_TX_EN__ENET_TX_EN	0x4001b0a8
+				MX6QDL_PAD_ENET_CRS_DV__GPIO1_IO25	0x0f0b0		/* ethernet phy reset */
+				MX6QDL_PAD_ENET_TX_EN__GPIO1_IO28	0x1b0b0		/* ethernet phy interrupt */
 			>;
 		};
 
