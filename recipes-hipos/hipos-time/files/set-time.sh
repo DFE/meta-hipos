@@ -17,7 +17,11 @@ ntpserver_config() {
 if [ "$SUB_TYPE" == "dvmon" ]; then
         ntpserver=$(ntpserver_config) &&
         if [ -n "$ntpserver" ]; then
-                ntpd -gq $ntpserver
+                if ping -c1 -W1 $ntpserver 2>&1 > /dev/null ; then
+                        if ntpq -p $ntpserver 2>&1 > /dev/null ; then
+                                ntpd -gq $ntpserver
+                        fi
+                fi
         fi
 else
         date -u -s "$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)" ||
