@@ -1,0 +1,97 @@
+/*
+ * Copyright 2012 Freescale Semiconductor, Inc.
+ * Copyright 2011 Linaro Ltd.
+ *
+ * The code contained herein is licensed under the GNU General Public
+ * License. You may obtain a copy of the GNU General Public License
+ * Version 2 or later at the following locations:
+ *
+ * http://www.opensource.org/licenses/gpl-license.html
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
+/dts-v1/;
+
+#include "imx6q.dtsi"
+#include "imx6dqscm-qwks-rev2.dtsi"
+#include "imx6dqscm-1gb-fix.dtsi"
+
+/ {
+	model = "Freescale i.MX6DQ SCM QWKS";
+	compatible = "fsl,imx6q";
+};
+
+&ldb {
+	lvds-channel@0 {
+		crtc = "ipu2-di0";
+	};
+
+	lvds-channel@1 {
+		crtc = "ipu2-di1";
+	};
+};
+
+&mxcfb1 {
+	status = "okay";
+};
+
+&mxcfb2 {
+	status = "okay";
+};
+
+&mxcfb3 {
+	status = "okay";
+};
+
+&mxcfb4 {
+	status = "okay";
+};
+
+&cpu0 {
+	arm-supply = <&reg_arm>;
+	soc-supply = <&reg_soc>;
+};
+
+&gpc {
+	/* use ldo-enable, u-boot will check it and configure */
+	fsl,ldo-bypass = <0>;
+	/* watchdog select of reset source */
+	fsl,wdog-reset = <1>;
+};
+
+&wdog1 {
+	status = "okay";
+};
+
+&wdog2 {
+	status = "disabled";
+};
+
+&fec {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec>;
+	phy-mode = "rmii";
+	status = "okay";
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_hog>;
+
+	imx6qdl-sabresd {
+		pinctrl_fec: fecgrp {
+			fsl,pins = <
+				MX6QDL_PAD_ENET_MDC__ENET_MDC		0x1b0b0
+				MX6QDL_PAD_ENET_MDIO__ENET_MDIO		0x1b0b0
+				MX6QDL_PAD_ENET_CRS_DV__ENET_RX_EN	0x1b0b0
+				MX6QDL_PAD_ENET_RX_ER__ENET_RX_ER	0x1b0b0
+				MX6QDL_PAD_ENET_TX_EN__ENET_TX_EN	0x1b0b0
+				MX6QDL_PAD_ENET_RXD0__ENET_RX_DATA0	0x1b0b0
+				MX6QDL_PAD_ENET_RXD1__ENET_RX_DATA1	0x1b0b0
+				MX6QDL_PAD_ENET_TXD0__ENET_TX_DATA0	0x1b0b0
+				MX6QDL_PAD_ENET_TXD1__ENET_TX_DATA1	0x1b0b0
+				MX6QDL_PAD_GPIO_16__ENET_REF_CLK	0x4001b0a8
+			>;
+		};
+	};
+};

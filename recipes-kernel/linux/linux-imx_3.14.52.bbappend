@@ -41,11 +41,17 @@ SRC_URI += " \
     file://0035-ARM-dtb-IMX6DQSCM-512MB-ePoP-support.patch \
     file://0036-Enable-1gb-and-2gb-for-hvb-on-imx6dqscm.patch \
     file://0037-ARM-dtb-IMX6DQSCMQWKS-eMMC-support.patch \
+    file://imx6dqscm-1gb-qwks-rmii-50mhz.dts \
+    file://ENET_REF_CLK.patch \
 "
 python do_patch_prepend() {
     import subprocess
     subprocess.call("echo Reseting to rel_imx_3.14.52_1.1.0_ga", shell=True)
     subprocess.call("git -C ${S} checkout rel_imx_3.14.52_1.1.0_ga", shell=True)
+}
+
+do_configure_prepend_imx6dqscm-1gb-qwks() {
+	cp ${WORKDIR}/imx6dqscm-1gb-qwks-rmii-50mhz.dts ${S}/arch/arm/boot/dts/
 }
 
 COMPATIBLE_MACHINE = "(imx6dqscm)"
