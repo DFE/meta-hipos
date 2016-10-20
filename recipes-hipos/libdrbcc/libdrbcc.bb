@@ -8,7 +8,7 @@ LICENSE = "GPLv3 & LGPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
 		    file://COPYING.LIB;md5=e6a600fd5e1d9cbde2d983680233ad02 "
 
-PR = "r6"
+PR = "r7"
 
 S = "${WORKDIR}/git"
 
@@ -17,7 +17,7 @@ S = "${WORKDIR}/git"
 DRSRCBRANCH="master"
 
 SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH}"
-SRCREV_default_pn-libdrbcc = "e75d557a43658f95d672b2fe2101041e6df269eb"
+SRCREV_default_pn-libdrbcc = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
 
 PACKAGES += " drbcc "
 
