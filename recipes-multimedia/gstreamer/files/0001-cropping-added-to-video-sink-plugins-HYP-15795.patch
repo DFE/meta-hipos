@@ -1,0 +1,223 @@
+From a038534f76a40d08e7a8d0473bd6b8b82bd3d0a0 Mon Sep 17 00:00:00 2001
+From: Sascha Dierberg <dierberg@dresearch-fe.de>
+Date: Tue, 20 Dec 2016 08:27:58 +0100
+Subject: [PATCH] cropping added to video sink plugins HYP-15795
+
+Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+---
+ src/blitter/video_sink.c | 149 +++++++++++++++++++++++++++++++++++++++++++++++
+ src/blitter/video_sink.h |   3 +
+ 2 files changed, 152 insertions(+)
+
+diff --git a/src/blitter/video_sink.c b/src/blitter/video_sink.c
+index 3aacdcc..d014dfc 100644
+--- a/src/blitter/video_sink.c
++++ b/src/blitter/video_sink.c
+@@ -51,6 +51,10 @@ enum
+ 	PROP_WINDOW_Y_COORD,
+ 	PROP_WINDOW_WIDTH,
+ 	PROP_WINDOW_HEIGHT,
++	PROP_LEFT_CROP,
++	PROP_TOP_CROP,
++	PROP_RIGHT_CROP,
++	PROP_BOTTOM_CROP,
+ 	PROP_LEFT_MARGIN,
+ 	PROP_TOP_MARGIN,
+ 	PROP_RIGHT_MARGIN,
+@@ -72,6 +76,10 @@ enum
+ #define DEFAULT_RIGHT_MARGIN 0
+ #define DEFAULT_BOTTOM_MARGIN 0
+ 
++#define DEFAULT_LEFT_CROP 0
++#define DEFAULT_TOP_CROP 0
++#define DEFAULT_RIGHT_CROP 0
++#define DEFAULT_BOTTOM_CROP 0
+ 
+ G_DEFINE_ABSTRACT_TYPE(GstImxBlitterVideoSink, gst_imx_blitter_video_sink, GST_TYPE_VIDEO_SINK)
+ 
+@@ -281,6 +289,54 @@ static void gst_imx_blitter_video_sink_class_init(GstImxBlitterVideoSinkClass *k
+ 			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
+ 		)
+ 	);
++	g_object_class_install_property(
++		object_class,
++		PROP_LEFT_CROP,
++		g_param_spec_int(
++			"left-crop",
++			"Left crop",
++			"Left crop",
++			G_MININT, G_MAXINT,
++			DEFAULT_LEFT_CROP,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
++		)
++	);
++	g_object_class_install_property(
++		object_class,
++		PROP_TOP_CROP,
++		g_param_spec_int(
++			"top-crop",
++			"Top crop",
++			"Top crop",
++			G_MININT, G_MAXINT,
++			DEFAULT_TOP_CROP,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
++		)
++	);
++	g_object_class_install_property(
++		object_class,
++		PROP_RIGHT_CROP,
++		g_param_spec_uint(
++			"right-crop",
++			"Right crop",
++			"Right crop",
++			0, G_MAXINT,
++			DEFAULT_RIGHT_CROP,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
++		)
++	);
++	g_object_class_install_property(
++		object_class,
++		PROP_BOTTOM_CROP,
++		g_param_spec_uint(
++			"bottom-crop",
++			"Bottom crop",
++			"Bottom crop",
++			0, G_MAXINT,
++			DEFAULT_BOTTOM_CROP,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
++		)
++	);	
+ }
+ 
+ 
+@@ -422,6 +478,41 @@ static void gst_imx_blitter_video_sink_set_property(GObject *object, guint prop_
+ 			break;
+ 		}
+ 
++		case PROP_LEFT_CROP:
++		{
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			blitter_video_sink->left_crop = g_value_get_int(value);
++			blitter_video_sink->canvas_needs_update = TRUE;
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++		}
++
++		case PROP_TOP_CROP:
++		{
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			blitter_video_sink->top_crop = g_value_get_int(value);
++			blitter_video_sink->canvas_needs_update = TRUE;
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++		}
++
++		case PROP_RIGHT_CROP:
++		{
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			blitter_video_sink->right_crop = g_value_get_uint(value);
++			blitter_video_sink->canvas_needs_update = TRUE;
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++		}
++
++		case PROP_BOTTOM_CROP:
++		{
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			blitter_video_sink->bottom_crop = g_value_get_uint(value);
++			blitter_video_sink->canvas_needs_update = TRUE;
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++		}
+ 		case PROP_WINDOW_X_COORD:
+ 		{
+ 			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
+@@ -553,6 +644,30 @@ static void gst_imx_blitter_video_sink_get_property(GObject *object, guint prop_
+ 			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
+ 			break;
+ 
++		case PROP_LEFT_CROP:
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			g_value_set_int(value, blitter_video_sink->left_crop);
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++
++		case PROP_TOP_CROP:
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			g_value_set_int(value, blitter_video_sink->top_crop);
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++
++		case PROP_RIGHT_CROP:
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			g_value_set_uint(value, blitter_video_sink->right_crop);
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++
++		case PROP_BOTTOM_CROP:
++			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
++			g_value_set_uint(value, blitter_video_sink->bottom_crop);
++			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
++			break;
++
+ 		case PROP_LEFT_MARGIN:
+ 			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
+ 			g_value_set_uint(value, blitter_video_sink->canvas.margin_left);
+@@ -851,6 +966,40 @@ static GstFlowReturn gst_imx_blitter_video_sink_show_frame(GstVideoSink *video_s
+ 		if (blitter_video_sink->canvas_needs_update)
+ 			gst_imx_blitter_video_sink_update_canvas(blitter_video_sink, &(blitter_video_sink->last_source_region));
+ 	}
++	else if (blitter_video_sink->left_crop || blitter_video_sink->top_crop || blitter_video_sink->right_crop || blitter_video_sink->bottom_crop)
++	{
++		/* Crop metadata present. Reconfigure canvas. */
++
++		GstImxRegion source_region;
++		source_region.x1 = blitter_video_sink->left_crop;
++		source_region.y1 = blitter_video_sink->top_crop;
++		source_region.x2 = GST_VIDEO_INFO_WIDTH(&(blitter_video_sink->input_video_info)) - blitter_video_sink->right_crop;
++		source_region.y2 = GST_VIDEO_INFO_HEIGHT(&(blitter_video_sink->input_video_info)) - blitter_video_sink->bottom_crop;
++
++		/* Make sure the source region does not exceed valid bounds */
++		source_region.x1 = MAX(0, source_region.x1);
++		source_region.y1 = MAX(0, source_region.y1);
++		source_region.x2 = MIN(GST_VIDEO_INFO_WIDTH(&(blitter_video_sink->input_video_info)), source_region.x2);
++		source_region.y2 = MIN(GST_VIDEO_INFO_HEIGHT(&(blitter_video_sink->input_video_info)), source_region.y2);
++
++		GST_LOG_OBJECT(blitter_video_sink, "retrieved crop rectangle %" GST_IMX_REGION_FORMAT, GST_IMX_REGION_ARGS(&source_region));
++
++		/* Canvas needs to be updated if either one of these applies:
++		 * - the current frame has crop metadata, the last one didn't
++		 * - the new crop rectangle and the last are different */
++		if (!(blitter_video_sink->last_frame_with_cropdata) || !gst_imx_region_equal(&source_region, &(blitter_video_sink->last_source_region)))
++		{
++			GST_LOG_OBJECT(blitter_video_sink, "using new crop rectangle %" GST_IMX_REGION_FORMAT, GST_IMX_REGION_ARGS(&source_region));
++			blitter_video_sink->last_source_region = source_region;
++			blitter_video_sink->canvas_needs_update = TRUE;
++		}
++
++		blitter_video_sink->last_frame_with_cropdata = TRUE;
++
++		/* Update canvas and input region if necessary */
++		if (blitter_video_sink->canvas_needs_update)
++			gst_imx_blitter_video_sink_update_canvas(blitter_video_sink, &(blitter_video_sink->last_source_region));
++	}
+ 	else
+ 	{
+ 		/* Force an update if this frame has no crop metadata but the last one did */
+diff --git a/src/blitter/video_sink.h b/src/blitter/video_sink.h
+index fa558c3..9fde197 100644
+--- a/src/blitter/video_sink.h
++++ b/src/blitter/video_sink.h
+@@ -81,6 +81,9 @@ struct _GstImxBlitterVideoSink
+ 
+ 	gint window_x_coord, window_y_coord;
+ 	guint window_width, window_height;
++	
++	gint left_crop, top_crop;
++	guint right_crop, bottom_crop;
+ 
+ 	GstVideoInfo input_video_info, output_video_info;
+ 
+-- 
+2.6.6
+
