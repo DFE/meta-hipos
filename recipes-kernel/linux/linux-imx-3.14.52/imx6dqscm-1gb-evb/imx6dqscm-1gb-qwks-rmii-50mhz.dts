@@ -14,7 +14,7 @@
 
 #include "imx6q.dtsi"
 #include "imx6dqscm-qwks-rev2.dtsi"
-#include "imx6dqscm-1gb-fix.dtsi"
+#include "imx6dqscm-1gb-interleave.dtsi"
 
 / {
 	model = "Freescale i.MX6DQ SCM QWKS";
