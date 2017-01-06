@@ -28,6 +28,8 @@ SRC_URI_append_himx0294 = " \
 	file://imx6q-himx0294-ivap.dts \
         file://imx6qdl-himx0294-dvmon.dtsi \
         file://imx6q-himx0294-dvmon.dts \
+        file://imx6qdl-himx0294-dvrec.dtsi \
+        file://imx6q-himx0294-dvrec.dts \
 	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-simulate-phy.patch \
 	file://rafi-touchscreen-support.patch \
@@ -65,6 +67,8 @@ do_configure_prepend_himx0294() {
 	cp ${WORKDIR}/imx6q-himx0294-ivap.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-ivap.dts
         cp ${WORKDIR}/imx6qdl-himx0294-dvmon.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-dvmon.dtsi
         cp ${WORKDIR}/imx6q-himx0294-dvmon.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-dvmon.dts
+        cp ${WORKDIR}/imx6qdl-himx0294-dvrec.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-dvrec.dtsi
+        cp ${WORKDIR}/imx6q-himx0294-dvrec.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-dvrec.dts
 }
 
 do_configure_prepend_nitrogen6x() {
