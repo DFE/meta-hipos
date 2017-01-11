@@ -19,6 +19,7 @@ SRC_URI_append = " \
 	file://imx-sdma-update-channel.patch \
 	file://mmc-sd-show-ssr-in-sysfs.patch \
 	file://0001-libahci_platform-add-missing-symbol-export.patch \
+	file://ENET_REF_CLK.patch \
 "
 
 SRC_URI_append_himx0294 = " \
