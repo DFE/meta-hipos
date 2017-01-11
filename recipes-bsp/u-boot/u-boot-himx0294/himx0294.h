@@ -28,6 +28,7 @@
 #define CONFIG_SYS_MALLOC_LEN		(10 * 1024 * 1024)
 
 #define CONFIG_BOARD_EARLY_INIT_F
+#define CONFIG_BOARD_LATE_INIT
 #define CONFIG_MISC_INIT_R
 #define CONFIG_MXC_GPIO
 #define CONFIG_CMD_GPIO
@@ -180,6 +181,7 @@
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
+#define CONFIG_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"

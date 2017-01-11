@@ -169,6 +169,8 @@ static iomux_v3_cfg_t const enet_pads1[] = {
 static iomux_v3_cfg_t const misc_pads[] = {
 	MX6_PAD_GPIO_1__USB_OTG_ID		| MUX_PAD_CTRL(WEAK_PULLUP),
 	MX6_PAD_KEY_COL4__USB_OTG_OC		| MUX_PAD_CTRL(WEAK_PULLUP),
+	MX6_PAD_ENET_RX_ER__GPIO1_IO24		| MUX_PAD_CTRL(WEAK_PULLUP),
+#define ENET_RX_ER_GP IMX_GPIO_NR(1, 24)
 };
 
 static void setup_iomux_enet(void)
@@ -614,6 +616,7 @@ int board_init(void)
 
 	imx_iomux_v3_setup_multiple_pads(misc_pads, ARRAY_SIZE(misc_pads));
 
+
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
@@ -635,12 +638,26 @@ int board_init(void)
 	return 0;
 }
 
+int board_late_init(void)
+{
+#if defined(CONFIG_BOARD_IS_HIMX_IVAP)
+	gpio_direction_input(ENET_RX_ER_GP);
+	if (0 == gpio_get_value(ENET_RX_ER_GP)) {
+		printf("Detected DVREC\n");
+		if (setenv("fdt_file", CONFIG_DEFAULT_FDT_FILE_DVREC)) {
+			printf("setenv: fdt_file '%s' failed\n", CONFIG_DEFAULT_FDT_FILE_DVREC);
+		}
+	}
+#endif
+	return 0;
+}
+
 int checkboard(void)
 {
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 	puts("Board: himx0294-imoc\n");
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
-	puts("Board: himx0294-ivap\n");
+	puts("Board: himx0294-ivap/dvrec\n");
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 	puts("Board: himx0294-dvmon\n");
 #else
