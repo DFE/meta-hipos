@@ -26,6 +26,8 @@ SRC_URI_append = " \
 SRC_URI_append_himx0294 = " \
 	file://imx6qdl-himx0294-imoc.dtsi \
 	file://imx6q-himx0294-imoc.dts \
+	file://imx6qdl-himx0294-imoc-2.dtsi \
+	file://imx6q-himx0294-imoc-2.dts \
 	file://imx6qdl-himx0294-ivap.dtsi \
 	file://imx6q-himx0294-ivap.dts \
         file://imx6qdl-himx0294-dvmon.dtsi \
@@ -65,6 +67,8 @@ do_configure_prepend_himx0294() {
         cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0294_defconfig
 	cp ${WORKDIR}/imx6qdl-himx0294-imoc.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-imoc.dtsi
 	cp ${WORKDIR}/imx6q-himx0294-imoc.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-imoc.dts
+	cp ${WORKDIR}/imx6qdl-himx0294-imoc-2.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-imoc-2.dtsi
+	cp ${WORKDIR}/imx6q-himx0294-imoc-2.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-imoc-2.dts
 	cp ${WORKDIR}/imx6qdl-himx0294-ivap.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-ivap.dtsi
 	cp ${WORKDIR}/imx6q-himx0294-ivap.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-ivap.dts
         cp ${WORKDIR}/imx6qdl-himx0294-dvmon.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-dvmon.dtsi
