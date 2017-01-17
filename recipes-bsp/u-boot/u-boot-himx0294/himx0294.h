@@ -177,7 +177,7 @@
 #define CONFIG_BOOTCOMMAND	"setenv bootcmd run x_bootA; saveenv; boot"
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc-2.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
