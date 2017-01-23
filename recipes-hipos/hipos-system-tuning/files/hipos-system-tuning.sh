@@ -36,14 +36,16 @@ do
 		/bin/echo "DMA: sync";
 		/bin/sync;
 	fi
-	# drop caches to collect unused buffers
-	if [ ${buffers_count} -le 96 ]; then
-		/bin/echo "DMA: drop_caches"
+	if [ ${buffers_count} -le 64 ]; then
+		# drop caches to collect unused slab objects and pagecache buffers
 		/bin/echo 3 > /proc/sys/vm/drop_caches;
-	fi
-	# compact memory to get more big continuous free memory
+	elif [ ${buffers_count} -le 96 ]; then
+		# drop caches to collect pagecache buffers
+                /bin/echo 1 > /proc/sys/vm/drop_caches;
+        fi
 	if [ ${buffers_count} -le 16 ]; then
-		/bin/echo "DMA: compact_memory";
+                # compact memory to get more big continuous free memory
+                /bin/echo "DMA: compact_memory";
 		/bin/echo 1 >/proc/sys/vm/compact_memory;
-	fi
+        fi
 done
