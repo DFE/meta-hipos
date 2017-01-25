@@ -1,22 +1,22 @@
-From fd44cead2fb38e88f429d022d22b580545cc34a5 Mon Sep 17 00:00:00 2001
+From ca19a6a29479045a4ef109997c46016647f4dc0e Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 21 Jan 2016 11:49:08 +0100
+Date: Wed, 25 Jan 2017 14:57:44 +0100
 Subject: [PATCH] net: fec_main: Simulate phy
 
-On himx0294 board fec is direct connected with a switch. And there is no phy.
-Add a fixed phy, which simulate a 1000Mbit/s full duplex connection. But test
-if Marvell switch is present.
+On himx0294 boards fec is direct connected with a switch. And there is no phy.
+Add a fixed phy, which simulate a 1000Mbit/s full duplex connection on ivap and
+imoc boards and a 100Mbit/s connection on dvrec boards.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/net/ethernet/freescale/fec_main.c | 115 +++++++++++++++++++++++++++++-
- 1 file changed, 113 insertions(+), 2 deletions(-)
+ drivers/net/ethernet/freescale/fec_main.c | 119 +++++++++++++++++++++++++++++-
+ 1 file changed, 117 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
-index 3e56492..50d7812 100644
+index 12b1b54..4ac4d5e 100644
 --- a/drivers/net/ethernet/freescale/fec_main.c
 +++ b/drivers/net/ethernet/freescale/fec_main.c
-@@ -1845,6 +1845,109 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
+@@ -1826,6 +1826,110 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
  	return 0;
  }
  
@@ -26,7 +26,7 @@ index 3e56492..50d7812 100644
 +#define SMI_BUSY_BIT 15
 +
 +static int is_direct_switch = 0;
-+static int detect_switch = 0;
++static int detect_switch = 1;
 +
 +static u16 fixed_regs[32] = {
 +       0x1140, /* 0x0 MII_BMCR */
@@ -42,26 +42,27 @@ index 3e56492..50d7812 100644
 +       0x3000, /* 0xf MII_ESTATUS */
 +};
 +
-+static void detect_marvell_switch(struct mii_bus *bus)
++static void detect_direct_switch(struct mii_bus *bus)
 +{
 +	int val;
++
 +	val = fec_enet_mdio_read(bus, 0x10, 3);
 +	if(((val & 0xfff0) == 0x1760) || ((val & 0xfff0) == 0x1720)) {
 +		pr_info("fec: Marvell switch detected\n");
 +		is_direct_switch = 1;
-+	} else {
-+		pr_info("fec: No Marvell switch detected\n");
-+		is_direct_switch = 0;
++		return;
 +	}
++	pr_info("fec: No switch detected\n");
++	is_direct_switch = 0;
 +}
 +
 +static int my_fec_enet_mdio_read(struct mii_bus *bus, int phyaddr, int phyreg)
 +{
 +	int data = 0;
 +
-+	if(!detect_switch) {
-+		detect_marvell_switch(bus);
-+		detect_switch = 1;
++	if(detect_switch) {
++		detect_direct_switch(bus);
++		detect_switch = 0;
 +	}
 +
 +	if(!is_direct_switch) {
@@ -92,9 +93,9 @@ index 3e56492..50d7812 100644
 +
 +static int my_fec_enet_mdio_write(struct mii_bus *bus, int phyaddr, int phyreg, u16 phydata)
 +{
-+	if(!detect_switch) {
-+		detect_marvell_switch(bus);
-+		detect_switch = 1;
++	if(detect_switch) {
++		detect_direct_switch(bus);
++		detect_switch = 0;
 +	}
 +
 +	if(!is_direct_switch) {
@@ -126,7 +127,7 @@ index 3e56492..50d7812 100644
  static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
  {
  	struct fec_enet_private *fep = netdev_priv(ndev);
-@@ -2054,8 +2157,8 @@ static int fec_enet_mii_init(struct platform_device *pdev, int phy_irq)
+@@ -2059,8 +2163,8 @@ static int fec_enet_mii_init(struct platform_device *pdev, int phy_irq)
  	}
  
  	fep->mii_bus->name = "fec_enet_mii_bus";
@@ -137,21 +138,24 @@ index 3e56492..50d7812 100644
  	snprintf(fep->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
  		pdev->name, fep->dev_id + 1);
  	fep->mii_bus->priv = fep;
-@@ -3336,6 +3439,14 @@ fec_probe(struct platform_device *pdev)
+@@ -3440,6 +3544,17 @@ fec_probe(struct platform_device *pdev)
  
- 	platform_set_drvdata(pdev, ndev);
+ 	fec_enet_of_parse_stop_mode(pdev);
  
-+	if (of_get_property(np, "direct-switch", NULL)) {
++	if (of_get_property(np, "direct-switch-lan9354", NULL)) {
++		pr_info("fec: LAN9354 switch\n");
++		fixed_regs[0x0] = 0x3100;
++		fixed_regs[0x1] = 0x782D;
++		fixed_regs[0x4] = 0x0DE1;
++		fixed_regs[0x9] = 0xFFFF;
++		fixed_regs[0xa] = 0xFFFF;
 +		is_direct_switch = 1;
-+		pr_info("fec: direct-switch\n");
-+	} else { 
-+		is_direct_switch = 0;
-+		pr_info("fec: NO direct-switch\n");
++		detect_switch = 0;
 +	}
 +
  	if (of_get_property(np, "fsl,magic-packet", NULL))
  		fep->wol_flag |= FEC_WOL_HAS_MAGIC_PACKET;
  
 -- 
-2.1.4
+2.6.6
 
