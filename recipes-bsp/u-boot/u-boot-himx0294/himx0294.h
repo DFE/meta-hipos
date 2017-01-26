@@ -182,6 +182,7 @@
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
 #define CONFIG_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
+#define CONFIG_DEFAULT_FDT_FILE_DVREC_P "/boot/imx6qp-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"
