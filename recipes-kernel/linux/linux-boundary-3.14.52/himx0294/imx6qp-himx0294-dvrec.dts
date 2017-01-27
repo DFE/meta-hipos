@@ -19,22 +19,6 @@
 	model = "dfe,himx0294-dvrec";
 };
 
-&mxcfb1 {
-	prefetch;
-};
-
-&mxcfb2 {
-	prefetch;
-};
-
-&mxcfb3 {
-	prefetch;
-};
-
-&mxcfb4 {
-	prefetch;
-};
-
 &pre1 {
 	status = "okay";
 };
@@ -52,10 +36,16 @@
 };
 
 &prg1 {
+	memory-region = <&memory>;
 	status = "okay";
 };
 
 &prg2 {
+	memory-region = <&memory>;
+	status = "okay";
+};
+
+&sata {
 	status = "okay";
 };
 
