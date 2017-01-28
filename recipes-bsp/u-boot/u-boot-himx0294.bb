@@ -2,7 +2,7 @@ require recipes-bsp/u-boot/u-boot_2016.03.bb
 
 COMPATIBLE_MACHINE = "himx0294"
 
-PR = "r6"
+PR = "r7"
 
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
@@ -17,6 +17,7 @@ SRC_URI_append_himx0294 = " \
 	file://1066mhz_4x256mx16.cfg \
 	file://himx0294_imoc_defconfig \
 	file://himx0294_ivap_defconfig \
+	file://himx0294_ivap_qp_defconfig \
 	file://himx0294_dvmon_defconfig \
 	file://himx0294.h \
 "
@@ -35,6 +36,7 @@ do_configure_prepend() {
 
 	cp ${WORKDIR}/himx0294_imoc_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294_ivap_defconfig ${B}/configs/
+	cp ${WORKDIR}/himx0294_ivap_qp_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294_dvmon_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
 }
