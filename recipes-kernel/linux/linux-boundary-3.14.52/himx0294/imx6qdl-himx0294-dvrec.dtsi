@@ -183,6 +183,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
 	phy-mode = "rmii";
+	phy-reset-duration = <1>;
+	phy-reset-gpios = <&gpio4 30 0>;
 	direct-switch-lan9354;
 	status = "okay";
 
