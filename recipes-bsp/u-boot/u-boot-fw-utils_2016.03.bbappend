@@ -12,7 +12,7 @@ SRC_URI_append_himx0294 = " \
 	file://1066mhz_4x128mx16.cfg \
 	file://himx0294_imoc_defconfig \
 	file://himx0294_ivap_defconfig \
-	file://himx0294_ivap_qp_defconfig \
+	file://himx0294_ivqp_defconfig \
 	file://himx0294_dvmon_defconfig \
 	file://himx0294.h \
 	file://fw_env.config \
@@ -50,7 +50,7 @@ do_configure_prepend_himx0294 () {
 
 	cp ${WORKDIR}/himx0294_imoc_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294_ivap_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0294_ivap_qp_defconfig ${B}/configs/
+	cp ${WORKDIR}/himx0294_ivqp_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294_dvmon_defconfig ${B}/configs/
 	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
 }
