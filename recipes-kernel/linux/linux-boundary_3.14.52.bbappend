@@ -55,6 +55,7 @@ SRC_URI_append_himx0294 = " \
 	file://ldb-lvds-power-up-down-sequence.patch \
 	file://0001-mcs7830-Fixed-MOSCHIP-driver-probe-error-110-HYP-132.patch \
 	file://0001-DCIC-ioctl-improved-to-get-real-checksums-HYP-16117.patch \
+	file://ahci_imx-reset-sata-phy.patch \
 "
 
 do_configure_prepend() {
