@@ -283,8 +283,9 @@
 				MX6QDL_PAD_KEY_COL1__GPIO4_IO08		0x1b0b0		/* Key 2 */
 				MX6QDL_PAD_KEY_COL2__GPIO4_IO10		0x1b0b0		/* Key 3 */
 				MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0x1b0b0		/* Key black */
+				MX6QDL_PAD_GPIO_1__GPIO1_IO01		0x1b0b0		/* INIC ERR/BOOT production */
 		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* /RST_USB_HUB */
-		/*		MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x000b0	*/	/* /INIC_INT */
+				MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x1b0b0		/* /INIC_INT */
 		/*		MX6QDL_PAD_GPIO_9__GPIO1_IO09		0x80000000 */	/* MOST PWR EN */
 		/*		MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x1b0b0	*/	/* IGN */
                                 MX6QDL_PAD_GPIO_18__GPIO7_IO13          0x1b0b0		/* /HW_INT */
@@ -292,6 +293,8 @@
 		/*		MX6QDL_PAD_ENET_TX_EN__GPIO1_IO28	0x1b0b0	*/	/* /ETH_INT */
 				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x80000000	/* USDHC3 CD */
 				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* /SD3_WP*/
+				MX6QDL_PAD_SD4_DAT5__GPIO2_IO13		0x1b0b0		/* INIC ERR/BOOT */
+				MX6QDL_PAD_SD4_DAT6__GPIO2_IO14		0x1b0b0		/* INIC RST */
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* /SD4_WP */
 			>;
@@ -308,12 +311,6 @@
 				MX6QDL_PAD_EIM_D17__ECSPI1_MISO		0x100b1
 				MX6QDL_PAD_EIM_D18__ECSPI1_MOSI		0x100b1
 				MX6QDL_PAD_EIM_D16__ECSPI1_SCLK		0x100b1
-			>;
-		};
-
-		pinctrl_usbotg: usbotggrp {
-			fsl,pins = <
-				MX6QDL_PAD_GPIO_1__USB_OTG_ID 0x17059
 			>;
 		};
 
@@ -503,14 +500,6 @@
 
 &usbh1 {
 	reset-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
-	status = "okay";
-};
-
-&usbotg {
-	vbus-supply = <&reg_usb_otg_vbus>;
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_usbotg>;
-	disable-over-current;
 	status = "okay";
 };
 
