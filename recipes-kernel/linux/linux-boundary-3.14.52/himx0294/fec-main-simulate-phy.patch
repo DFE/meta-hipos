@@ -1,22 +1,23 @@
-From ca19a6a29479045a4ef109997c46016647f4dc0e Mon Sep 17 00:00:00 2001
+From c9a7e16d28a596e66a3887c0c975f6c53d0bc7fe Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 25 Jan 2017 14:57:44 +0100
+Date: Tue, 7 Feb 2017 15:11:07 +0100
 Subject: [PATCH] net: fec_main: Simulate phy
 
 On himx0294 boards fec is direct connected with a switch. And there is no phy.
 Add a fixed phy, which simulate a 1000Mbit/s full duplex connection on ivap and
 imoc boards and a 100Mbit/s connection on dvrec boards.
+Do not disable reference clock if it is needed by the switch.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/net/ethernet/freescale/fec_main.c | 119 +++++++++++++++++++++++++++++-
- 1 file changed, 117 insertions(+), 2 deletions(-)
+ drivers/net/ethernet/freescale/fec_main.c | 131 +++++++++++++++++++++++++++++-
+ 1 file changed, 129 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
-index 12b1b54..4ac4d5e 100644
+index 12b1b54..a1d6846 100644
 --- a/drivers/net/ethernet/freescale/fec_main.c
 +++ b/drivers/net/ethernet/freescale/fec_main.c
-@@ -1826,6 +1826,110 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
+@@ -1826,6 +1826,111 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
  	return 0;
  }
  
@@ -27,6 +28,7 @@ index 12b1b54..4ac4d5e 100644
 +
 +static int is_direct_switch = 0;
 +static int detect_switch = 1;
++static int imx6_generate_enet_ref_clk = 0;
 +
 +static u16 fixed_regs[32] = {
 +       0x1140, /* 0x0 MII_BMCR */
@@ -127,7 +129,24 @@ index 12b1b54..4ac4d5e 100644
  static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
  {
  	struct fec_enet_private *fep = netdev_priv(ndev);
-@@ -2059,8 +2163,8 @@ static int fec_enet_mii_init(struct platform_device *pdev, int phy_irq)
+@@ -1860,6 +1965,16 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
+ 				goto failed_clk_ref;
+ 		}
+ 	} else {
++		/*
++		 * On some boards the imx6 generates a refence clock that is
++		 * uses e.g. by a ethernet network switch. If the reference
++		 * clock is disabled, the ethernet network switch no longer
++		 * works. So we do not disable the reference clock on such
++		 * boards.
++		 */
++		if(imx6_generate_enet_ref_clk) {
++			return 0;
++		}
+ 		clk_disable_unprepare(fep->clk_ahb);
+ 		clk_disable_unprepare(fep->clk_ipg);
+ 		if (fep->clk_enet_out)
+@@ -2059,8 +2174,8 @@ static int fec_enet_mii_init(struct platform_device *pdev, int phy_irq)
  	}
  
  	fep->mii_bus->name = "fec_enet_mii_bus";
@@ -138,7 +157,7 @@ index 12b1b54..4ac4d5e 100644
  	snprintf(fep->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
  		pdev->name, fep->dev_id + 1);
  	fep->mii_bus->priv = fep;
-@@ -3440,6 +3544,17 @@ fec_probe(struct platform_device *pdev)
+@@ -3440,6 +3555,18 @@ fec_probe(struct platform_device *pdev)
  
  	fec_enet_of_parse_stop_mode(pdev);
  
@@ -151,6 +170,7 @@ index 12b1b54..4ac4d5e 100644
 +		fixed_regs[0xa] = 0xFFFF;
 +		is_direct_switch = 1;
 +		detect_switch = 0;
++		imx6_generate_enet_ref_clk = 1;
 +	}
 +
  	if (of_get_property(np, "fsl,magic-packet", NULL))
