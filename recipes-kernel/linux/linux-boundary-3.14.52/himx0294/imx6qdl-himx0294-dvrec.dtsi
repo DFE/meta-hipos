@@ -609,10 +609,6 @@ MST
 	status = "okay";
 };
 
-&pcie {
-	status = "okay";
-};
-
 #if 0
 &pwm1 {
 	pinctrl-names = "default";
