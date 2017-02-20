@@ -91,6 +91,7 @@ IMAGE_INSTALL += "  \
 # system / plumbing level tools
 IMAGE_INSTALL += "  \
     ethtool         \
+    bridge-utils    \
     ltrace          \
     strace          \
     pciutils        \
