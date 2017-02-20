@@ -14,7 +14,7 @@ PV = "gitr${SRCPV}"
 
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="4.6"
 
 SRC_URI = "git://bitbucket.org/dresearchfe/${BPN}.git;protocol=https;branch=${DRSRCBRANCH}"
 
