@@ -642,7 +642,8 @@ int board_late_init(void)
 {
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
 	gpio_direction_input(ENET_RX_ER_GP);
-	if (0 == gpio_get_value(ENET_RX_ER_GP)) {
+	if (0 == gpio_get_value(ENET_RX_ER_GP) &&
+	    !strcmp(getenv("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
 		char *fdt = CONFIG_DEFAULT_FDT_FILE_DVREC;
 		printf("Detected DVREC\n");
 		if (is_cpu_type(MXC_CPU_MX6QP)) {
