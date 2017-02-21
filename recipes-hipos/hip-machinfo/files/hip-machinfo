@@ -18,12 +18,14 @@ while [ "$#" -gt 0 ]; do
 		-m|--machine)    GET_MACHINE=true;;
 		-s|--submachine) GET_SUBMACHINE=true;;
 		-a|--all)        GET_MACHINE=true; GET_SUBMACHINE=true;;
+		--soc)           test -f "/sys/devices/soc0/soc_id" && cat /sys/devices/soc0/soc_id; exit 0 ;;
 		*) 
 			echo "Use $NAME to obtain information about machine and/or submachine type."
 			echo "    -m|--machine       return machine name"
 			echo "    -s|--submachine    return submachine name"
 			echo "    -a|--all           return machine-submachine name"
 			echo "    -h|--help          get this little help"
+			echo "    --soc              return SoC identifcation"
 			exit 1
 			;;
 	esac
