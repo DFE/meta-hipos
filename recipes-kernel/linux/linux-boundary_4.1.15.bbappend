@@ -1,7 +1,7 @@
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-3.14.52:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-4.1.15:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
