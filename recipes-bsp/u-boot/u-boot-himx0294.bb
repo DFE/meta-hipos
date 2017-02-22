@@ -24,20 +24,20 @@ SRC_URI_append_himx0294 = " \
 
 do_configure_prepend() {
 	mkdir -p ${S}/board/freescale/himx0294
-	cp ${WORKDIR}/himx0294.c ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/Makefile ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/Kconfig ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/nitrogen6q.cfg ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/nitrogen6q2g.cfg ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/ddr-setup.cfg ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/1066mhz_4x128mx16.cfg ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/1066mhz_4x256mx16.cfg ${B}/board/freescale/himx0294/
-	cp ${WORKDIR}/clocks.cfg ${B}/board/freescale/himx0294/
+	cp ${WORKDIR}/himx0294.c ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/Makefile ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/Kconfig ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/nitrogen6q.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/nitrogen6q2g.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/ddr-setup.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/1066mhz_4x128mx16.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/1066mhz_4x256mx16.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/clocks.cfg ${S}/board/freescale/himx0294/
 
-	cp ${WORKDIR}/himx0294_imoc_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0294_ivap_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0294_ivqp_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0294_dvmon_defconfig ${B}/configs/
-	cp ${WORKDIR}/himx0294.h ${B}/include/configs/
+	cp ${WORKDIR}/himx0294_imoc_defconfig ${S}/configs/
+	cp ${WORKDIR}/himx0294_ivap_defconfig ${S}/configs/
+	cp ${WORKDIR}/himx0294_ivqp_defconfig ${S}/configs/
+	cp ${WORKDIR}/himx0294_dvmon_defconfig ${S}/configs/
+	cp ${WORKDIR}/himx0294.h ${S}/include/configs/
 }
 
