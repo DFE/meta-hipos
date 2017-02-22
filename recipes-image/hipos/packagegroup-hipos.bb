@@ -10,7 +10,6 @@ PACKAGES = "\
 "
 
 RDEPENDS_packagegroup-hipos-qt = "\
-    qtbase-fonts \
     qtbase-plugins \
     qtbase-tools \
     qtdeclarative \
