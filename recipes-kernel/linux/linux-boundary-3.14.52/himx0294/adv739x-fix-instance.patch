@@ -8,13 +8,13 @@ than one instance.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/video/mxc/mxcfb_adv739x.c | 2 +-
+ drivers/video/fbdev/mxc/mxcfb_adv739x.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/video/mxc/mxcfb_adv739x.c b/drivers/video/mxc/mxcfb_adv739x.c
+diff --git a/drivers/video/fbdev/mxc/mxcfb_adv739x.c b/drivers/video/fbdev/mxc/mxcfb_adv739x.c
 index 74204a0..f859539 100644
---- a/drivers/video/mxc/mxcfb_adv739x.c
-+++ b/drivers/video/mxc/mxcfb_adv739x.c
+--- a/drivers/video/fbdev/mxc/mxcfb_adv739x.c
++++ b/drivers/video/fbdev/mxc/mxcfb_adv739x.c
 @@ -328,7 +328,7 @@ static int adv739x_disp_init(struct mxc_dispdrv_handle *disp,
  	adv739x->enabled = 0;
  	adv739x->cur_mode = ADV739X_MODE_NTSC;  //default mode

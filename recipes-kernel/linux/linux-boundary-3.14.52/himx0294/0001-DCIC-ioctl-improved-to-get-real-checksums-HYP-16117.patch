@@ -1,20 +1,20 @@
-From cc7ce108681503489c221229f17b54c9816ddc6d Mon Sep 17 00:00:00 2001
-From: Sascha Dierberg <dierberg@dresearch-fe.de>
-Date: Fri, 18 Nov 2016 12:58:08 +0100
+From b4ffba5cbcef4135659678629981e5d9b5543a00 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 22 Feb 2017 09:47:48 +0100
 Subject: [PATCH] DCIC ioctl improved to get real checksums HYP-16117
 
 Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
 ---
- drivers/video/mxc/mxc_dcic.c  | 28 +++++++++++++++++++++++++---
- include/linux/mxc_dcic.h      |  1 +
- include/uapi/linux/mxc_dcic.h |  1 +
+ drivers/video/fbdev/mxc/mxc_dcic.c | 28 +++++++++++++++++++++++++---
+ include/linux/mxc_dcic.h           |  1 +
+ include/uapi/linux/mxc_dcic.h      |  1 +
  3 files changed, 27 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/video/mxc/mxc_dcic.c b/drivers/video/mxc/mxc_dcic.c
-index 8cf909d..045cee1 100644
---- a/drivers/video/mxc/mxc_dcic.c
-+++ b/drivers/video/mxc/mxc_dcic.c
-@@ -59,6 +59,8 @@
+diff --git a/drivers/video/fbdev/mxc/mxc_dcic.c b/drivers/video/fbdev/mxc/mxc_dcic.c
+index cae872a..106798b 100644
+--- a/drivers/video/fbdev/mxc/mxc_dcic.c
++++ b/drivers/video/fbdev/mxc/mxc_dcic.c
+@@ -52,6 +52,8 @@
  #define FB_SYNC_OE_LOW_ACT		0x80000000
  #define FB_SYNC_CLK_LAT_FALL	0x40000000
  
@@ -23,7 +23,7 @@ index 8cf909d..045cee1 100644
  static const struct dcic_mux imx6q_dcic0_mux[] = {
  	{
  		.dcic = DCIC_IPU1_DI0,
-@@ -304,9 +306,7 @@ static irqreturn_t dcic_irq_handler(int irq, void *data)
+@@ -297,9 +299,7 @@ static irqreturn_t dcic_irq_handler(int irq, void *data)
  	writel(dcics, &dcic->regs->dcics);
  
  	for (i = 0; i < 16; i++) {
@@ -34,7 +34,7 @@ index 8cf909d..045cee1 100644
  	}
  	complete(&dcic->roi_crc_comp);
  
-@@ -396,6 +396,9 @@ static long dcic_ioctl(struct file *file,
+@@ -389,6 +389,9 @@ static long dcic_ioctl(struct file *file,
  	case DCIC_IOC_CONFIG_DCIC:
  		if (!copy_from_user(&sync, argp, sizeof(unsigned int)))
  			dcic_configure(dcic, sync);
@@ -44,7 +44,7 @@ index 8cf909d..045cee1 100644
  		break;
  	case DCIC_IOC_CONFIG_ROI:
  		if (copy_from_user(&roi_param, argp, sizeof(roi_param)))
-@@ -427,6 +430,25 @@ static long dcic_ioctl(struct file *file,
+@@ -420,6 +423,25 @@ static long dcic_ioctl(struct file *file,
  		}
  		dcic_disable(dcic);
  		break;
@@ -71,10 +71,10 @@ index 8cf909d..045cee1 100644
  		printk(KERN_ERR "%s, Unsupport cmd %d\n", __func__, cmd);
  		break;
 diff --git a/include/linux/mxc_dcic.h b/include/linux/mxc_dcic.h
-index 9f0ebc5..f2aec63 100644
+index 8e330bd..961e6fc 100644
 --- a/include/linux/mxc_dcic.h
 +++ b/include/linux/mxc_dcic.h
-@@ -130,5 +130,6 @@ struct dcic_data {
+@@ -122,5 +122,6 @@ struct dcic_data {
  	struct cdev cdev;	/* Char device structure */
  	dev_t devt;
  	unsigned int result;
@@ -82,7 +82,7 @@ index 9f0ebc5..f2aec63 100644
  };
  #endif
 diff --git a/include/uapi/linux/mxc_dcic.h b/include/uapi/linux/mxc_dcic.h
-index cbcacaa..4077cb8 100644
+index 83e3e2c..d6c2223 100644
 --- a/include/uapi/linux/mxc_dcic.h
 +++ b/include/uapi/linux/mxc_dcic.h
 @@ -33,6 +33,7 @@

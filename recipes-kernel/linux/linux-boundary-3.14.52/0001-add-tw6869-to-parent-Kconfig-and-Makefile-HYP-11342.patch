@@ -1,7 +1,7 @@
-From a38d10339244c03845bf1341b422fc4e18fd9510 Mon Sep 17 00:00:00 2001
-From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Thu, 10 Mar 2016 14:59:19 +0100
-Subject: [PATCH] add drtw6869 to Kconfig and Makefile, HYP-12497
+From d66795aff563442d09a58a9bf6b27a8ebb14c840 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 21 Feb 2017 21:17:57 +0100
+Subject: [PATCH] add drtw6869 to Kconfig and Makefile, HYP-16401
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
@@ -10,29 +10,29 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  2 files changed, 2 insertions(+)
 
 diff --git a/drivers/media/pci/Kconfig b/drivers/media/pci/Kconfig
-index a5e5ad0..c2b3299 100644
+index 1ce1f407..56edea5 100644
 --- a/drivers/media/pci/Kconfig
 +++ b/drivers/media/pci/Kconfig
-@@ -22,6 +22,7 @@ source "drivers/media/pci/saa7146/Kconfig"
- source "drivers/media/pci/TW68/Kconfig"
- source "drivers/media/pci/tw686x/Kconfig"
+@@ -24,6 +24,7 @@ source "drivers/media/pci/tw68/Kconfig"
+ source "drivers/media/pci/TW_68/Kconfig"
  source "drivers/media/pci/tw6869/Kconfig"
+ source "drivers/media/pci/tw686x/Kconfig"
 +source "drivers/media/pci/drtw6869/Kconfig"
  endif
  
  if MEDIA_ANALOG_TV_SUPPORT || MEDIA_DIGITAL_TV_SUPPORT
 diff --git a/drivers/media/pci/Makefile b/drivers/media/pci/Makefile
-index 9b92251..87418c8 100644
+index 948ea63..c3e275c 100644
 --- a/drivers/media/pci/Makefile
 +++ b/drivers/media/pci/Makefile
-@@ -18,6 +18,7 @@ obj-$(CONFIG_VIDEO_ZORAN) += zoran/
- obj-$(CONFIG_VIDEO_TW68) += TW68/
- obj-$(CONFIG_VIDEO_TW686X) += tw686x/
+@@ -19,6 +19,7 @@ obj-$(CONFIG_VIDEO_ZORAN) += zoran/
+ obj-$(CONFIG_VIDEO_TW_68) += TW_68/
  obj-$(CONFIG_VIDEO_TW6869) += tw6869/
+ obj-$(CONFIG_VIDEO_TW686X) += tw686x/
 +obj-$(CONFIG_VIDEO_DRTW6869) += drtw6869/
  obj-$(CONFIG_VIDEO_CX18) += cx18/
  obj-$(CONFIG_VIDEO_CX23885) += cx23885/
  obj-$(CONFIG_VIDEO_CX25821) += cx25821/
 -- 
-2.7.2
+2.6.6
 

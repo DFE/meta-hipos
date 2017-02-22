@@ -1,6 +1,6 @@
-From f862b2bf4cdd3ad5963f9096c2d13f2aec74d722 Mon Sep 17 00:00:00 2001
+From 9f20fd2db04c0c2b16c60e05f0b0ec58488d4bfe Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 12 Mar 2015 14:17:17 +0100
+Date: Wed, 22 Feb 2017 08:23:22 +0100
 Subject: [PATCH] Rafi touchscreen support
 
 Add rafi touchscreen support.
@@ -32,14 +32,14 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  create mode 100644 include/linux/input/rafi_gs.h
 
 diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
-index d9ea01f..1c318ee 100644
+index 485c191..4e14bed 100644
 --- a/drivers/input/touchscreen/Kconfig
 +++ b/drivers/input/touchscreen/Kconfig
-@@ -11,6 +11,13 @@ menuconfig INPUT_TOUCHSCREEN
+@@ -15,6 +15,13 @@ config OF_TOUCHSCREEN
+ 	def_tristate INPUT
+ 	depends on INPUT && OF
  
- if INPUT_TOUCHSCREEN
- 
-+config TOUCHSCREEN_RAFI_GS
++config TOUCHSCREEN_RAFI_GSa
 +	bool "RAFI glasscape touchscreen controller @ I2C bus"
 +	depends on I2C
 +	help
@@ -50,13 +50,13 @@ index d9ea01f..1c318ee 100644
  	tristate "Marvell 88PM860x touchscreen"
  	depends on MFD_88PM860X
 diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
-index f76960f..f3ae02e 100644
+index 2bfe27b..41de3fa 100644
 --- a/drivers/input/touchscreen/Makefile
 +++ b/drivers/input/touchscreen/Makefile
-@@ -6,6 +6,7 @@
- 
+@@ -7,6 +7,7 @@
  wm97xx-ts-y := wm97xx-core.o
  
+ obj-$(CONFIG_OF_TOUCHSCREEN)		+= of_touchscreen.o
 +obj-$(CONFIG_TOUCHSCREEN_RAFI_GS)	+= rafi_gs.o rafi_gs_device.o rafi_ts_input.o rafi_key_input.o
  obj-$(CONFIG_TOUCHSCREEN_88PM860X)	+= 88pm860x-ts.o
  obj-$(CONFIG_TOUCHSCREEN_AD7877)	+= ad7877.o
@@ -2281,5 +2281,5 @@ index 0000000..1477e48
 +
 +#endif
 -- 
-2.1.4
+2.6.6
 
