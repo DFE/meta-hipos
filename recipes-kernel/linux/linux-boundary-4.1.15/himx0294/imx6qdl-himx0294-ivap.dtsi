@@ -139,7 +139,7 @@
 		compatible = "fsl,imx6q-sabrelite-sgtl5000",
 			     "fsl,imx-audio-sgtl5000";
 		model = "imx6q-sabrelite-sgtl5000";
-		cpu-dai = <&ssi1>;
+		ssi-controller = <&ssi1>;
 		audio-codec = <&codec>;
 		audio-routing =
 			"MIC_IN", "Mic Jack",
@@ -232,6 +232,8 @@
 
 	codec: sgtl5000@0a {
 		compatible = "fsl,sgtl5000";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_i2c1_sgtl5000>;
 		reg = <0x0a>;
 		clocks = <&clks 201>;
 		VDDA-supply = <&reg_2p5v>;
@@ -296,7 +298,7 @@
 	imx6q-nitrogen6x {
 		pinctrl_hog_1: hoggrp-1 {
 			fsl,pins = <
-				MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x130b0		/* AUD_MCK */
+		/*		MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x130b0	*/	/* AUD_MCK */
 				MX6QDL_PAD_GPIO_2__GPIO1_IO02		0x0b868		/* LTE_ON_OFF */
 				MX6QDL_PAD_GPIO_3__XTALOSC_REF_CLK_24M	0x00068		/* USB 24MHz CLK */
 		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* /RST_USB_HUB */
@@ -314,6 +316,12 @@
 		/*		MX6QDL_PAD_SD4_DAT5__GPIO2_IO13		0x1b0b0	*/	/* WLAN_ON */
 				MX6QDL_PAD_NANDF_D6__GPIO2_IO06		0x80000000	/* uSDHC4 CD */
 				MX6QDL_PAD_NANDF_D7__GPIO2_IO07		0x80000000	/* /SD4_WP */
+			>;
+		};
+
+		pinctrl_i2c1_sgtl5000: i2c1-sgtl5000grp {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_0__CCM_CLKO1		0x000b0		/* sys_mclk */
 			>;
 		};
 
