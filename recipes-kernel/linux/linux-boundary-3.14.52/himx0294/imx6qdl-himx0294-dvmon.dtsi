@@ -419,6 +419,12 @@
 	};
 };
 
+&dcic1 {
+	dcic_id = <0>;
+	dcic_mux = "dcic-lvds0";
+	status = "okay";
+};
+
 &ldb {
 	ext_ref = <1>;
 	status = "okay";
