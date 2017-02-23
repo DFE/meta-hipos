@@ -54,6 +54,7 @@ IMAGE_INSTALL_append_himx0294 += " \
   tslib-calibrate \
   tslib-tests \
   gstreamer1.0-plugins-imx \
+  gstreamer1.0-plugins-base \
   eglinfo-fb \
   fsl-alsa-plugins \
 "
