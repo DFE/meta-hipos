@@ -683,6 +683,7 @@ MST
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc3>;
 	cd-gpios = <&gpio7 0 0>;
+	cd-inverted;
 	vmmc-supply = <&reg_3p3v>;
 	status = "okay";
 };
@@ -691,6 +692,7 @@ MST
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc4>;
 	cd-gpios = <&gpio2 6 0>;
+	cd-inverted;
 	vmmc-supply = <&reg_3p3v>;
 	status = "okay";
 };
