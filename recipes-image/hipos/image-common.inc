@@ -26,16 +26,6 @@ IMAGE_INSTALL += "          \
   tzdata tzdata-misc tzdata-posix tzdata-right tzdata-africa tzdata-americas tzdata-antarctica tzdata-arctic tzdata-asia tzdata-atlantic tzdata-australia tzdata-europe tzdata-pacific \
 "
 
-IMAGE_INSTALL_append_hikirk += "   \
-  u-boot-fw-utils           \
-  libdrbcc                  \
-  drbcc                     \
-  hipos-device-info         \
-  hipos-time                \
-  hip-machinfo              \
-  hipos-network-setup       \
-"
-
 IMAGE_INSTALL_append_himx0294 += "   \
   u-boot-fw-utils           \
   libdrbcc                  \

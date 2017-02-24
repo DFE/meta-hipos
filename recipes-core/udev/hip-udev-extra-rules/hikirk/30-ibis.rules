@@ -1,1 +1,0 @@
-KERNEL=="ttyUSB*", KERNELS=="1-1.4:1.1", SYMLINK+="ttydribis"
