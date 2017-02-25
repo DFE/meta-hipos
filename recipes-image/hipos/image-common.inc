@@ -2,7 +2,24 @@
 
 require recipes-images/angstrom/systemd-image.bb
 
-IMAGE_FEATURES += " package-management "
+# Image feature debug-tweaks makes an image suitable for development. It adds 'allow-empty-password',
+# 'empty-root-password', and 'post-install-logging' to IMAGE_FEATURES.
+# meta-angstrom/recipes-images/angstrom/angstrom-image.bb adds also allow-empty-password to IMAGE_FEATURES.
+# If 'debug-tweaks' or 'allow-empty-password' is in IMAGE_FEATURES then the rootfs postprocess command
+# 'ssh_allow_empty_password' is executed and sets option 'PermitEmptyPasswords yes' in rootfs file
+# /etc/ssh/sshd_config. There is an other problem in yocto/morty with openssh which installs and uses the
+# configuration file /etc/ssh/sshd_config. See https://bugzilla.mindrot.org/show_bug.cgi?id=2475
+# ------------------------------------------------------------------------------------------
+# Login fails with "Write failed: Broken pipe" when all three of these settings are enabled:
+# PasswordAuthentication=yes
+# ChallengeResponseAuthentication=yes
+# PermitEmptyPasswords=yes
+# ------------------------------------------------------------------------------------------
+# To workaround this issue we want to disable 'PermitEmptyPasswords'. Which is not possilbe with openssh
+# append since the rootfs postprocess command is executed after ipk installation.
+# So we remove 'allow-empty-password' and 'debug-tweaks' from IMAGE_FEATURES here.
+IMAGE_FEATURES += " package-management post-install-logging "
+IMAGE_FEATURES_remove = " allow-empty-password debug-tweaks "
 
 # remove connman
 IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client"
