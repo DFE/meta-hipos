@@ -8,4 +8,5 @@ SRC_URI_append = " \
 	file://0001-imxvpudec-new-property-reordering-enabled-added.patch \
 	file://0001-new-property-framerate-numerator-added-to-decoder-ba.patch \
 	file://0001-cropping-added-to-video-sink-plugins-HYP-15795.patch \
+	file://0001-param-check-added-to-avoid-encoder-crash-on-flush-HYP-15795.patch \
 "
