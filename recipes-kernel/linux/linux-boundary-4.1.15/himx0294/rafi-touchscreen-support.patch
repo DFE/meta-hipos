@@ -39,7 +39,7 @@ index 485c191..4e14bed 100644
  	def_tristate INPUT
  	depends on INPUT && OF
  
-+config TOUCHSCREEN_RAFI_GSa
++config TOUCHSCREEN_RAFI_GS
 +	bool "RAFI glasscape touchscreen controller @ I2C bus"
 +	depends on I2C
 +	help
