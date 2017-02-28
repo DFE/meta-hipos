@@ -242,7 +242,7 @@ index 0000000..a7b5aa8
 +}
 +
 +
-+static DRIVER_ATTR(version, 0444, drv_attr_show_version, NULL);
++static DRIVER_ATTR(version, 0440, drv_attr_show_version, NULL);
 +
 +
 +/*********************************************************************************************************************/
@@ -472,7 +472,7 @@ index 0000000..76a2108
 +}
 +
 +
-+DEVICE_ATTR(config, 0222, NULL, dev_attr_set_config);
++DEVICE_ATTR(config, 0220, NULL, dev_attr_set_config);
 +
 +
 +/*********************************************************************************************************************/
@@ -513,7 +513,7 @@ index 0000000..76a2108
 +}
 +
 +
-+DEVICE_ATTR(sw_version, 0444, dev_attr_show_sw_version, NULL);
++DEVICE_ATTR(sw_version, 0440, dev_attr_show_sw_version, NULL);
 +
 +
 +/*********************************************************************************************************************/
