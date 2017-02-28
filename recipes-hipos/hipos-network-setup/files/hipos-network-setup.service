@@ -5,7 +5,8 @@ After=hipos-device-info.service
 Requires=sys-subsystem-net-devices-eth0.device
 After=sys-subsystem-net-devices-eth0.device
 
-Before=networking.service
+Requires=networking.service
+After=networking.service
 
 [Service]
 Type=oneshot
