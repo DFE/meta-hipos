@@ -18,6 +18,7 @@ SRC_URI_append = " \
 	file://mmc-sd-show-ssr-in-sysfs.patch \
 	file://ENET_REF_CLK.patch \
 	file://support-mitsubishi-touch-controller.patch \
+	file://fix-fb_memcpy_tofb.patch \
 "
 
 #	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch
