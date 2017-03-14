@@ -2,20 +2,20 @@
 
 VERBOSITY=0
 
-if [ -f "/var/run/udhcpc.$IFACE.pid" ]; then
-	/bin/cat /var/run/udhcpc.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+if [ -f "/run/udhcpc.$IFACE.pid" ]; then
+	/bin/cat /run/udhcpc.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
 fi
 
-if [ -f "/var/run/wpa_supplicant.$IFACE.pid" ]; then
-	/bin/cat /var/run/wpa_supplicant.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+if [ -f "/run/wpa_supplicant.$IFACE.pid" ]; then
+	/bin/cat /run/wpa_supplicant.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
 fi
 
-if [ -f "/var/run/zeroconf.$IFACE.pid" ]; then
-        /bin/cat /var/run/zeroconf.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+if [ -f "/run/zeroconf.$IFACE.pid" ]; then
+        /bin/cat /run/zeroconf.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
 fi
 
-if [ -f "/var/run/avahi-autoipd.$IFACE.pid" ]; then
-        /bin/cat /var/run/avahi-autoipd.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
+if [ -f "/run/avahi-autoipd.$IFACE.pid" ]; then
+        /bin/cat /run/avahi-autoipd.$IFACE.pid > /sys/fs/cgroup/systemd/tasks
         /bin/echo $(/bin/ps axf  | /bin/grep "avahi-autoipd" | /bin/grep $IFACE | /bin/grep "callout dispatcher" | /usr/bin/awk '{print $1}') > /sys/fs/cgroup/systemd/tasks | /bin/true
 fi
 
