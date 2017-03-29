@@ -7,7 +7,7 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = "drbcc gawk bash"
 
-PR = "r15"
+PR = "r16"
 
 SRC_URI = " file://hipos-time.service \
             file://set-time.sh \

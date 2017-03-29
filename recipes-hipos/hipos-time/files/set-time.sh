@@ -19,7 +19,8 @@ if [ "$SUB_TYPE" == "dvmon" ]; then
         if [ -n "$ntpserver" ]; then
                 if ping -c1 -W1 $ntpserver 2>&1 > /dev/null ; then
                         if ntpq -p $ntpserver 2>&1 > /dev/null ; then
-                                ntpd -gq $ntpserver
+                                ntpd -gq $ntpserver &&
+				touch /run/ntpd-synced
                         fi
                 fi
         fi
