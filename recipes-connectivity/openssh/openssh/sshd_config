@@ -39,6 +39,9 @@ Protocol 2
 
 #LoginGraceTime 2m
 PermitRootLogin yes
+
+IPQoS lowdelay cs0
+
 #StrictModes yes
 #MaxAuthTries 6
 #MaxSessions 10
