@@ -7,19 +7,31 @@ cores="$(/bin/grep processor /proc/cpuinfo | /usr/bin/wc -l)"
 if [ "${cores}" -eq 4 ]
 	then
 		/bin/echo "reconfigure: smp_affinity"
-		# network to core 3
-		/bin/echo 8 >/proc/irq/286/smp_affinity
-		/bin/echo 8 >/proc/irq/287/smp_affinity
+		# ethernet to core 3
+		interrupts="`/usr/bin/find /proc/irq/ | grep -i ethernet | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
+		for i in ${interrupts}; do
+		        /bin/echo 8 >/proc/irq/$i/smp_affinity
+		done
+
 		# IPU and VPU to core 2
-		/bin/echo 4 >/proc/irq/298/smp_affinity
-		/bin/echo 4 >/proc/irq/299/smp_affinity
-		/bin/echo 4 >/proc/irq/308/smp_affinity
-		/bin/echo 4 >/proc/irq/309/smp_affinity
-		/bin/echo 4 >/proc/irq/27/smp_affinity
-		/bin/echo 4 >/proc/irq/28/smp_affinity
+		interrupts="`/usr/bin/find /proc/irq/ | grep -i ipu | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
+		for i in ${interrupts}; do
+		        /bin/echo 4 >/proc/irq/$i/smp_affinity
+		done		
+		interrupts="`/usr/bin/find /proc/irq/ | grep -i vpu | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
+		for i in ${interrupts}; do
+		        /bin/echo 4 >/proc/irq/$i/smp_affinity
+		done
+
 		# PCIe and SATA to core 1
-		/bin/echo 2 >/proc/irq/312/smp_affinity
-		/bin/echo 2 >/proc/irq/307/smp_affinity
+		interrupts="`/usr/bin/find /proc/irq/ | grep -i pcie | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
+		for i in ${interrupts}; do
+		        /bin/echo 2 >/proc/irq/$i/smp_affinity
+		done
+		interrupts="`/usr/bin/find /proc/irq/ | grep -i sata | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
+		for i in ${interrupts}; do
+		        /bin/echo 2 >/proc/irq/$i/smp_affinity
+		done
 fi
 
 
