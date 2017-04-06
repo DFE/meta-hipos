@@ -8,18 +8,18 @@ if [ "${cores}" -eq 4 ]
 	then
 		/bin/echo "reconfigure: smp_affinity"
 		# network to core 3
-		/bin/echo 8 >/proc/irq/150/smp_affinity
-		/bin/echo 8 >/proc/irq/151/smp_affinity
+		/bin/echo 8 >/proc/irq/286/smp_affinity
+		/bin/echo 8 >/proc/irq/287/smp_affinity
 		# IPU and VPU to core 2
-		/bin/echo 4 >/proc/irq/35/smp_affinity
-		/bin/echo 4 >/proc/irq/37/smp_affinity
-		/bin/echo 4 >/proc/irq/38/smp_affinity
-		/bin/echo 4 >/proc/irq/39/smp_affinity
-		/bin/echo 4 >/proc/irq/40/smp_affinity
-		/bin/echo 4 >/proc/irq/44/smp_affinity
+		/bin/echo 4 >/proc/irq/298/smp_affinity
+		/bin/echo 4 >/proc/irq/299/smp_affinity
+		/bin/echo 4 >/proc/irq/308/smp_affinity
+		/bin/echo 4 >/proc/irq/309/smp_affinity
+		/bin/echo 4 >/proc/irq/27/smp_affinity
+		/bin/echo 4 >/proc/irq/28/smp_affinity
 		# PCIe and SATA to core 1
-		/bin/echo 2 >/proc/irq/71/smp_affinity
-		/bin/echo 2 >/proc/irq/155/smp_affinity
+		/bin/echo 2 >/proc/irq/312/smp_affinity
+		/bin/echo 2 >/proc/irq/307/smp_affinity
 fi
 
 
