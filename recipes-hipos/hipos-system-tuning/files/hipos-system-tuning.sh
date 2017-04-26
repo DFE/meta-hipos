@@ -3,37 +3,21 @@
 # get CPU-Core count
 cores="$(/bin/grep processor /proc/cpuinfo | /usr/bin/wc -l)"
 
-# shift ISRs to other CPU-core if 4 cores (0-3) are available
-if [ "${cores}" -eq 4 ]
-	then
-		/bin/echo "reconfigure: smp_affinity"
-		# ethernet to core 3
-		interrupts="`/usr/bin/find /proc/irq/ | grep -i ethernet | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
-		for i in ${interrupts}; do
-		        /bin/echo 8 >/proc/irq/$i/smp_affinity
-		done
-
-		# IPU and VPU to core 2
-		interrupts="`/usr/bin/find /proc/irq/ | grep -i ipu | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
-		for i in ${interrupts}; do
-		        /bin/echo 4 >/proc/irq/$i/smp_affinity
-		done		
-		interrupts="`/usr/bin/find /proc/irq/ | grep -i vpu | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
-		for i in ${interrupts}; do
-		        /bin/echo 4 >/proc/irq/$i/smp_affinity
-		done
-
-		# PCIe and SATA to core 1
-		interrupts="`/usr/bin/find /proc/irq/ | grep -i pcie | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
-		for i in ${interrupts}; do
-		        /bin/echo 2 >/proc/irq/$i/smp_affinity
-		done
-		interrupts="`/usr/bin/find /proc/irq/ | grep -i sata | /usr/bin/awk 'BEGIN { FS = \"/\" } ; { print \$4 }'`"
-		for i in ${interrupts}; do
-		        /bin/echo 2 >/proc/irq/$i/smp_affinity
-		done
-fi
-
+# shift ISRs to other CPU-core
+let CPU=0; cd /proc/irq/;
+/bin/echo "found: ${cores} CPU Cores"
+for IRQ in *; do
+	if [ -f /proc/irq/$IRQ/smp_affinity_list ]; then
+		/bin/echo "IRQ$IRQ -> CPU$CPU"
+		/bin/echo $CPU > /proc/irq/$IRQ/smp_affinity_list
+		if [ $? -eq 0 ]; then
+			let CPU+=1
+			if [ ${CPU} -ge ${cores} ]; then
+				let CPU=0;
+			fi
+		fi
+	fi
+done
 
 wait_sec=0;
 
