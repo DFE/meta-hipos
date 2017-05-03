@@ -187,6 +187,9 @@
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH ""
+#elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ipcam.dtb"
+#define CONFIG_DEFAULT_FDT_HIGH ""
 #else
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"

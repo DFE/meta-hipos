@@ -665,6 +665,8 @@ int checkboard(void)
 	puts("Board: himx0294-ivap/dvrec\n");
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 	puts("Board: himx0294-dvmon\n");
+#elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+	puts("Board: himx0294-ipcam\n");
 #else
 	puts("Board: himx0294-???\n");
 #endif
