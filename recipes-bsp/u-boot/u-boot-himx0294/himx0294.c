@@ -128,6 +128,17 @@ static struct i2c_pads_info i2c_pad_info2 = {
 	}
 };
 
+#if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+static iomux_v3_cfg_t const usdhc1_pads[] = {
+	MX6_PAD_SD1_CLK__SD1_CLK   | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_SD1_CMD__SD1_CMD   | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_SD1_DAT0__SD1_DATA0 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_SD1_DAT1__SD1_DATA1 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_SD1_DAT2__SD1_DATA2 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_SD1_DAT3__SD1_DATA3 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
+	MX6_PAD_GPIO_3__GPIO1_IO03    | MUX_PAD_CTRL(NO_PAD_CTRL), /* CD */
+};
+#else
 static iomux_v3_cfg_t const usdhc3_pads[] = {
 	MX6_PAD_SD3_CLK__SD3_CLK   | MUX_PAD_CTRL(USDHC_PAD_CTRL),
 	MX6_PAD_SD3_CMD__SD3_CMD   | MUX_PAD_CTRL(USDHC_PAD_CTRL),
@@ -147,6 +158,7 @@ static iomux_v3_cfg_t const usdhc4_pads[] = {
 	MX6_PAD_SD4_DAT3__SD4_DATA3 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
 	MX6_PAD_NANDF_D6__GPIO2_IO06    | MUX_PAD_CTRL(NO_PAD_CTRL), /* CD */
 };
+#endif
 
 static iomux_v3_cfg_t const enet_pads1[] = {
 	MX6_PAD_ENET_MDIO__ENET_MDIO		| MUX_PAD_CTRL(ENET_PAD_CTRL),
@@ -173,12 +185,14 @@ static iomux_v3_cfg_t const misc_pads[] = {
 #define ENET_RX_ER_GP IMX_GPIO_NR(1, 24)
 };
 
+#if !defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 static void setup_iomux_enet(void)
 {
 	imx_iomux_v3_setup_multiple_pads(enet_pads1, ARRAY_SIZE(enet_pads1));
 
 	udelay(100);	/* Wait 100 us before using mii interface */
 }
+#endif
 
 static iomux_v3_cfg_t const usb_pads[] = {
 	NEW_PAD_CTRL(MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M, PAD_CTL_DSE_48ohm|PAD_CTL_SPEED_LOW),
@@ -234,6 +248,13 @@ int board_mmc_init(bd_t *bis)
 {
 	s32 status = 0;
 	u32 index = 0;
+#if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+	usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
+	usdhc_cfg[0].max_bus_width = 4;
+	imx_iomux_v3_setup_multiple_pads(
+				usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
+	status = fsl_esdhc_initialize(bis, &usdhc_cfg[index]);
+#else
 
 	usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
 	usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
@@ -261,6 +282,7 @@ int board_mmc_init(bd_t *bis)
 		status |= fsl_esdhc_initialize(bis, &usdhc_cfg[index]);
 	}
 
+#endif // else defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 	return status;
 }
 #endif
@@ -285,6 +307,9 @@ static void setup_spi(void)
 					 ARRAY_SIZE(ecspi1_pads));
 }
 #endif
+
+#if defined(CONFIG_BOARD_IS_HIMX_IMOC) || \
+	defined(CONFIG_BOARD_IS_HIMX_IVAP)
 
 #define SMI_PHY_COMMAND_REGISTER 0x18
 #define SMI_PHY_DATA_REGISTER    0x19
@@ -415,9 +440,13 @@ int board_phy_config(struct phy_device *phydev)
 
 	return 0;
 }
+#endif
 
 int board_eth_init(bd_t *bis)
 {
+#if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+	return 0;
+#else
 	uint32_t base = IMX_FEC_BASE;
 	struct mii_dev *bus = NULL;
 	struct phy_device *phydev = NULL;
@@ -452,6 +481,7 @@ free_phydev:
 free_bus:
 	free(bus);
 	return ret;
+#endif // else defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 }
 
 #if defined(CONFIG_VIDEO_IPUV3)
@@ -627,6 +657,10 @@ int board_init(void)
 	setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
 	setup_i2c(2, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info2);
 
+#if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
+	return 0;
+#else
+
 #ifdef CONFIG_CMD_SATA
 	setup_sata();
 #endif
@@ -636,6 +670,7 @@ int board_init(void)
 	udelay(1000);
 	gpio_set_value(IMX_GPIO_NR(4, 4), 1);
 	return 0;
+#endif // else defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 }
 
 int board_late_init(void)
