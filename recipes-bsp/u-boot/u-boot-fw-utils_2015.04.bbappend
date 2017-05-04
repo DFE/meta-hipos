@@ -28,6 +28,7 @@ SRC_URI += " \
     file://0021-Add-imx6dqscm-ePoP-support.patch \
     file://0022-Add-support-for-2GB-on-imx6dqscm-HVB-board.patch \
     file://0023-scm-config-Use-default-ARCR-Dynamic-Jump-params-for-.patch \
+    file://fix-gcc6-compile-problem.patch \
 "
 python do_patch_prepend() {
     import subprocess
