@@ -43,6 +43,7 @@ SRC_URI += " \
     file://0037-ARM-dtb-IMX6DQSCMQWKS-eMMC-support.patch \
     file://imx6dqscm-1gb-qwks-rmii-50mhz.dts \
     file://ENET_REF_CLK.patch \
+    file://fix-gcc6-compile-problem.patch \
 "
 python do_patch_prepend() {
     import subprocess
