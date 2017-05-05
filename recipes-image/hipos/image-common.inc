@@ -80,6 +80,11 @@ IMAGE_INSTALL_append_imx6qsabrelite += " \
   fsl-alsa-plugins \
 "
 
+IMAGE_INSTALL_append_imx6dqscm-1gb-qwks += " \
+  gstreamer1.0-plugins-imx \
+  gstreamer1.0-plugins-base \
+"
+
 # profiling
 IMAGE_INSTALL += "  \
   systemd-analyze   \
