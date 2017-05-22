@@ -73,7 +73,6 @@ IMAGE_INSTALL_append_imx6qsabrelite += " \
   tslib-tests \
   packagegroup-hipos-qt \
   packagegroup-hipos-qt-examples \
-  packagegroup-fsl-gstreamer1.0 \
   packagegroup-hipos-gstreamer \
   gstreamer1.0-plugins-imx \
   eglinfo-fb \
