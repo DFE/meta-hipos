@@ -1,0 +1,23 @@
+--- a/drivers/net/usb/asix_devices.c
++++ b/drivers/net/usb/asix_devices.c
+@@ -299,6 +299,7 @@  static int ax88772_reset(struct usbnet *dev)
+ {
+	struct asix_data *data = (struct asix_data *)&dev->data;
+	int ret, embd_phy;
++	int reg;
+	u16 rx_ctl;
+
+	ret = asix_write_gpio(dev,
+@@ -359,8 +360,10 @@  static int ax88772_reset(struct usbnet *dev)
+	msleep(150);
+
+	asix_mdio_write(dev->net, dev->mii.phy_id, MII_BMCR, BMCR_RESET);
+-	asix_mdio_write(dev->net, dev->mii.phy_id, MII_ADVERTISE,
+-			ADVERTISE_ALL | ADVERTISE_CSMA);
++	reg = asix_mdio_read(dev->net, dev->mii.phy_id, MII_ADVERTISE);
++	if (!reg)
++		reg = ADVERTISE_ALL | ADVERTISE_CSMA;
++	asix_mdio_write(dev->net, dev->mii.phy_id, MII_ADVERTISE, reg);
+	mii_nway_restart(&dev->mii);
+
+	ret = asix_write_medium_mode(dev, AX88772_MEDIUM_DEFAULT);
