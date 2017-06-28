@@ -45,6 +45,7 @@ case $(cat /proc/device-tree/model 2> /dev/null) in
 	dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
 	dfe,himx0294-dvmon)  MACHINE="himx0294"; SUBMACHINE="dvmon";;
 	dfe,himx0294-dvrec)  MACHINE="himx0294"; SUBMACHINE="dvrec";;
+	dfe,himx0294-ipcam)  MACHINE="himx0294"; SUBMACHINE="ipcam";;
 	dfe,hikirk)          MACHINE="hikirk";   SUBMACHINE=""; GET_SUBMACHINE=false;;
 	# add checks for other submachines here
 esac
