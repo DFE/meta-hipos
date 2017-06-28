@@ -108,7 +108,6 @@ IMAGE_INSTALL += "  \
     strace          \
     pciutils        \
     tcpdump         \
-    iperf           \
     iperf3          \
     procps          \
     wireless-tools  \
