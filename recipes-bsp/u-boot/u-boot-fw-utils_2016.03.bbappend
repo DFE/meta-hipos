@@ -18,6 +18,7 @@ SRC_URI_append_himx0294 = " \
 	file://himx0294_ipcam_defconfig \
 	file://himx0294.h \
 	file://fw_env.config \
+	file://fw_env-ipcam.config \
 "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
@@ -45,4 +46,5 @@ do_configure_prepend_himx0294 () {
 do_install_append_himx0294 () {
 	install -d ${D}/etc
 	install -m 755 ${WORKDIR}/fw_env.config ${D}/etc/fw_env.config
+	install -m 755 ${WORKDIR}/fw_env-ipcam.config ${D}/etc/fw_env-ipcam.config
 }
