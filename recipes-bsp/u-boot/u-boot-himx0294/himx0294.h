@@ -179,20 +179,25 @@
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc-2.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
 #define CONFIG_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_FILE_DVREC_P "/boot/imx6qp-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH ""
+#define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ipcam.dtb"
+#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6qscm-himx0294-ipcam.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH ""
+#define CONFIG_DEFAULT_LINUX_DEV "0"
 #else
 #define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define CONFIG_DEFAULT_LINUX_DEV "2"
 #endif
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -213,9 +218,9 @@
 		"root=${bootroot} rootwait " \
 		"mxc_hdmi.only_cea=0\0" \
 	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
-		"setenv bootroot /dev/mmcblk2p1; run do_boot\0" \
+		"setenv bootroot /dev/mmcblk" CONFIG_DEFAULT_LINUX_DEV "p1; run do_boot\0" \
 	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
-		"setenv bootroot /dev/mmcblk2p2; run do_boot\0"
+		"setenv bootroot /dev/mmcblk" CONFIG_DEFAULT_LINUX_DEV "p2; run do_boot\0"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
