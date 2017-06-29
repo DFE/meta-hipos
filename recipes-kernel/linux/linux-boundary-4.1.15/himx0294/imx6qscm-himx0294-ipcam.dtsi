@@ -44,6 +44,11 @@
 		compatible = "fsl,mxc_v4l2_output";
 		status = "okay";
 	};
+
+	gpio-poweroff {
+		compatible = "gpio-poweroff";
+		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+	};
 };
 
 &cpu0 {
