@@ -1,6 +1,6 @@
-From f285c8b7c91470afbd8b1e2b54d4cfea96fde595 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 15 Mar 2017 15:09:33 +0100
+From d7ff1bbc1774aa4fa39bfc05f9a2b6802d6896c5 Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Thu, 29 Jun 2017 14:29:08 +0200
 Subject: [PATCH] ifupdown: enable udhcpc backgrounding HYP-17009
 
 The former default behaviour was to exit with failure if lease is not
@@ -8,23 +8,24 @@ immediately obtained. This results in permanent network disconnect if
 DHCP server is (accidentally) not available at boot time. :(
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
  inet.defn | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/inet.defn b/inet.defn
-index c0cbe91..c17cc18 100644
+index b5f5da2..592b0ab 100644
 --- a/inet.defn
 +++ b/inet.defn
-@@ -90,7 +90,7 @@ method dhcp
-         elsif (execable("/sbin/dhclient3"))
+@@ -99,7 +99,7 @@ method dhcp
+         if (execable("/sbin/dhclient"))
      pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
-         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
+         elsif (execable("/sbin/pump"))
 -    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
 +    udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
-         elsif (execable("/sbin/udhcpc") && mylinuxver() >= mylinux(2,2,0))
+         elsif (execable("/sbin/udhcpc"))
      dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
 -- 
-2.6.6
+2.13.2
 
