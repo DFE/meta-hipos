@@ -241,8 +241,13 @@ static struct fsl_esdhc_cfg usdhc_cfg[2] = {
 int board_mmc_getcd(struct mmc *mmc)
 {
 	struct fsl_esdhc_cfg *cfg = (struct fsl_esdhc_cfg *)mmc->priv;
-	int gp_cd = (cfg->esdhc_base == USDHC3_BASE_ADDR) ? IMX_GPIO_NR(7, 0) :
-			IMX_GPIO_NR(2, 6);
+	int gp_cd;
+
+	switch(cfg->esdhc_base) {
+	case USDHC1_BASE_ADDR: gp_cd = IMX_GPIO_NR(1, 3); break;
+	case USDHC3_BASE_ADDR: gp_cd = IMX_GPIO_NR(7, 0); break;
+	default: gp_cd = IMX_GPIO_NR(2, 6); break;
+	}
 
 	gpio_direction_input(gp_cd);
 	return !gpio_get_value(gp_cd);
