@@ -11,8 +11,6 @@
 #define __CONFIG_H
 
 #include "mx6_common.h"
-#define CONFIG_DISPLAY_CPUINFO
-#define CONFIG_DISPLAY_BOARDINFO
 
 #define CONFIG_MACH_TYPE	3769
 
@@ -74,7 +72,6 @@
 #define CONFIG_SYS_FSL_ESDHC_ADDR      0
 #define CONFIG_SYS_FSL_USDHC_NUM       2
 
-#define CONFIG_MMC
 #define CONFIG_CMD_MMC
 #define CONFIG_GENERIC_MMC
 #define CONFIG_BOUNCE_BUFFER
@@ -133,18 +130,13 @@
 #define CONFIG_CMD_BMODE
 
 /* Framebuffer and LCD */
-#define CONFIG_VIDEO
 #define CONFIG_VIDEO_IPUV3
-#define CONFIG_CFB_CONSOLE
-#define CONFIG_VGA_AS_SINGLE_DEVICE
-#define CONFIG_SYS_CONSOLE_IS_IN_ENV
 #define CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE
 #define CONFIG_VIDEO_BMP_RLE8
 #define CONFIG_SPLASH_SCREEN
 #define CONFIG_BMP_16BPP
 #define CONFIG_IPUV3_CLK 260000000
 #define CONFIG_CMD_HDMIDETECT
-#define CONFIG_CONSOLE_MUX
 #define CONFIG_IMX_HDMI
 #define CONFIG_IMX_VIDEO_SKIP
 
@@ -177,25 +169,20 @@
 #define CONFIG_BOOTCOMMAND	"setenv bootcmd run x_bootA; saveenv; boot"
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc-2.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-ivap.dtb"
 #define CONFIG_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_FILE_DVREC_P "/boot/imx6qp-himx0294-dvrec.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-dvmon.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH ""
 #define CONFIG_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6qscm-himx0294-ipcam.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH ""
 #define CONFIG_DEFAULT_LINUX_DEV "0"
 #else
-#define CONFIG_DEFAULT_FDT_FILE "/boot/imx6q-himx0294-imoc.dtb"
 #define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #define CONFIG_DEFAULT_LINUX_DEV "2"
 #endif
@@ -278,7 +265,6 @@
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
 #endif
 
-#define CONFIG_OF_LIBFDT
 #define CONFIG_CMD_BOOTZ
 
 #ifndef CONFIG_SYS_DCACHE_OFF
