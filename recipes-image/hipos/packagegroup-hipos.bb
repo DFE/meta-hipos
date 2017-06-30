@@ -13,7 +13,6 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtbase-plugins \
     qtbase-tools \
     qtdeclarative \
-    qtdeclarative-plugins \
     qtdeclarative-tools \
     qtdeclarative-qmlplugins \
     qtmultimedia \
@@ -48,7 +47,6 @@ RDEPENDS_packagegroup-hipos-gstreamer = "\
     gstreamer \
     gstreamer-dev \
     gst-plugins-base-app \
-    gst-plugins-base-app-dev \
     gst-plugins-base-meta \
     gst-plugins-good-meta \
     gst-plugins-ugly-meta \
