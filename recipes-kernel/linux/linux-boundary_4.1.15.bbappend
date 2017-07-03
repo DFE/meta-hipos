@@ -57,6 +57,7 @@ SRC_URI_append_himx0294 = " \
 	file://0001-mcs7830-Fixed-MOSCHIP-driver-probe-error-110-HYP-132.patch \
 	file://0001-DCIC-ioctl-improved-to-get-real-checksums-HYP-16117.patch \
 	file://ahci_imx-reset-sata-phy.patch \
+	file://imx-watchdog-Assert-wdog_b-reset.patch \
 "
 
 #	file://bpp-default-device-tree.patch
