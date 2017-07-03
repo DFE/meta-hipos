@@ -39,21 +39,6 @@
 	soc-supply = <&reg_soc>;
 };
 
-&gpc {
-	/* use ldo-enable, u-boot will check it and configure */
-	fsl,ldo-bypass = <0>;
-	/* watchdog select of reset source */
-	fsl,wdog-reset = <1>;
-};
-
-&wdog1 {
-	status = "okay";
-};
-
-&wdog2 {
-	status = "disabled";
-};
-
 &fec {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec>;

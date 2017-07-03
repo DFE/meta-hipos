@@ -340,6 +340,12 @@
 			>;
 		};
 
+		pinctrl_wdog: wdoggrp {
+			fsl,pins = <
+				MX6QDL_PAD_DISP0_DAT9__WDOG2_B		0x80000000
+			>;
+		};
+
 	};
 };
 
@@ -391,5 +397,8 @@
 };
 
 &wdog2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_wdog>;
+	fsl,wdog_b;
 	status = "okay";
 };
