@@ -63,6 +63,7 @@ IMAGE_INSTALL_append_himx0294 += " \
   tslib-tests \
   gstreamer1.0-plugins-imx \
   gstreamer1.0-plugins-base \
+  gstreamer1.0-plugins-bad-mpegtsmux \
   eglinfo-fb \
   fsl-alsa-plugins \
 "
