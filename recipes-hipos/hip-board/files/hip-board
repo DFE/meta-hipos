@@ -1,0 +1,84 @@
+#!/bin/bash
+# vim:set ts=4 sw=4 noexpandtab:
+#
+# \brief board specfic util
+#
+# (C) 2017 DResearch Fahrzeugelektonik GmbH
+#set -x
+
+SCRIPT_NAME=$(basename "$0")
+MACHINE=`hip-machinfo -a`
+
+get_board()
+{
+	TYPE=$1
+	case $TYPE in
+		"production") strings /dev/mtd2 ;;
+		"devid") strings /dev/mtd3 ;;
+		*) echo "Invalid nor partition: " $TYPE >&2 ; exit -1 ;;	
+	esac
+}
+
+nor_write()
+{
+	FILE=$1
+	PART=$2
+	flash_erase $PART 0 0 >/dev/null 2>&1
+	cat $FILE > $PART
+}
+
+put_board()
+{
+	TYPE=$1
+	FILE=$2
+
+	case $TYPE in
+		"production") nor_write $FILE /dev/mtd2 ;;
+		"devid")      nor_write $FILE /dev/mtd3 ;;
+		*) echo "Invalid nor partition: " $TYPE >&2 ; exit -1 ;;	
+	esac
+}
+
+board()
+{
+	TYPE=$1
+	FILE=$2
+
+	if [ $MACHINE != "himx0294-ipcam" ]
+	then
+		echo "Not supported machine: " $MACHINE >&2
+		exit -1
+	fi
+	
+	if [ -z $FILE ]
+	then
+		get_board $TYPE
+	else
+		put_board $TYPE $FILE
+	fi	
+}
+
+usage()
+{
+cat >&2 <<EOF
+Usage: $SCRIPT_NAME with arguments:
+	devid [filename]       prints 'devid' to stdout or stores from file
+	production [filename]  prints 'production' to stdout or stores from file
+EOF
+}
+
+# Option evaluation
+case $1 in
+	devid|production) board $* ;;
+	*) usage; exit 10;;
+esac
+
+# Editor hints for emacs
+#
+# Local Variables:
+# indent-tabs-mode:t
+# tab-width:4
+# End:
+#
+# NO CODE BELOW THIS!
+
