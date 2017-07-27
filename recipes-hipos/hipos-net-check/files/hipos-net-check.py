@@ -21,7 +21,9 @@ ERROR_CODE = 1
 def main():
     devidfile = "/etc/hydraip-devid"
     devidcontent = read_file(devidfile)
-    ubootcontent = subprocess.check_output("fw_printenv", shell=True)
+    machine = subprocess.check_output("/usr/sbin/hip-machinfo -a", shell=True).strip()
+    fw_opt = "-c /etc/fw_env-ipcam.config" if machine == "himx0294-ipcam" else ""
+    ubootcontent = subprocess.check_output("fw_printenv {}".format(fw_opt), shell=True)
 
     parameters = [ "ethaddr", "lanspeed" ]
 
@@ -35,7 +37,7 @@ def main():
                 ubootvalue = ubootvalue.group(1).lower()
             if devidvalue != ubootvalue:
                 print "Update u-boot env: {} {}".format(p, devidvalue)
-                subprocess.check_output("fw_setenv {} {}".format(p, devidvalue), shell=True)
+                subprocess.check_output("fw_setenv {} {} {}".format(fw_opt, p, devidvalue), shell=True)
 
 
 def read_file(file):
