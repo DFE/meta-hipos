@@ -5,9 +5,9 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = "libdrbcc bash"
+RDEPENDS_${PN} = "libdrbcc bash hip-machinfo hip-board"
 
-PR = "r22"
+PR = "r23"
 
 SRC_URI = " file://hipos-device-info.service  \
             file://hipos-device-info.sh \
