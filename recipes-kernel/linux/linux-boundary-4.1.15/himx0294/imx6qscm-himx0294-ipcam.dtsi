@@ -73,6 +73,27 @@
                 compatible = "micron,n25q128a13";
                 spi-max-frequency = <20000000>;
                 reg = <0>;
+
+                partition@0 {
+                        reg = <0x0 0xc0000>;
+                        label = "u-boot-not-used";
+                };
+                partition@c0000 {
+                        reg = <0xc0000 0x20000>;
+                        label = "u-boot-env-not-used";
+                };
+                partition@e0000 {
+                        reg = <0xe0000 0x10000>;
+                        label = "production";
+                };
+                partition@f0000 {
+                        reg = <0xf0000 0x10000>;
+                        label = "devid";
+                };
+                partition@100000 {
+                        reg = <0x100000 0xF00000>;
+                        label = "spare";
+                };
         };
 };
 
