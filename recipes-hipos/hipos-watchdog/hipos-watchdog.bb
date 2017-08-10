@@ -7,7 +7,7 @@ inherit systemd allarch
 
 RDEPENDS_${PN} = " drbcc bash "
 
-PR = "r13"
+PR = "r14"
 
 SRC_URI = " \
         file://hipos-watchdog.service \
