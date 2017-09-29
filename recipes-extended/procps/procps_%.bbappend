@@ -1,4 +1,4 @@
-PR = "r5"
+
 do_install_append() {
     TEMP_DATA=$(cat ${D}${sysconfdir}/sysctl.conf | grep -v "kernel.panic");echo "$TEMP_DATA
 kernel.panic=30">${D}${sysconfdir}/sysctl.conf
