@@ -45,9 +45,9 @@
 		status = "okay";
 	};
 
-	gpio-poweroff {
-		compatible = "gpio-poweroff";
-		gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+	restart-poweroff {
+		compatible = "restart-poweroff";
+		status = "okay";
 	};
 };
 
@@ -370,19 +370,7 @@
 			>;
 		};
 
-		pinctrl_wdog: wdoggrp {
-			fsl,pins = <
-				MX6QDL_PAD_DISP0_DAT9__WDOG2_B		0x80000000
-			>;
-		};
-
 	};
-};
-
-&gpc {
-	/* use ldo-bypass, u-boot will check it and configure */
-	fsl,ldo-bypass = <1>;
-	fsl,wdog-reset = <2>;
 };
 
 #if 0
@@ -429,13 +417,3 @@
 	status = "okay";
 };
 
-&wdog1 {
-	status = "disabled";
-};
-
-&wdog2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_wdog>;
-	fsl,wdog_b;
-	status = "okay";
-};
