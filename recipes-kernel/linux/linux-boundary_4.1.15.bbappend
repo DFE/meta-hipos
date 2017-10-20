@@ -58,6 +58,7 @@ SRC_URI_append_himx0294 = " \
 	file://0001-DCIC-ioctl-improved-to-get-real-checksums-HYP-16117.patch \
 	file://ahci_imx-reset-sata-phy.patch \
 	file://imx-watchdog-Assert-wdog_b-reset.patch \
+	file://ov5640-Fix-exposure-and-white-balance.patch \
 "
 
 #	file://bpp-default-device-tree.patch
