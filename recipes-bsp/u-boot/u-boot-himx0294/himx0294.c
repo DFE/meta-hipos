@@ -182,12 +182,20 @@ static iomux_v3_cfg_t const enet_pads1[] = {
 	MX6_PAD_RGMII_RX_CTL__RGMII_RX_CTL	| MUX_PAD_CTRL(ENET_PAD_CTRL),
 };
 
+#if defined(CONFIG_BOARD_IS_HIMX_DVMON)
+static iomux_v3_cfg_t const misc_pads[] = {
+	MX6_PAD_GPIO_1__USB_OTG_ID		| MUX_PAD_CTRL(WEAK_PULLUP),
+	NEW_PAD_CTRL(MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M, PAD_CTL_DSE_48ohm|PAD_CTL_SPEED_LOW),
+	MX6_PAD_EIM_D31__GPIO3_IO31		| MUX_PAD_CTRL(NO_PAD_CTRL),
+};
+#else
 static iomux_v3_cfg_t const misc_pads[] = {
 	MX6_PAD_GPIO_1__USB_OTG_ID		| MUX_PAD_CTRL(WEAK_PULLUP),
 	MX6_PAD_KEY_COL4__USB_OTG_OC		| MUX_PAD_CTRL(WEAK_PULLUP),
 	MX6_PAD_ENET_RX_ER__GPIO1_IO24		| MUX_PAD_CTRL(WEAK_PULLUP),
 #define ENET_RX_ER_GP IMX_GPIO_NR(1, 24)
 };
+#endif
 
 #if !defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 static void setup_iomux_enet(void)
@@ -198,11 +206,17 @@ static void setup_iomux_enet(void)
 }
 #endif
 
+#if defined(CONFIG_BOARD_IS_HIMX_DVMON)
+static iomux_v3_cfg_t const usb_pads[] = {
+	MX6_PAD_EIM_D31__GPIO3_IO31 | MUX_PAD_CTRL(NO_PAD_CTRL),
+};
+#else
 static iomux_v3_cfg_t const usb_pads[] = {
 	NEW_PAD_CTRL(MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M, PAD_CTL_DSE_48ohm|PAD_CTL_SPEED_LOW),
 	MX6_PAD_GPIO_4__GPIO1_IO04 | MUX_PAD_CTRL(NO_PAD_CTRL),
 	MX6_PAD_KEY_ROW4__GPIO4_IO15 | MUX_PAD_CTRL(NO_PAD_CTRL),
 };
+#endif
 
 static void setup_iomux_uart(void)
 {
@@ -213,14 +227,17 @@ static void setup_iomux_uart(void)
 #ifdef CONFIG_USB_EHCI_MX6
 int board_ehci_hcd_init(int port)
 {
-printf("USB init\n");
+	printf("USB init\n");
 	imx_iomux_v3_setup_multiple_pads(usb_pads, ARRAY_SIZE(usb_pads));
-
+#if defined(CONFIG_BOARD_IS_HIMX_DVMON)
+	gpio_direction_output(IMX_GPIO_NR(3, 31), 1);
+#else
 	gpio_direction_output(IMX_GPIO_NR(4, 15), 1);
 	/* Reset USB hub */
 	gpio_direction_output(IMX_GPIO_NR(1, 4), 0);
 	mdelay(2);
 	gpio_set_value(IMX_GPIO_NR(1, 4), 1);
+#endif
 
 	return 0;
 }
@@ -675,10 +692,15 @@ int board_init(void)
 	setup_sata();
 #endif
 
+#if defined(CONFIG_BOARD_IS_HIMX_DVMON)
+	// Enable USB
+	gpio_direction_output(IMX_GPIO_NR(3, 31), 1);
+#else
 	gpio_direction_output(IMX_GPIO_NR(4, 4), 1);
 	gpio_set_value(IMX_GPIO_NR(4, 4), 0);
 	udelay(1000);
 	gpio_set_value(IMX_GPIO_NR(4, 4), 1);
+#endif
 	return 0;
 #endif // else defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 }
