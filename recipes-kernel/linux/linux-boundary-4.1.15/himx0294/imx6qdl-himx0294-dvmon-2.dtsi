@@ -310,12 +310,13 @@
 				MX6QDL_PAD_KEY_COL2__GPIO4_IO10		0x1b0b0		/* Key 3 */
 				MX6QDL_PAD_KEY_COL4__GPIO4_IO14		0x1b0b0		/* Key black */
 				MX6QDL_PAD_GPIO_1__GPIO1_IO01		0x1b0b0		/* INIC ERR/BOOT production */
-		/*		MX6QDL_PAD_GPIO_4__GPIO1_IO04		0x80000000 */	/* /RST_USB_HUB */
+				MX6QDL_PAD_GPIO_3__XTALOSC_REF_CLK_24M	0x00068		/* 24MHz CLK */
 				MX6QDL_PAD_GPIO_8__GPIO1_IO08		0x1b0b0		/* /INIC_INT */
 		/*		MX6QDL_PAD_GPIO_9__GPIO1_IO09		0x80000000 */	/* MOST PWR EN */
 		/*		MX6QDL_PAD_GPIO_17__GPIO7_IO12		0x1b0b0	*/	/* IGN */
                                 MX6QDL_PAD_GPIO_18__GPIO7_IO13          0x1b0b0		/* /HW_INT */
 				MX6QDL_PAD_EIM_D19__GPIO3_IO19		0x80000000	/* spi-nor CS */
+				MX6QDL_PAD_EIM_D31__GPIO3_IO31		0x1b0b0		/* USB Enable */
 		/*		MX6QDL_PAD_ENET_TX_EN__GPIO1_IO28	0x1b0b0	*/	/* /ETH_INT */
 				MX6QDL_PAD_SD3_DAT5__GPIO7_IO00		0x80000000	/* USDHC3 CD */
 				MX6QDL_PAD_SD3_DAT4__GPIO7_IO01		0x1f0b0		/* /SD3_WP*/
@@ -523,13 +524,6 @@
 &uart2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2_1>;
-	status = "okay";
-};
-
-&uart3 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3_2>;
-	fsl,uart-has-rtscts;
 	status = "okay";
 };
 
