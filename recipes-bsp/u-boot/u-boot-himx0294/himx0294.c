@@ -184,6 +184,7 @@ static iomux_v3_cfg_t const enet_pads1[] = {
 
 #if defined(CONFIG_BOARD_IS_HIMX_DVMON)
 static iomux_v3_cfg_t const misc_pads[] = {
+	MX6_PAD_GPIO_0__GPIO1_IO00 		| MUX_PAD_CTRL(NO_PAD_CTRL),
 	MX6_PAD_GPIO_1__USB_OTG_ID		| MUX_PAD_CTRL(WEAK_PULLUP),
 	NEW_PAD_CTRL(MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M, PAD_CTL_DSE_48ohm|PAD_CTL_SPEED_LOW),
 	MX6_PAD_EIM_D31__GPIO3_IO31		| MUX_PAD_CTRL(NO_PAD_CTRL),
@@ -695,6 +696,8 @@ int board_init(void)
 #if defined(CONFIG_BOARD_IS_HIMX_DVMON)
 	// Enable USB
 	gpio_direction_output(IMX_GPIO_NR(3, 31), 1);
+	// Enable Touchscreen
+	gpio_direction_output(IMX_GPIO_NR(1, 0), 0);
 #else
 	gpio_direction_output(IMX_GPIO_NR(4, 4), 1);
 	gpio_set_value(IMX_GPIO_NR(4, 4), 0);
