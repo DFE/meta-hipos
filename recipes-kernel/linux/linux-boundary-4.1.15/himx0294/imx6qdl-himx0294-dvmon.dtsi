@@ -450,9 +450,9 @@
 		status = "okay";
 		vcc-gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>, <&gpio1 13 GPIO_ACTIVE_HIGH>;
 		vcc-powerup-delay-ms = <35>;
-		vcc-down-delay-ms = <10>;
+		vcc-down-delay-ms = <500>;
 		backlight-gpio = <&gpio2 0 GPIO_ACTIVE_HIGH>;
-		backlight-powerup-delay-ms = <500>;
+		backlight-powerup-delay-ms = <10>;
 
 		display-timings {
 			native-mode = <&timing0>;

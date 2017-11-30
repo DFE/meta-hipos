@@ -460,11 +460,14 @@
 		fsl,data-width = <24>;
 		primary;
 		status = "okay";
-		vcc-gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>, <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		vcc-gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
 		vcc-powerup-delay-ms = <35>;
-		vcc-down-delay-ms = <10>;
+		vcc-down-delay-ms = <500>;
+		vled-gpio = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		vled-powerup-delay-ms = <200>;
+		vled-powerdown-delay-ms = <200>;
 		backlight-gpio = <&gpio2 0 GPIO_ACTIVE_HIGH>;
-		backlight-powerup-delay-ms = <500>;
+		backlight-powerup-delay-ms = <10>;
 
 		display-timings {
 			native-mode = <&timing0>;
