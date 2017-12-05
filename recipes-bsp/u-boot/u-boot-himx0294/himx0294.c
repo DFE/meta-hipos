@@ -723,6 +723,19 @@ int board_late_init(void)
 			printf("setenv: fdt_file '%s' failed\n", fdt);
 		}
 	}
+#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
+	/* If a touch controller is detected, then the touch display is
+	   connected and the alternative device tree is used. */
+	i2c_set_bus_num(0);
+	if(0 == i2c_probe(0x5c)) {
+		if(!strcmp(getenv("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
+			char *fdt = CONFIG_DEFAULT_FDT_FILE_DVMON_2;
+			printf("dvmon: detected touch use alternative fdt\n");
+			if (setenv("fdt_file", fdt)) {
+				printf("setenv: fdt_file '%s' failed\n", fdt);
+			}
+		}
+	}
 #endif
 	return 0;
 }
