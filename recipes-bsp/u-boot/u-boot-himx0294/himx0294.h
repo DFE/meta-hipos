@@ -15,7 +15,7 @@
 #define CONFIG_MACH_TYPE	3769
 
 #include <asm/arch/imx-regs.h>
-#include <asm/imx-common/gpio.h>
+#include <asm/mach-imx/gpio.h>
 
 #define CONFIG_CMDLINE_TAG
 #define CONFIG_SETUP_MEMORY_TAGS
@@ -37,7 +37,6 @@
 #define CONFIG_USB_ETH_CDC
 #define CONFIG_NETCONSOLE
 
-#define CONFIG_CMD_FUSE
 #ifdef CONFIG_CMD_FUSE
 #define CONFIG_MXC_OCOTP
 #endif
@@ -78,12 +77,6 @@
 #define CONFIG_CMD_EXT2
 #define CONFIG_CMD_EXT4
 #define CONFIG_CMD_EXT4_WRITE
-#define CONFIG_CMD_FAT
-#define CONFIG_DOS_PARTITION
-
-#ifdef CONFIG_MX6Q
-#define CONFIG_CMD_SATA
-#endif
 
 /*
  * SATA Configs
@@ -111,23 +104,11 @@
 #define CONFIG_PHY_MICREL_KSZ9021
 
 /* USB Configs */
-#define CONFIG_CMD_USB
-#define CONFIG_CMD_FAT
-#define CONFIG_USB_EHCI
-#define CONFIG_USB_EHCI_MX6
-#define CONFIG_USB_STORAGE
-#define CONFIG_USB_HOST_ETHER
-#define CONFIG_USB_ETHER_ASIX
-#define CONFIG_USB_ETHER_MCS7830
-#define CONFIG_USB_ETHER_SMSC95XX
 #define CONFIG_USB_MAX_CONTROLLER_COUNT 2
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET	/* For OTG port */
 #define CONFIG_MXC_USB_PORTSC	(PORT_PTS_UTMI | PORT_PTS_PTW)
 #define CONFIG_MXC_USB_FLAGS	0
 #define CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP
-
-/* Miscellaneous commands */
-#define CONFIG_CMD_BMODE
 
 /* Framebuffer and LCD */
 #define CONFIG_VIDEO_IPUV3

@@ -16,12 +16,12 @@
 #include <asm/arch/mx6-pins.h>
 #include <errno.h>
 #include <asm/gpio.h>
-#include <asm/imx-common/iomux-v3.h>
-#include <asm/imx-common/mxc_i2c.h>
-#include <asm/imx-common/sata.h>
-#include <asm/imx-common/spi.h>
-#include <asm/imx-common/boot_mode.h>
-#include <asm/imx-common/video.h>
+#include <asm/mach-imx/iomux-v3.h>
+#include <asm/mach-imx/mxc_i2c.h>
+#include <asm/mach-imx/sata.h>
+#include <asm/mach-imx/spi.h>
+#include <asm/mach-imx/boot_mode.h>
+#include <asm/mach-imx/video.h>
 #include <mmc.h>
 #include <fsl_esdhc.h>
 #include <micrel.h>
@@ -407,7 +407,7 @@ static void set_phy_speed(int phyaddr, int phydata)
 static void phy_speed(void)
 {
 	int i;
-	char *lanspeed = getenv("lanspeed");
+	char *lanspeed = env_get("lanspeed");
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 	for(i=0; i<2; ++i) {
@@ -587,7 +587,7 @@ size_t display_count = ARRAY_SIZE(displays);
 
 int board_cfb_skip(void)
 {
-	return NULL != getenv("novideo");
+	return NULL != env_get("novideo");
 }
 
 static void setup_display(void)
@@ -713,14 +713,14 @@ int board_late_init(void)
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
 	gpio_direction_input(ENET_RX_ER_GP);
 	if (0 == gpio_get_value(ENET_RX_ER_GP) &&
-	    !strcmp(getenv("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
+	    !strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
 		char *fdt = CONFIG_DEFAULT_FDT_FILE_DVREC;
 		printf("Detected DVREC\n");
 		if (is_cpu_type(MXC_CPU_MX6QP)) {
 			fdt = CONFIG_DEFAULT_FDT_FILE_DVREC_P;
 		}
-		if (setenv("fdt_file", fdt)) {
-			printf("setenv: fdt_file '%s' failed\n", fdt);
+		if (env_set("fdt_file", fdt)) {
+			printf("env_set: fdt_file '%s' failed\n", fdt);
 		}
 	}
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
@@ -728,11 +728,11 @@ int board_late_init(void)
 	   connected and the alternative device tree is used. */
 	i2c_set_bus_num(0);
 	if(0 == i2c_probe(0x5c)) {
-		if(!strcmp(getenv("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
+		if(!strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
 			char *fdt = CONFIG_DEFAULT_FDT_FILE_DVMON_2;
 			printf("dvmon: detected touch use alternative fdt\n");
-			if (setenv("fdt_file", fdt)) {
-				printf("setenv: fdt_file '%s' failed\n", fdt);
+			if (env_set("fdt_file", fdt)) {
+				printf("env_set: fdt_file '%s' failed\n", fdt);
 			}
 		}
 	}

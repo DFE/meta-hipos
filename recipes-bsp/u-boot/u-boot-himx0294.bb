@@ -2,7 +2,7 @@ require recipes-bsp/u-boot/u-boot_2017.09.bb
 
 COMPATIBLE_MACHINE = "himx0294"
 
-PR = "r11"
+PR = "r12"
 
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
@@ -11,6 +11,7 @@ SRC_URI_append_himx0294 = " \
 	file://Kconfig \
 	file://nitrogen6q.cfg \
 	file://nitrogen6q2g.cfg \
+	file://mx6qp.cfg \
 	file://ddr-setup.cfg \
 	file://clocks.cfg \
 	file://1066mhz_4x128mx16.cfg \
@@ -31,6 +32,7 @@ do_configure_prepend() {
 	cp ${WORKDIR}/Kconfig ${S}/board/freescale/himx0294/
 	cp ${WORKDIR}/nitrogen6q.cfg ${S}/board/freescale/himx0294/
 	cp ${WORKDIR}/nitrogen6q2g.cfg ${S}/board/freescale/himx0294/
+	cp ${WORKDIR}/mx6qp.cfg ${S}/board/freescale/himx0294/
 	cp ${WORKDIR}/ddr-setup.cfg ${S}/board/freescale/himx0294/
 	cp ${WORKDIR}/1066mhz_4x128mx16.cfg ${S}/board/freescale/himx0294/
 	cp ${WORKDIR}/1066mhz_4x256mx16.cfg ${S}/board/freescale/himx0294/

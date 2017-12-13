@@ -1,31 +1,42 @@
-From 87d9410bd2854effe02e2a0f9a8e0ca648a409a6 Mon Sep 17 00:00:00 2001
+From dc924e40f8274cc823a4ebaad6cffd74e82a4c58 Mon Sep 17 00:00:00 2001
 From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Wed, 28 Jun 2017 12:48:39 +0200
+Date: Wed, 13 Dec 2017 10:59:38 +0100
 Subject: [PATCH] himx0294: Add Kconfig
 
 Add Kconfig support for himx0294 board.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- arch/arm/cpu/armv7/mx6/Kconfig | 5 +++++
+ arch/arm/mach-imx/mx6/Kconfig | 5 +++++
  1 file changed, 5 insertions(+)
 
-diff --git a/arch/arm/cpu/armv7/mx6/Kconfig b/arch/arm/cpu/armv7/mx6/Kconfig
-index c646966f75..8d0c1ddd09 100644
---- a/arch/arm/cpu/armv7/mx6/Kconfig
-+++ b/arch/arm/cpu/armv7/mx6/Kconfig
-@@ -214,6 +214,10 @@ config TARGET_MX6ULL_14X14_EVK
- config TARGET_NITROGEN6X
- 	bool "nitrogen6x"
+diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
+index 540f2b29b1..44d8e590ae 100644
+--- a/arch/arm/mach-imx/mx6/Kconfig
++++ b/arch/arm/mach-imx/mx6/Kconfig
+@@ -312,6 +312,20 @@ config TARGET_NITROGEN6X
+ 	imply USB_ETHER_SMSC95XX
+ 	imply USB_ETHER_MCS7830
  
 +config TARGET_HIMX0294
 +	bool "Support himx0294"
 +	select SUPPORT_SPL
++	imply CMD_SATA
++	imply CMD_FAT
++	imply CMD_USB
++	imply USB
++	imply USB_EHCI
++	imply USB_STORAGE
++	imply USB_HOST_ETHER
++	imply USB_ETHER_ASIX
++	imply USB_ETHER_SMSC95XX
++	imply USB_ETHER_MCS7830
 +
- config TARGET_OT1200
- 	bool "Bachmann OT1200"
- 	select SUPPORT_SPL
-@@ -305,6 +309,7 @@ source "board/bachmann/ot1200/Kconfig"
+ config TARGET_OPOS6ULDEV
+ 	bool "Armadeus OPOS6ULDev board"
+ 	select MX6UL_OPOS6UL
+@@ -425,6 +429,7 @@ source "board/bachmann/ot1200/Kconfig"
  source "board/barco/platinum/Kconfig"
  source "board/barco/titanium/Kconfig"
  source "board/boundary/nitrogen6x/Kconfig"
@@ -34,5 +45,5 @@ index c646966f75..8d0c1ddd09 100644
  source "board/compulab/cm_fx6/Kconfig"
  source "board/congatec/cgtqmx6eval/Kconfig"
 -- 
-2.13.2
+2.13.6
 
