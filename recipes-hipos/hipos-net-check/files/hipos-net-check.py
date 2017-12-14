@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """ Himx only:
     Compare mac address and lanspeed parameters in file created from board controller info with the one in the uboot
