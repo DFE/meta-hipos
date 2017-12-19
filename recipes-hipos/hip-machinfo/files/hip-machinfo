@@ -39,7 +39,9 @@ case $(grep Hardware /proc/cpuinfo | cut -d:  -f2) in
 esac
 
 # check for devices with kernel device tree, HYP-12510
-case $(cat /proc/device-tree/model 2> /dev/null) in
+# Avoid warning: command substitution: ignored null byte in input HYP-18363
+# See: https://stackoverflow.com/questions/46163678/get-rid-of-warning-command-substitution-ignored-null-byte-in-input
+case $(tr -d '\0' </proc/device-tree/model 2> /dev/null) in
 	DResearch\ Fahrzeugelektronik\ GmbH\ himx0294) MACHINE="himx0294"; SUBMACHINE="imoc";;
 	dfe,himx0294-imoc)   MACHINE="himx0294"; SUBMACHINE="imoc";;
 	dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
