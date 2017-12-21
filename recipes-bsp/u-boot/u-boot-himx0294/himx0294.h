@@ -71,8 +71,6 @@
 #define CONFIG_SYS_FSL_ESDHC_ADDR      0
 #define CONFIG_SYS_FSL_USDHC_NUM       2
 
-#define CONFIG_CMD_MMC
-#define CONFIG_GENERIC_MMC
 #define CONFIG_BOUNCE_BUFFER
 #define CONFIG_CMD_EXT2
 #define CONFIG_CMD_EXT4
@@ -232,7 +230,6 @@
 
 #define CONFIG_ENV_SIZE			(8 * 1024)
 
-#define CONFIG_ENV_IS_IN_MMC
 
 #if defined(CONFIG_ENV_IS_IN_MMC)
 #define CONFIG_ENV_OFFSET		(1008 * 1024)
