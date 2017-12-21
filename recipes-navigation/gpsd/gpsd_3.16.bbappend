@@ -14,3 +14,10 @@ do_install_append() {
     rm -f ${D}${systemd_unitdir}/system/${PN}.socket
 }
 SYSTEMD_SERVICE_${PN} = "${PN}.service"
+
+# Add missing link. Needed in yocto/rocko.
+# See https://patchwork.openembedded.org/patch/145889/
+# Remove next two lines in next yocto release.
+ALTERNATIVE_LINK_NAME[gpsd-defaults] = "${sysconfdir}/default/gpsd"
+ALTERNATIVE_TARGET[gpsd-defaults] = "${sysconfdir}/default/gpsd.default"
+
