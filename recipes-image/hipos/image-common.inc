@@ -26,7 +26,6 @@ IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopbac
 
 IMAGE_INSTALL += "          \
   kernel-modules            \
-  kernel-devicetree         \
   linux-firmware-ralink     \
   htop                      \
   bash                      \
@@ -46,6 +45,7 @@ IMAGE_INSTALL += "          \
 
 IMAGE_INSTALL_append_himx0294 += "   \
   u-boot-fw-utils           \
+  kernel-devicetree         \
   libdrbcc                  \
   libdrtp                   \
   drbcc                     \
