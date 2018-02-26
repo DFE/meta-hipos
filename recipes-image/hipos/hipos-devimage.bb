@@ -2,7 +2,7 @@ require hipos-image.inc
 
 export IMAGE_BASENAME = "hipos-devimage"
 
-IMAGE_FSTYPES = "tar.bz2"
+IMAGE_FSTYPES_himx0294 = "tar.bz2"
 
 # SDK
 IMAGE_INSTALL += " \
