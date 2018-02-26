@@ -24,6 +24,13 @@ IMAGE_FEATURES_remove = " allow-empty-password debug-tweaks "
 # remove connman
 IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client"
 
+# When wic-image is created, two incorrect entries are generated in /etc/fstab.
+# This causes the boot process to get stuck with:
+# A start job is running for dev-disk-by...
+# Occured at machine congatec-tca5-64 and Yocto rocko
+# Use following wic option to not change /etc/fstab.
+WIC_CREATE_EXTRA_ARGS_append = " --no-fstab-update"
+
 IMAGE_INSTALL += "          \
   kernel-modules            \
   linux-firmware-ralink     \
