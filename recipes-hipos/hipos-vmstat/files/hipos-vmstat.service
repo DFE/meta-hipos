@@ -1,0 +1,10 @@
+[Unit]
+Description=hipos vmstat logger
+
+[Service]
+ExecStart=/bin/bash /etc/hipos/hipos-vmstat.sh
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
