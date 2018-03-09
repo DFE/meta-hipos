@@ -61,6 +61,7 @@ SRC_URI_append_himx0294 = " \
 	file://ahci_imx-reset-sata-phy.patch \
 	file://imx-watchdog-Assert-wdog_b-reset.patch \
 	file://ov5640-Fix-exposure-and-white-balance.patch \
+	file://tty-imx-disable-dma.patch \
 "
 
 #	file://bpp-default-device-tree.patch
