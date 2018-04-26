@@ -1,0 +1,30 @@
+From d4a4af7d10cce40eb50b849985ef090f40233eb1 Mon Sep 17 00:00:00 2001
+From: Sascha Dierberg <dierberg@dresearch-fe.de>
+Date: Thu, 26 Apr 2018 11:25:33 +0200
+Subject: [PATCH] imxvpuapi/imxvpuapi_vpulib.c: Output AUD NALs manually
+ disabled HYP-18916
+
+This enables using gstreamer1.0-plugins-imx 0.13.0
+
+Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+---
+ imxvpuapi/imxvpuapi_vpulib.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/imxvpuapi/imxvpuapi_vpulib.c b/imxvpuapi/imxvpuapi_vpulib.c
+index f7fce52..5567c6d 100644
+--- a/imxvpuapi/imxvpuapi_vpulib.c
++++ b/imxvpuapi/imxvpuapi_vpulib.c
+@@ -3146,7 +3146,8 @@ ImxVpuEncReturnCodes imx_vpu_enc_open(ImxVpuEncoder **encoder, ImxVpuEncOpenPara
+ 			 *
+ 			 * for this reason, the automatic AUD placement is not used and the
+ 			 * AUDs are inserted manually instead. */
+-			(*encoder)->aud_enable = open_params->codec_params.h264_params.enable_access_unit_delimiters;
++			 /* Bad idea this produces p-frames only */
++			(*encoder)->aud_enable = 0;
+ 			enc_open_param.EncStdParam.avcParam.avc_audEnable = 0;
+ 
+ 			/* XXX: h.264 MVC support is currently not implemented */
+-- 
+2.13.5
+
