@@ -10,7 +10,7 @@ PR = "r002"
 
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="5.0"
 
 SRC_URI = "git://github.com/DFE/darmok.git;branch=${DRSRCBRANCH}"
 SRCREV = "4f15c0427308d224cef134c9ac5c445ed4c99e25" 
