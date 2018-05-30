@@ -1,4 +1,6 @@
 OVRDEPENDS += " virtual/libg2d "
+# DEPENDS is in yocto pyro necessary
+DEPENDS += " virtual/libg2d "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
