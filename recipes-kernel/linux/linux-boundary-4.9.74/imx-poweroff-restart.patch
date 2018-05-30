@@ -1,0 +1,48 @@
+From 94a3f36ea30ef13cc8d6592a8cc4d524ab029c4d Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 18 Sep 2015 08:37:12 +0200
+Subject: [PATCH] imx-poweroff: Restart
+
+Wait 2 seconds after poweroff. And do a restart if cpu is still alive.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/power/reset/imx-snvs-poweroff.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/power/reset/imx-snvs-poweroff.c b/drivers/power/reset/imx-snvs-poweroff.c
+index ad6ce50..fa7fdbf 100644
+--- a/drivers/power/reset/imx-snvs-poweroff.c
++++ b/drivers/power/reset/imx-snvs-poweroff.c
+@@ -16,12 +16,15 @@
+ 
+ #include <linux/err.h>
+ #include <linux/init.h>
++#include <linux/delay.h>
+ #include <linux/io.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_address.h>
+ #include <linux/platform_device.h>
++#include <linux/reboot.h>
++#include <asm/system_misc.h>
+ 
+ static void __iomem *snvs_base;
+ 
+@@ -31,6 +34,12 @@ static void do_imx_poweroff(void)
+ 
+ 	/* set TOP and DP_EN bit */
+ 	writel(value | 0x60, snvs_base);
++
++	/* give it some time */
++	mdelay(2000);
++
++	/* If we are still alive then we can reboot */
++	arm_pm_restart(REBOOT_HARD, NULL);
+ }
+ 
+ static int imx_poweroff_probe(struct platform_device *pdev)
+-- 
+2.1.4
+

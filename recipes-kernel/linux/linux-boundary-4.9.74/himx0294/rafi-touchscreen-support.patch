@@ -1,0 +1,2285 @@
+From 9f20fd2db04c0c2b16c60e05f0b0ec58488d4bfe Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 22 Feb 2017 08:23:22 +0100
+Subject: [PATCH] Rafi touchscreen support
+
+Add rafi touchscreen support.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/input/touchscreen/Kconfig          |    7 +
+ drivers/input/touchscreen/Makefile         |    1 +
+ drivers/input/touchscreen/rafi_gs.c        |  239 +++++
+ drivers/input/touchscreen/rafi_gs.h        |   49 ++
+ drivers/input/touchscreen/rafi_gs_device.c | 1322 ++++++++++++++++++++++++++++
+ drivers/input/touchscreen/rafi_gs_device.h |   33 +
+ drivers/input/touchscreen/rafi_key_input.c |   98 +++
+ drivers/input/touchscreen/rafi_key_input.h |   16 +
+ drivers/input/touchscreen/rafi_obs.h       |   48 +
+ drivers/input/touchscreen/rafi_ts_input.c  |  315 +++++++
+ drivers/input/touchscreen/rafi_ts_input.h  |   16 +
+ include/linux/input/rafi_gs.h              |   23 +
+ 12 files changed, 2167 insertions(+)
+ create mode 100644 drivers/input/touchscreen/rafi_gs.c
+ create mode 100644 drivers/input/touchscreen/rafi_gs.h
+ create mode 100644 drivers/input/touchscreen/rafi_gs_device.c
+ create mode 100644 drivers/input/touchscreen/rafi_gs_device.h
+ create mode 100644 drivers/input/touchscreen/rafi_key_input.c
+ create mode 100644 drivers/input/touchscreen/rafi_key_input.h
+ create mode 100644 drivers/input/touchscreen/rafi_obs.h
+ create mode 100644 drivers/input/touchscreen/rafi_ts_input.c
+ create mode 100644 drivers/input/touchscreen/rafi_ts_input.h
+ create mode 100644 include/linux/input/rafi_gs.h
+
+diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
+index 485c191..4e14bed 100644
+--- a/drivers/input/touchscreen/Kconfig
++++ b/drivers/input/touchscreen/Kconfig
+@@ -15,6 +15,13 @@ config OF_TOUCHSCREEN
+ 	def_tristate INPUT
+ 	depends on INPUT && OF
+ 
++config TOUCHSCREEN_RAFI_GS
++	bool "RAFI glasscape touchscreen controller @ I2C bus"
++	depends on I2C
++	help
++	  Say Y here if you want to support the RAFI Glasscape tochscreen
++	  microcontroller connected via an I2C bus.
++
+ config TOUCHSCREEN_88PM860X
+ 	tristate "Marvell 88PM860x touchscreen"
+ 	depends on MFD_88PM860X
+diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
+index 2bfe27b..41de3fa 100644
+--- a/drivers/input/touchscreen/Makefile
++++ b/drivers/input/touchscreen/Makefile
+@@ -7,6 +7,7 @@
+ wm97xx-ts-y := wm97xx-core.o
+ 
+ obj-$(CONFIG_TOUCHSCREEN_PROPERTIES)	+= of_touchscreen.o
++obj-$(CONFIG_TOUCHSCREEN_RAFI_GS)	+= rafi_gs.o rafi_gs_device.o rafi_ts_input.o rafi_key_input.o
+ obj-$(CONFIG_TOUCHSCREEN_88PM860X)	+= 88pm860x-ts.o
+ obj-$(CONFIG_TOUCHSCREEN_AD7877)	+= ad7877.o
+ obj-$(CONFIG_TOUCHSCREEN_AD7879)	+= ad7879.o
+diff --git a/drivers/input/touchscreen/rafi_gs.c b/drivers/input/touchscreen/rafi_gs.c
+new file mode 100644
+index 0000000..a7b5aa8
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_gs.c
+@@ -0,0 +1,239 @@
++#include "rafi_gs.h"
++
++#include "rafi_gs_device.h"
++#include "rafi_ts_input.h"
++#include "rafi_key_input.h"
++
++#include <linux/input/rafi_gs.h>
++
++#include <linux/io.h>
++#include <linux/module.h>
++#include "linux/i2c-dev.h"
++#include "linux/i2c.h"
++#include "linux/device.h"
++
++
++/*********************************************************************************************************************/
++
++
++MODULE_AUTHOR("Guenter Gebhardt <g.gebhardt@gg-sw-systems.de>");
++MODULE_DESCRIPTION("RAFI Glasscape touchscreen driver");
++MODULE_LICENSE("GPL");
++
++
++/*********************************************************************************************************************/
++
++
++struct workqueue_struct * rafi_gs_wq = 0;
++
++
++static struct i2c_device_id rafi_gs_idtable[] = {
++    { RAFI_GS_NAME, RAFI_GS_I2C_ADDR },
++    { }
++};
++
++
++MODULE_DEVICE_TABLE(i2c, rafi_gs_idtable);
++
++
++/*********************************************************************************************************************/
++
++
++static int
++rafi_gs_probe(struct i2c_client * clnt, const struct i2c_device_id * id)
++{
++    int err;
++    struct rafi_gs_platform_data * pdata;
++
++    PDEBUG("Entered");
++
++#if 0
++MST
++    pdata = clnt->dev.platform_data;
++    if (NULL == pdata) {
++        PERROR("Platform data missing.");
++        return -EINVAL;
++    }
++#endif
++
++    if (0 == strcmp(RAFI_GS_NAME, clnt->name)) {
++        struct rafi_gs_device * device;
++        struct rafi_obs_ts * ts_obs;
++        int i;
++
++//        device = rafi_gs_device_create(clnt, id, pdata->gpio);
++        device = rafi_gs_device_create(clnt, id, 9);
++        if (NULL == device) {
++            PERROR("In rafi_gs_device_create().");
++            return -ENOMEM;
++        }
++
++        ts_obs = rafi_ts_input_ctor(dev_name(&clnt->dev), 0);
++        if (NULL == ts_obs) {
++            rafi_gs_device_destroy(device);
++            PERROR("In rafi_ts_input_ctor().");
++            return -ENOMEM;
++        }
++
++        err = rafi_gs_device_reg_ts_obs(device, ts_obs);
++        if (err) {
++            rafi_gs_device_destroy(device);
++            PERROR("In rafi_gs_device_reg_ts_obs(): %i", err);
++            return err;
++        }
++
++#if 0
++MST
++        for (i = 0; i < pdata->keys; ++i) {
++            struct rafi_obs_key * key_obs;
++
++            key_obs = rafi_key_input_ctor(dev_name(&clnt->dev), 1 + i);
++            if (NULL == key_obs) {
++                rafi_gs_device_destroy(device);
++                PERROR("In rafi_key_input_ctor().");
++                return -ENOMEM;
++            }
++
++            err = rafi_gs_device_reg_key_obs(device, i, key_obs);
++            if (err) {
++                rafi_gs_device_destroy(device);
++                PERROR("In rafi_gs_device_reg_key_obs(): %i", err);
++                return err;
++            }
++        }
++#endif
++
++        i2c_set_clientdata(clnt, (void *)device);
++
++        err = rafi_gs_device_start(device);
++        if (err) {
++            rafi_gs_device_destroy(device);
++            PERROR("In rafi_gs_device_start(): %i", err);
++            return err;
++        }
++    } else {
++        PERROR("Invalid device name=%s.", clnt->name);
++        return -EINVAL;
++    }
++    
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++static int
++rafi_gs_remove(struct i2c_client * clnt)
++{
++    PDEBUG("Entered.");
++
++    if (0 == strcmp(RAFI_GS_NAME, clnt->name)) {
++        struct rafi_gs_device * device;
++
++        device = (struct rafi_gs_device *)i2c_get_clientdata(clnt);
++        if (NULL == device) {
++            PERROR("In i2c_get_clientdata().");
++            return -EINVAL;
++        }
++
++        rafi_gs_device_destroy(device);
++        i2c_set_clientdata(clnt, NULL);
++    } else {
++        PERROR("Invalid device name=%s.", clnt->name);
++        return -EINVAL;
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++static struct i2c_driver rafi_gs_driver = {
++    .driver = {
++        .name   = RAFI_GS_NAME,
++    },
++
++    .id_table = rafi_gs_idtable,
++    .probe    = rafi_gs_probe,
++    .remove   = rafi_gs_remove,
++};
++
++
++/*********************************************************************************************************************/
++
++
++#define RAFI_GS_DRV_VERSION                      "0.0.1"
++
++
++static ssize_t
++drv_attr_show_version(struct device_driver * drv, char * buf)
++{
++    return sprintf(buf, "%s", RAFI_GS_DRV_VERSION"\n");
++}
++
++
++static DRIVER_ATTR(version, 0440, drv_attr_show_version, NULL);
++
++
++/*********************************************************************************************************************/
++
++
++static int __init
++rafi_gs_init(void)
++{
++    int err;
++
++    PDEBUG("Entered.");
++
++    err = i2c_register_driver(THIS_MODULE, &rafi_gs_driver);
++    if (err < 0) {
++        PERROR("In i2c_register_driver(): %i.\n", err);
++        goto error_0;
++    }
++
++    rafi_gs_wq = alloc_workqueue("rafi_gs_wq", 0, 8);
++    if (NULL == rafi_gs_wq) {
++        PERROR("In rafi_gs_wq().");
++        goto error_1;
++    }
++
++    err = driver_create_file(&rafi_gs_driver.driver, &driver_attr_version);
++    if (err < 0) {
++        PERROR("In driver_create_file(): %i", err);
++        goto error_2;
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++
++error_2:
++
++    destroy_workqueue(rafi_gs_wq);
++
++error_1:
++
++    i2c_del_driver(&rafi_gs_driver);
++
++error_0:
++
++    return err;
++}
++
++
++static void __exit
++rafi_gs_exit(void)
++{
++    PDEBUG("Entered.");
++
++    driver_remove_file(&rafi_gs_driver.driver, &driver_attr_version);
++    destroy_workqueue(rafi_gs_wq);
++    i2c_del_driver(&rafi_gs_driver);
++
++    PDEBUG("Leaved.");
++}
++
++
++module_init(rafi_gs_init);
++module_exit(rafi_gs_exit);
+diff --git a/drivers/input/touchscreen/rafi_gs.h b/drivers/input/touchscreen/rafi_gs.h
+new file mode 100644
+index 0000000..9d7927e
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_gs.h
+@@ -0,0 +1,49 @@
++/*
++ * RAFI Glasscape standard electronic touchscreen driver.
++ *
++ * Copyright (C) 2013 Guenter Gebhardt, RAFI GmbH
++ *
++ * Licensed under the GPL-2 or later.
++ */
++#ifndef _RAFI_GS_H_
++#define _RAFI_GS_H_
++
++
++#include <linux/input/rafi_gs.h>
++
++#include <linux/workqueue.h>
++
++
++/*********************************************************************************************************************/
++
++
++#define RAFI_GS_MAX_FINGERS            2 /**< The maximum number of fingers supported. */
++
++
++/*********************************************************************************************************************/
++
++
++#undef PDEBUG /* Only to be sure. */
++
++#ifdef RAFI_GS_DEBUG
++#   define PDEBUG(fmt, args...) printk(KERN_INFO "*** " RAFI_GS_NAME ":<%s>: " fmt"\n", __FUNCTION__, ##args)
++#else
++#   define PDEBUG(fmt, args...) /* No debugging, do nothing. */
++#endif
++
++
++#undef PERROR /* Only to be sure. */
++
++#define PERROR(fmt, args...) printk(KERN_ERR "!!! " RAFI_GS_NAME ":%s:%i: " fmt"\n", __FILE__, __LINE__, ##args)
++
++
++/*********************************************************************************************************************/
++
++
++extern struct workqueue_struct * rafi_gs_wq;
++
++
++/*********************************************************************************************************************/
++
++
++#endif
+diff --git a/drivers/input/touchscreen/rafi_gs_device.c b/drivers/input/touchscreen/rafi_gs_device.c
+new file mode 100644
+index 0000000..76a2108
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_gs_device.c
+@@ -0,0 +1,1322 @@
++#include "rafi_gs_device.h"
++
++#include "rafi_obs.h"
++#include "rafi_gs.h"
++
++#include <linux/string.h>
++#include <linux/slab.h>
++#include <linux/list.h>
++#include <linux/gpio.h>
++#include <linux/interrupt.h>
++#include <linux/irq.h>
++#include <linux/semaphore.h>
++#include <linux/wait.h>
++#include <linux/types.h>
++#include <linux/device.h>
++#include <linux/i2c.h>
++
++
++/*********************************************************************************************************************/
++
++
++static int
++send_command_select_touch_configuration(struct rafi_gs_device * thiz, unsigned long config);
++
++
++static int
++send_command_sw_version(struct rafi_gs_device * thiz,
++                        uint8_t * major,
++                        uint8_t * minor,
++                        uint8_t * revision);
++
++
++/*********************************************************************************************************************/
++
++
++const char *
++array_to_str(uint8_t * array, unsigned int size)
++{
++    static char buffer[256] = { '\0' };
++    unsigned int pos = 0;
++    unsigned int i;
++
++    for (i = 0; i < size; ++i) {
++        pos += snprintf(&buffer[pos], sizeof(buffer) - pos - 1, "%02X ", array[i]);
++    }
++
++    return buffer;
++}
++
++
++/*********************************************************************************************************************/
++
++
++static ssize_t
++dev_attr_set_config(struct device * device, struct device_attribute * attr, const char * buffer, size_t count)
++{
++    struct i2c_client * clnt;
++    struct rafi_gs_device * thiz;
++    unsigned long config_no;
++    char * rem;
++    int err;
++
++    PDEBUG("Entered.");
++
++    clnt = container_of(device, struct i2c_client, dev);
++
++    thiz = (struct rafi_gs_device *)i2c_get_clientdata(clnt);
++    if (NULL == thiz) {
++        PERROR("In i2c_get_clientdata().");
++        return -EINVAL;
++    }
++
++    if (0 == count) {
++        PERROR("No data given.");
++        return -EINVAL;
++    }
++
++    if (('\0' != buffer[count - 1]) && ('\n' != buffer[count - 1])) {
++        PERROR("Input is neither terminated by null nor newline.");
++        return -EINVAL;
++    }
++
++    if (2 > count) {
++        PERROR("No decimal digits given.");
++        return -EINVAL;
++    }
++
++    config_no = simple_strtoul(buffer, &rem, 10); 
++    if ((*rem != '\0') && (*rem != '\n')) {
++        PERROR("Input string contains non decimal digits.");
++        return -EINVAL;
++    }
++
++    err = send_command_select_touch_configuration(thiz, config_no);
++    if (err) {
++        PERROR("In send_command_select_touch_configuration(): %i", err);
++        return err;
++    }
++
++    PDEBUG("Leaved.");
++
++    return count;
++}
++
++
++DEVICE_ATTR(config, 0220, NULL, dev_attr_set_config);
++
++
++/*********************************************************************************************************************/
++
++
++static ssize_t
++dev_attr_show_sw_version(struct device * device, struct device_attribute * attr, char * buffer)
++{
++    struct i2c_client * clnt;
++    struct rafi_gs_device * thiz;
++    int err;
++    uint8_t major;
++    uint8_t minor;
++    uint8_t revision;
++    int count;
++
++    PDEBUG("Entered.");
++
++    clnt = container_of(device, struct i2c_client, dev);
++
++    thiz = (struct rafi_gs_device *)i2c_get_clientdata(clnt);
++    if (NULL == thiz) {
++        PERROR("In i2c_get_clientdata().");
++        return -EINVAL;
++    }
++
++    err = send_command_sw_version(thiz, &major, &minor, &revision);
++    if (err) {
++        PERROR("In send_command_select_touch_configuration(): %i", err);
++        return err;
++    }
++
++    count = sprintf(buffer, "%hhu.%hhu.%hhu", major, minor, revision);
++
++    PDEBUG("Leaved: version=%s.", buffer);
++
++    return count;
++}
++
++
++DEVICE_ATTR(sw_version, 0440, dev_attr_show_sw_version, NULL);
++
++
++/*********************************************************************************************************************/
++
++
++struct report_sw_version {
++    uint8_t major;
++    uint8_t minor;
++    uint8_t revision;
++};
++
++
++/*********************************************************************************************************************/
++
++
++enum report_status_code {
++    REPORT_STATUS_CODE_NORMAL_OPERATION = 1,
++    REPORT_STATUS_CODE_ACCEPTING_DATA = 2,
++    REPORT_STATUS_CODE_DATA_ACCEPTED = 3,
++    REPORT_STATUS_CODE_ERROR = 4
++};
++
++
++const char *
++report_status_code_to_str(enum report_status_code code)
++{
++    static char unknown[64] = { '\0' };
++
++    switch (code) {
++        case REPORT_STATUS_CODE_NORMAL_OPERATION:
++            return "NORMAL_OPERATION";
++        case REPORT_STATUS_CODE_ACCEPTING_DATA:
++            return "ACCEPTING_DATA";
++        case REPORT_STATUS_CODE_DATA_ACCEPTED:
++            return "DATA_ACCEPTED";
++        case REPORT_STATUS_CODE_ERROR:
++            return "ERROR";
++        default:
++            snprintf(unknown, sizeof(unknown) - 1, "UNKNOWN (%i)", code);
++            return unknown;
++    }
++}
++
++
++enum report_status_error {
++    REPORT_STATUS_ERROR_NO_ERR = 0,
++    REPORT_STATUS_ERROR_UNSUPP_MSG_ID = 1,
++    REPORT_STATUS_ERROR_UNEXP_MSG_ID = 2,
++    REPORT_STATUS_ERROR_INV_MSG_DAT = 3,
++    REPORT_STATUS_ERROR_UNEXP_ERR = 4,
++    REPORT_STATUS_ERROR_DAT_OUT_OF_ORDER = 7,
++    REPORT_STATUS_ERROR_TOO_VIEW_DAT = 8,
++    REPORT_STATUS_ERROR_TOO_MANY_DAT = 9,
++    REPORT_STATUS_ERROR_FW_CHK_SUM = 10,
++    REPORT_STATUS_ERROR_FW_FILE_LEN = 11,
++    REPORT_STATUS_ERROR_FW_ERASE = 12,
++    REPORT_STATUS_ERROR_FW_PROG = 13,
++    REPORT_STATUS_ERROR_DOWNLOAD_TYPE = 14,
++    REPORT_STATUS_ERROR_DOWNLOAD_CONFIG_IDX = 15
++};
++
++
++const char *
++report_status_error_to_str(enum report_status_error error)
++{
++    static char unknown[64] = { '\0' };
++
++    switch (error) {
++        case REPORT_STATUS_ERROR_NO_ERR:
++            return "NO_ERR";
++        case REPORT_STATUS_ERROR_UNSUPP_MSG_ID:
++            return "UNSUPP_MSG_ID";
++        case REPORT_STATUS_ERROR_UNEXP_MSG_ID:
++            return "UNEXP_MSG_ID";
++        case REPORT_STATUS_ERROR_INV_MSG_DAT:
++            return "INV_MSG_DAT";
++        case REPORT_STATUS_ERROR_UNEXP_ERR:
++            return "UNEXP_ERR";
++        case REPORT_STATUS_ERROR_DAT_OUT_OF_ORDER:
++            return "DAT_OUT_OF_ORDER";
++        case REPORT_STATUS_ERROR_TOO_VIEW_DAT:
++            return "TOO_VIEW_DAT";
++        case REPORT_STATUS_ERROR_TOO_MANY_DAT:
++            return "TOO_MANY_DAT";
++        case REPORT_STATUS_ERROR_FW_CHK_SUM:
++            return "FW_CHK_SUM";
++        case REPORT_STATUS_ERROR_FW_FILE_LEN:
++            return "FW_CHK_SUM";
++        case REPORT_STATUS_ERROR_FW_ERASE:
++            return "FW_ERASE";
++        case REPORT_STATUS_ERROR_FW_PROG:
++            return "FW_PROG";
++        case REPORT_STATUS_ERROR_DOWNLOAD_TYPE:
++            return "DOWNLOAD_TYPE";
++        case REPORT_STATUS_ERROR_DOWNLOAD_CONFIG_IDX:
++            return "DOWNLOAD_CONFIG_IDX";
++        default:
++            snprintf(unknown, sizeof(unknown) - 1, "UNKNOWN (%i)", error);
++            return unknown;
++    }
++}
++
++
++struct report_status {
++    enum report_status_code code;
++    enum report_status_error error;
++    int last_cmd_id;
++};
++
++
++/*********************************************************************************************************************/
++
++
++struct report_ts_data {
++    int pressed;
++    int in_range;
++    int valid;
++    unsigned int finger_id;
++    unsigned int x;
++    unsigned int y;
++    unsigned int contact_cnt;
++};
++
++
++/*********************************************************************************************************************/
++
++
++struct report_key_array {
++    unsigned int num_keys;
++    int any_key_touched;
++    int key_touched[RAFI_GS_MAX_KEYS];
++};
++
++
++/*********************************************************************************************************************/
++
++
++enum report_id {
++    REPORT_ID_SW_VERSION = 11,
++    REPORT_ID_STATUS = 40,
++    REPORT_ID_TS_DATA = 75,
++    REPORT_ID_KEY_ARRAY = 79
++};
++
++
++const char *
++report_id_to_str(enum report_id id)
++{
++    static char unknown[64] = { '\0' };
++
++    switch (id) {
++        case REPORT_ID_SW_VERSION:
++            return "SW_VERSION";
++        case REPORT_ID_STATUS:
++            return "STATUS";
++        case REPORT_ID_TS_DATA:
++            return "TS_DATA";
++        case REPORT_ID_KEY_ARRAY:
++            return "KEY_ARRAY";
++        default:
++            snprintf(unknown, sizeof(unknown) - 1, "UNKNOWN (%i)", id);
++            return unknown;
++    }
++}
++
++
++struct report {
++    uint8_t remaining_frames;
++    enum report_id id;
++    union {
++        struct report_sw_version sw_version;
++        struct report_status status;
++        struct report_ts_data ts_data;
++        struct report_key_array key_array;
++    } payload;
++};
++
++
++/*********************************************************************************************************************/
++
++
++/* Control byte field values. */
++#define RAFI_GS_BYTE_CTRL_WRITE                  0x00
++#define RAFI_GS_BYTE_CTRL_READ                   0x01
++#define RAFI_GS_BYTE_CTRL_REREAD                 0x03
++
++
++/* Frame size. */
++#define RAFI_GS_FRAME_SIZE                       10 /**< Size of a frame excluding the control byte. */
++
++/* Frame field offsets. */
++#define RAFI_GS_FRAME_OFF_REMAINING_FRAMES       0
++#define RAFI_GS_FRAME_OFF_MESSAGE_FRAGMENT       1
++#define RAFI_GS_FRAME_OFF_CMD_ID                 RAFI_GS_FRAME_OFF_MESSAGE_FRAGMENT
++#define RAFI_GS_FRAME_OFF_REQ_ID                 RAFI_GS_FRAME_OFF_MESSAGE_FRAGMENT
++#define RAFI_GS_FRAME_OFF_CMD_PAYLOAD            2
++#define RAFI_GS_FRAME_OFF_REQ_PAYLOAD            2
++#define RAFI_GS_FRAME_OFF_CRC                    9
++
++/* Frame field sizes. */
++#define RAFI_GS_FRAME_SZ_REMAINING_FRAMES        1
++#define RAFI_GS_FRAME_SZ_MESSAGE_FRAGMENT        8
++#define RAFI_GS_FRAME_SZ_CHECKSUM                1
++
++
++/* Report message field offsets. */
++#define RAFI_GS_REPORT_OFF_REPORT_ID             0
++#define RAFI_GS_REPORT_OFF_DATA                  1
++
++/* Report message field sizes. */
++#define RAFI_GS_REPORT_SZ_REPORT_ID              1
++
++
++/* SW version report message size. */
++#define RAFI_GS_REPORT_STATUS_SIZE               7
++
++/* SW version report field offsets. */
++#define RAFI_GS_REPORT_SW_VERSION_OFF_MAJOR      0
++#define RAFI_GS_REPORT_SW_VERSION_OFF_MINOR      1
++#define RAFI_GS_REPORT_SW_VERSION_OFF_REVISION   2
++
++
++/* Status report message size. */
++#define RAFI_GS_REPORT_STATUS_SIZE               7
++
++/* Status report field offsets. */
++#define RAFI_GS_REPORT_STATUS_OFF_CODE           0
++#define RAFI_GS_REPORT_STATUS_OFF_ERROR          1
++#define RAFI_GS_REPORT_STATUS_OFF_LAST_CMD_ID    2
++
++
++/* Touchscreen data report message size. */
++#define RAFI_GS_REPORT_TS_DATA_SIZE              7
++
++/* Touchscreen data report field offsets. */
++#define RAFI_GS_REPORT_TS_DATA_OFF_INFO          0
++#define RAFI_GS_REPORT_TS_DATA_OFF_FINGER_ID     1
++#define RAFI_GS_REPORT_TS_DATA_OFF_X_LSB         2
++#define RAFI_GS_REPORT_TS_DATA_OFF_X_MSB         3
++#define RAFI_GS_REPORT_TS_DATA_OFF_Y_LSB         4
++#define RAFI_GS_REPORT_TS_DATA_OFF_Y_MSB         5
++#define RAFI_GS_REPORT_TS_DATA_OFF_CONTACT_CNT   6
++
++/* Touchscreen data report field INFO bits. */
++#define RAFI_GS_REPORT_TS_DATA_INFO_PRESS        (1 << 0)
++#define RAFI_GS_REPORT_TS_DATA_INFO_IN_RANGE     (1 << 1)
++#define RAFI_GS_REPORT_TS_DATA_INFO_VALID        (1 << 2)
++
++
++/* Key array report message size. */
++#define RAFI_GS_REPORT_KEY_ARRAY_SIZE            7
++
++/* Key array report field offsets. */
++#define RAFI_GS_REPORT_KEY_ARRAY_OFF_INFO        0
++#define RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_0_7    1
++#define RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_8_15   2
++#define RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_16_23  3
++#define RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_24_31  4
++
++/* Key array report field INFO bits. */
++#define RAFI_GS_REPORT_KEY_ARRAY_INFO_NUM_KEYS            (0x1F << 0)
++#define RAFI_GS_REPORT_KEY_ARRAY_INFO_ANY_KEY_TOUCHED     (1 << 7)
++
++
++/*********************************************************************************************************************/
++
++
++static int
++decode_report_sw_version(uint8_t * buffer, unsigned int size, struct report * report)
++{
++    PDEBUG("Entered.");
++
++    if (RAFI_GS_REPORT_STATUS_SIZE != size) {
++        PERROR("Invalid size=%u", size);
++        return -EINVAL;
++    }
++
++    report->payload.sw_version.major = buffer[RAFI_GS_REPORT_SW_VERSION_OFF_MAJOR];
++    report->payload.sw_version.minor = buffer[RAFI_GS_REPORT_SW_VERSION_OFF_MINOR];
++    report->payload.sw_version.revision = buffer[RAFI_GS_REPORT_SW_VERSION_OFF_REVISION];
++
++    PDEBUG("Leaved: major=%hhu minor=%hhu revision=%hhu.",
++            report->payload.sw_version.major,
++            report->payload.sw_version.minor,
++            report->payload.sw_version.revision);
++
++    return 0;
++}
++
++
++static int
++decode_report_status(uint8_t * buffer, unsigned int size, struct report * report)
++{
++    PDEBUG("Entered.");
++
++    if (RAFI_GS_REPORT_STATUS_SIZE != size) {
++        PERROR("Invalid size=%u", size);
++        return -EINVAL;
++    }
++
++    switch (buffer[RAFI_GS_REPORT_STATUS_OFF_CODE]) {
++        case REPORT_STATUS_CODE_NORMAL_OPERATION:
++        case REPORT_STATUS_CODE_ACCEPTING_DATA:
++        case REPORT_STATUS_CODE_DATA_ACCEPTED:
++        case REPORT_STATUS_CODE_ERROR:
++            report->payload.status.code = buffer[RAFI_GS_REPORT_STATUS_OFF_CODE];
++            break;
++        default:
++            PERROR("Invalid code=%hhu", buffer[RAFI_GS_REPORT_STATUS_OFF_CODE]);
++            return -EINVAL;
++    }
++
++    switch (buffer[RAFI_GS_REPORT_STATUS_OFF_ERROR]) {
++        case REPORT_STATUS_ERROR_NO_ERR:
++        case REPORT_STATUS_ERROR_UNSUPP_MSG_ID:
++        case REPORT_STATUS_ERROR_UNEXP_MSG_ID:
++        case REPORT_STATUS_ERROR_INV_MSG_DAT:
++        case REPORT_STATUS_ERROR_UNEXP_ERR:
++        case REPORT_STATUS_ERROR_DAT_OUT_OF_ORDER:
++        case REPORT_STATUS_ERROR_TOO_VIEW_DAT:
++        case REPORT_STATUS_ERROR_TOO_MANY_DAT:
++        case REPORT_STATUS_ERROR_FW_CHK_SUM:
++        case REPORT_STATUS_ERROR_FW_FILE_LEN:
++        case REPORT_STATUS_ERROR_FW_ERASE:
++        case REPORT_STATUS_ERROR_FW_PROG:
++        case REPORT_STATUS_ERROR_DOWNLOAD_TYPE:
++        case REPORT_STATUS_ERROR_DOWNLOAD_CONFIG_IDX:
++            report->payload.status.error = buffer[RAFI_GS_REPORT_STATUS_OFF_ERROR];
++            break;
++        default:
++            PERROR("Invalid error=%hhu", buffer[RAFI_GS_REPORT_STATUS_OFF_ERROR]);
++            return -EINVAL;
++    }
++
++    /* ToDo: Check. */
++    report->payload.status.last_cmd_id = buffer[RAFI_GS_REPORT_STATUS_OFF_LAST_CMD_ID];
++
++    PDEBUG("Leaved: code=%s error=%s last_cmd_id=%i.",
++            report_status_code_to_str(report->payload.status.code),
++            report_status_error_to_str(report->payload.status.error),
++            report->payload.status.last_cmd_id);
++
++    return 0;
++}
++
++
++static int
++decode_report_ts_data(uint8_t * buffer, unsigned int size, struct report * report)
++{
++    uint8_t info;
++
++    PDEBUG("Entered.");
++
++    if (RAFI_GS_REPORT_TS_DATA_SIZE != size) {
++        PERROR("Invalid size=%u", size);
++        return -EINVAL;
++    }
++
++    info = buffer[RAFI_GS_REPORT_TS_DATA_OFF_INFO];
++
++    report->payload.ts_data.pressed = (info & RAFI_GS_REPORT_TS_DATA_INFO_PRESS) ? 1 : 0;
++    report->payload.ts_data.in_range = (info & RAFI_GS_REPORT_TS_DATA_INFO_IN_RANGE) ? 1 : 0;
++    report->payload.ts_data.valid = (info & RAFI_GS_REPORT_TS_DATA_INFO_VALID) ? 1 : 0;
++    report->payload.ts_data.finger_id = buffer[RAFI_GS_REPORT_TS_DATA_OFF_FINGER_ID];
++    report->payload.ts_data.x = (buffer[RAFI_GS_REPORT_TS_DATA_OFF_X_LSB] & 0xFF) +
++        ((buffer[RAFI_GS_REPORT_TS_DATA_OFF_X_MSB] & 0xFF) << 8);
++    report->payload.ts_data.y = (buffer[RAFI_GS_REPORT_TS_DATA_OFF_Y_LSB] & 0xFF) +
++        ((buffer[RAFI_GS_REPORT_TS_DATA_OFF_Y_MSB] & 0xFF) << 8);
++    report->payload.ts_data.contact_cnt = buffer[RAFI_GS_REPORT_TS_DATA_OFF_CONTACT_CNT];
++
++    PDEBUG("Leaved: pressed=%i in_range=%i valid=%i finger_id=%u x=%u y=%u contact_cnt=%u",
++            report->payload.ts_data.pressed,
++            report->payload.ts_data.in_range,
++            report->payload.ts_data.valid,
++            report->payload.ts_data.finger_id,
++            report->payload.ts_data.x,
++            report->payload.ts_data.y,
++            report->payload.ts_data.contact_cnt);
++
++    return 0;
++}
++
++
++static int
++decode_report_key_array(uint8_t * buffer, unsigned int size, struct report * report)
++{
++    uint8_t info;
++    unsigned int i;
++
++    PDEBUG("Entered.");
++
++    if (RAFI_GS_REPORT_TS_DATA_SIZE != size) {
++        PERROR("Invalid size=%u", size);
++        return -EINVAL;
++    }
++
++    info = buffer[RAFI_GS_REPORT_KEY_ARRAY_OFF_INFO];
++
++    report->payload.key_array.num_keys = (info & RAFI_GS_REPORT_KEY_ARRAY_INFO_NUM_KEYS);
++    report->payload.key_array.any_key_touched = (info & RAFI_GS_REPORT_KEY_ARRAY_INFO_ANY_KEY_TOUCHED) ? 1 : 0;
++
++    for (i = 0; i < RAFI_GS_MAX_KEYS; ++i) {
++        unsigned int byte;
++        unsigned int bit;
++
++        byte = (i / 8) + RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_0_7;
++        bit = i % 8;
++
++        report->payload.key_array.key_touched[i] = (buffer[byte] & (1 << bit)) ? 1 : 0;
++    }
++
++    PDEBUG("Leaved: num_keys=%u any_key_touched=%i key_touched=0x%02X%02X%02X%02X.",
++            report->payload.key_array.num_keys,
++            report->payload.key_array.num_keys,
++            buffer[RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_24_31],
++            buffer[RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_16_23],
++            buffer[RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_8_15],
++            buffer[RAFI_GS_REPORT_KEY_ARRAY_OFF_KEYS_0_7]);
++
++    return 0;
++}
++
++
++static int
++decode_report(uint8_t * buffer, unsigned int size, struct report * report)
++{
++    report->id = buffer[RAFI_GS_REPORT_OFF_REPORT_ID];
++
++    if (REPORT_ID_SW_VERSION == report->id) {
++        return decode_report_sw_version(&buffer[RAFI_GS_REPORT_OFF_DATA], size - RAFI_GS_REPORT_SZ_REPORT_ID, report);
++    } else if (REPORT_ID_STATUS == report->id) {
++        return decode_report_status(&buffer[RAFI_GS_REPORT_OFF_DATA], size - RAFI_GS_REPORT_SZ_REPORT_ID, report);
++    } else if (REPORT_ID_TS_DATA == report->id) {
++        return decode_report_ts_data(&buffer[RAFI_GS_REPORT_OFF_DATA], size - RAFI_GS_REPORT_SZ_REPORT_ID, report);
++    } else if (REPORT_ID_KEY_ARRAY == report->id) {
++        return decode_report_key_array(&buffer[RAFI_GS_REPORT_OFF_DATA], size - RAFI_GS_REPORT_SZ_REPORT_ID, report);
++    } else {
++        PERROR("Unsupported report type=%hhu" , buffer[RAFI_GS_REPORT_OFF_REPORT_ID]);
++        return -EINVAL;
++    }
++}
++
++
++static uint8_t
++crc8(uint8_t start, uint8_t * array, unsigned int size)
++{
++    static const uint8_t crcpoly = 0x8C;
++    unsigned int i;
++    uint8_t crc = start;
++
++    for (i = 0; i < size; ++i) {
++        uint8_t index = 7;
++        uint8_t fb;
++        uint8_t dat = array[i];
++
++        do {
++            fb = (crc ^ dat) & 0x01;
++            dat >>= 1;
++            crc >>= 1;
++            if (fb) {
++                crc ^= crcpoly;
++            }
++        } while (index--);
++    }
++
++    return crc;
++}
++
++
++static int
++decode_frame(uint8_t * rcv, unsigned int size, struct report * report)
++{
++    uint8_t crc;
++    int err;
++
++    PDEBUG("Entered.");
++
++    if (size != RAFI_GS_FRAME_SIZE) {
++        PERROR("Invalid size=%u", size);
++        return -EINVAL;
++    }
++
++    crc = crc8(0, rcv, size);
++    if (0 != crc) {
++        PERROR("CRC calculation failed: %hhu", crc);
++        PERROR("Frame = %s", array_to_str(rcv, size));
++        return -EINVAL;
++    }
++
++    report->remaining_frames = rcv[RAFI_GS_FRAME_OFF_REMAINING_FRAMES];
++    if (report->remaining_frames) { /* Not supported yet. */
++        PERROR("Did not expect to get fragmented frames, report->remaining_frames=%i.", report->remaining_frames);
++        PERROR("Frame = %s", array_to_str(rcv, size));
++        return -EINVAL;
++    }
++
++    err = decode_report(&rcv[RAFI_GS_FRAME_OFF_MESSAGE_FRAGMENT], RAFI_GS_FRAME_SZ_MESSAGE_FRAGMENT, report);
++    if (err) {
++        PERROR("In decode_report(): %i", err);
++        PERROR("Frame = %s", array_to_str(rcv, size));
++        return err;
++    }
++    
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++/*********************************************************************************************************************/
++
++
++struct ts_obs {
++    struct list_head list;
++    struct rafi_obs_ts * obs;
++};
++
++
++struct key_obs {
++    struct list_head list;
++    struct rafi_obs_key * obs;
++};
++
++
++
++struct rafi_gs_device {
++    struct semaphore clnt_lock; /* Serializes access to clnt. */
++    struct i2c_client * clnt;
++
++    unsigned int gpio;
++    unsigned int irq;
++
++    struct work_struct work;
++
++    wait_queue_head_t report_queue; /* Used to wait for a command's status report. */
++    int report_delivered; /* Signals whether the status report is delivered. */
++    spinlock_t report_lock; /* Serializes access to status_report. */
++    struct report report;
++
++    spinlock_t obs_lock; /* Protects ts_obs and key_obs. */
++    struct list_head ts_obs;
++    int finger_down[RAFI_GS_MAX_FINGERS];
++    struct list_head key_obs[RAFI_GS_MAX_KEYS];
++    int key_touched[RAFI_GS_MAX_KEYS];
++};
++
++
++/*********************************************************************************************************************/
++
++
++static void
++bc_event_ts_press(struct rafi_gs_device * thiz, unsigned int finger, int x, int y)
++{
++    struct list_head * pos = 0;
++    struct ts_obs * ts_obs;
++
++    PDEBUG("Enter: finger=%u x=%i y=%i", finger, x, y);
++
++    if (finger >= RAFI_GS_MAX_FINGERS) {
++        PERROR("finger=%u too big (max=%u)", finger, RAFI_GS_MAX_FINGERS);
++        return;
++    }
++
++    spin_lock(&thiz->obs_lock);
++        list_for_each(pos, &thiz->ts_obs) {
++            ts_obs = list_entry(pos, struct ts_obs, list);
++
++            if (0 == thiz->finger_down[finger]) {
++                ts_obs->obs->down(ts_obs->obs, finger, x, y);
++                thiz->finger_down[finger] = 1;
++            }
++
++            ts_obs->obs->move(ts_obs->obs, finger, x, y);
++        }
++    spin_unlock(&thiz->obs_lock);
++
++    PDEBUG("Leaved.");
++}
++
++
++static void
++bc_event_ts_release(struct rafi_gs_device * thiz, unsigned int finger)
++{
++    struct list_head * pos = 0;
++    struct ts_obs * ts_obs;
++
++    PDEBUG("Entered: finger=%u", finger);
++
++    if (finger >= RAFI_GS_MAX_FINGERS) {
++        PERROR("finger=%u too big (max=%u)", finger, RAFI_GS_MAX_FINGERS);
++        return;
++    }
++
++    spin_lock(&thiz->obs_lock);
++        list_for_each(pos, &thiz->ts_obs) {
++            ts_obs = list_entry(pos, struct ts_obs, list);
++
++            if (thiz->finger_down[finger]) {
++                ts_obs->obs->up(ts_obs->obs, finger);
++                thiz->finger_down[finger] = 0;
++            }
++        }
++    spin_unlock(&thiz->obs_lock);
++
++    PDEBUG("Leaved.");
++}
++
++
++static void
++bc_event_key_down(struct rafi_gs_device * thiz, unsigned int key)
++{
++    struct list_head * pos = 0;
++    struct key_obs * key_obs;
++
++    PDEBUG("Entered: key=%u", key);
++
++    if (key >= RAFI_GS_MAX_KEYS) {
++        PERROR("key=%u too big (max=%u)", key, RAFI_GS_MAX_KEYS);
++        return;
++    }
++
++    spin_lock(&thiz->obs_lock);
++        list_for_each(pos, &thiz->key_obs[key]) {
++            key_obs = list_entry(pos, struct key_obs, list);
++            key_obs->obs->down(key_obs->obs);
++        }
++    spin_unlock(&thiz->obs_lock);
++
++    PDEBUG("Leaved.");
++}
++
++
++static void
++bc_event_key_up(struct rafi_gs_device * thiz, unsigned int key)
++{
++    struct list_head * pos = 0;
++    struct key_obs * key_obs;
++
++    PDEBUG("Entered: key=%u", key);
++
++    if (key >= RAFI_GS_MAX_KEYS) {
++        PERROR("key=%u too big (max=%u)", key, RAFI_GS_MAX_KEYS);
++        return;
++    }
++
++    spin_lock(&thiz->obs_lock);
++        list_for_each(pos, &thiz->key_obs[key]) {
++            key_obs = list_entry(pos, struct key_obs, list);
++            key_obs->obs->up(key_obs->obs);
++        }
++    spin_unlock(&thiz->obs_lock);
++
++    PDEBUG("Leaved.");
++}
++
++
++/*********************************************************************************************************************/
++
++
++static int
++handle_report(struct rafi_gs_device * thiz, struct report * report)
++{
++    PDEBUG("Entered.");
++
++    spin_lock(&thiz->report_lock);
++        thiz->report = *report;
++        thiz->report_delivered = 1;
++    spin_unlock(&thiz->report_lock);
++
++    wake_up(&thiz->report_queue);
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++static int
++handle_ts_data_report(struct rafi_gs_device * thiz, struct report_ts_data * ts_data)
++{
++    PDEBUG("Entered.");
++
++    if (ts_data->pressed && (!ts_data->in_range || !ts_data->valid)) {
++        PERROR("Ignore data report due to invalid data.");
++        return -EINVAL;
++    }
++
++    if (ts_data->pressed) {
++        bc_event_ts_press(thiz, ts_data->finger_id, ts_data->x, ts_data->y);
++    } else {
++        bc_event_ts_release(thiz, ts_data->finger_id);
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++static int
++handle_key_array_report(struct rafi_gs_device * thiz, struct report_key_array * key_array)
++{
++    int i;
++
++    PDEBUG("Entered.");
++
++    for (i = 0; i < RAFI_GS_MAX_KEYS; ++i) {
++        if (key_array->key_touched[i]) {
++            if (0 == thiz->key_touched[i]) {
++                thiz->key_touched[i] = 1;
++                bc_event_key_down(thiz, i);
++            }
++        } else {
++            if (1 == thiz->key_touched[i]) {
++                thiz->key_touched[i] = 0;
++                bc_event_key_up(thiz, i);
++            }
++        }
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++/*********************************************************************************************************************/
++
++
++static int
++get_report(struct rafi_gs_device * thiz, struct report * report)
++{
++    int err;
++    struct i2c_msg msg[1];
++    uint8_t snd[1];
++    uint8_t rcv[10];
++
++    PDEBUG("Entered.");
++
++    err = down_interruptible(&thiz->clnt_lock);
++    if (err) {
++        PERROR("In down_interruptible(): %i", err);
++        return err;
++    }
++        /* Read request. */
++        snd[0] = RAFI_GS_BYTE_CTRL_READ;
++        msg[0].addr = thiz->clnt->addr;
++        msg[0].flags = 0;
++        msg[0].len = sizeof(snd);
++        msg[0].buf = snd;
++
++        err = i2c_transfer(thiz->clnt->adapter, msg, 1);
++        if (err < 0) {
++            up(&thiz->clnt_lock);
++            PERROR("In i2c_transfer(): %i", err);
++            return err;
++        }
++
++        /* Read response. */
++        msg[0].addr = thiz->clnt->addr;
++        msg[0].flags = I2C_M_RD;
++        msg[0].len = sizeof(rcv);
++        msg[0].buf = rcv;
++
++        err = i2c_transfer(thiz->clnt->adapter, msg, 1);
++        if (err < 0) {
++            up(&thiz->clnt_lock);
++            PERROR("In i2c_transfer(): %i", err);
++            return err;
++        }
++    up(&thiz->clnt_lock);
++
++    PDEBUG("rcv[] = %s", array_to_str(rcv, sizeof(rcv)));
++
++    err = decode_frame(rcv, sizeof(rcv), report);
++    if (err) {
++        PDEBUG("In decode_frame(): %i", err);
++        return err;
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++static void
++work_fn(struct work_struct * work)
++{
++    struct rafi_gs_device * thiz;
++    struct report report;
++    int err;
++
++    thiz = container_of(work, struct rafi_gs_device, work);
++
++    PDEBUG("Entered.");
++
++    err = get_report(thiz, &report);
++    enable_irq(thiz->irq); /* Enable again in any case. */
++    if (err) {
++        PERROR("In get_report(): %i!", err);
++        return;
++    }
++
++    if (report.remaining_frames) {
++        PERROR("remaining_frames=%u, not supported!", report.remaining_frames);
++        return;
++    }
++
++    if (report.id == REPORT_ID_TS_DATA) {
++        err = handle_ts_data_report(thiz, &report.payload.ts_data);
++        if (err) {
++            PERROR("In handle_ts_data_report(): %i", err);
++            return;
++        }
++    } else if (report.id == REPORT_ID_KEY_ARRAY) {
++        err = handle_key_array_report(thiz, &report.payload.key_array);
++        if (err) {
++            PERROR("In handle_key_array_report(): %i", err);
++            return;
++        }
++    } else { /* Report received due to a command or request. */
++        err = handle_report(thiz, &report);
++        if (err) {
++            PERROR("In handle_status_report(): %i", err);
++            return;
++        }
++    }
++
++    PDEBUG("Leaved.");
++}
++
++
++static irqreturn_t
++irq_handler(int irq, void * ctxt)
++{
++    struct rafi_gs_device * thiz = ctxt;
++
++    PDEBUG("Entered.");
++
++    if (thiz->irq != irq) {
++        PERROR("thiz->irq=%i != irq=%i", thiz->irq, irq);
++        return IRQ_NONE;
++    }
++
++    disable_irq_nosync(irq);
++
++    queue_work(rafi_gs_wq, &thiz->work);
++
++    PDEBUG("Leaved.");
++
++    return IRQ_HANDLED;
++}
++
++
++/*********************************************************************************************************************/
++
++
++static int
++send_command(struct rafi_gs_device * thiz, uint8_t * cmd, unsigned int size)
++{
++    int err;
++    struct i2c_msg msg[1];
++    uint8_t buffer[size + 1];
++
++    PDEBUG("Entered: size=%u cmd=%s.", size, array_to_str(cmd, size));
++
++    if (0 == size) {
++        PERROR("No data.");
++        return -EINVAL;
++    }
++
++    buffer[0] = RAFI_GS_BYTE_CTRL_WRITE;
++    memcpy(&buffer[1], cmd, size);
++
++    err = down_interruptible(&thiz->clnt_lock);
++    if (err) {
++        PERROR("In down_interruptible(): %i", err);
++        return err;
++    }
++        msg[0].addr = thiz->clnt->addr;
++        msg[0].flags = 0;
++        msg[0].len = sizeof(buffer);
++        msg[0].buf = buffer;
++
++        err = i2c_transfer(thiz->clnt->adapter, msg, 1);
++        if (err < 0) {
++            up(&thiz->clnt_lock);
++            PERROR("In i2c_transfer(): %i", err);
++            return err;
++        }
++    up(&thiz->clnt_lock);
++
++    err = wait_event_timeout(thiz->report_queue, thiz->report_delivered, HZ);
++    if (0 == err) {
++        PERROR("In wait_event_timeout(): %i", err);
++        return -ETIMEDOUT;
++    }
++
++    PDEBUG("Leaved.");
++
++    return 0;
++}
++
++
++enum command {
++    COMMAND_SELECT_TOUCH_CONFIGURATION = 78,
++    COMMAND_SW_VERSION = 11
++};
++
++
++#define REQUEST_SW_VERSION                       COMMAND_SW_VERSION
++
++
++static int
++send_command_select_touch_configuration(struct rafi_gs_device * thiz, unsigned long config)
++{
++    uint8_t array[RAFI_GS_FRAME_SIZE] = { 0x00 };
++    int err;
++
++    if (config > 255) {
++        PERROR("config=%lu invalid!", config);
++        return -EINVAL;
++    }
++
++    array[RAFI_GS_FRAME_OFF_REMAINING_FRAMES] = 0x00;
++    array[RAFI_GS_FRAME_OFF_CMD_ID] = COMMAND_SELECT_TOUCH_CONFIGURATION;
++    array[RAFI_GS_FRAME_OFF_CMD_PAYLOAD] = config;
++    array[RAFI_GS_FRAME_OFF_CRC] = crc8(0x00, array, RAFI_GS_FRAME_SIZE - 1);
++
++    err = send_command(thiz, array, sizeof(array));
++    if (err) {
++        PERROR("In send_command(): %i", err);
++        return err;
++    }
++
++    spin_lock(&thiz->report_lock);
++        thiz->report_delivered = 0;
++
++        if (REPORT_ID_STATUS == thiz->report.id) {
++            if (thiz->report.payload.status.last_cmd_id != COMMAND_SELECT_TOUCH_CONFIGURATION) {
++                spin_unlock(&thiz->report_lock);
++                PERROR("last_cmd_id=%i", thiz->report.payload.status.last_cmd_id);
++                return -EINVAL;
++            }
++
++            if (thiz->report.payload.status.code == REPORT_STATUS_CODE_ERROR) {
++                spin_unlock(&thiz->report_lock);
++                PERROR("Command refused with code %s", report_status_code_to_str(thiz->report.payload.status.code));
++                PERROR("Command refused with error %s", report_status_error_to_str(thiz->report.payload.status.error));
++                return -EIO;
++            }
++        } else {
++            spin_unlock(&thiz->report_lock);
++            PERROR("Wrong report = %s delivered!", report_id_to_str(thiz->report.id));
++            return -EINVAL;
++        }
++    spin_unlock(&thiz->report_lock);
++
++    return 0;
++}
++
++
++static int
++send_command_sw_version(struct rafi_gs_device * thiz,
++                        uint8_t * major,
++                        uint8_t * minor,
++                        uint8_t * revision)
++{
++    uint8_t array[RAFI_GS_FRAME_SIZE] = { 0x00 };
++    int err;
++
++    array[RAFI_GS_FRAME_OFF_REMAINING_FRAMES] = 0x00;
++    array[RAFI_GS_FRAME_OFF_CMD_ID] = COMMAND_SW_VERSION;
++    array[RAFI_GS_FRAME_OFF_CRC] = crc8(0x00, array, RAFI_GS_FRAME_SIZE - 1);
++
++    err = send_command(thiz, array, sizeof(array));
++    if (err) {
++        PERROR("In send_command(): %i", err);
++        return err;
++    }
++
++    spin_lock(&thiz->report_lock);
++        thiz->report_delivered = 0;
++
++        if (REPORT_ID_SW_VERSION == thiz->report.id) {
++            *major = thiz->report.payload.sw_version.major;
++            *minor = thiz->report.payload.sw_version.minor;
++            *revision = thiz->report.payload.sw_version.revision;
++        } else {
++            PERROR("Wrong report = %s delivered!", report_id_to_str(thiz->report.id));
++            return -EINVAL;
++        }
++    spin_unlock(&thiz->report_lock);
++
++    return 0;
++}
++
++
++/*********************************************************************************************************************/
++
++
++struct rafi_gs_device *
++rafi_gs_device_create(struct i2c_client * clnt, const struct i2c_device_id * id, unsigned int gpio)
++{
++    struct rafi_gs_device * thiz = NULL;
++    unsigned int i;
++    int irq;
++    int err;
++
++    PDEBUG("Entered: gpio=%u.", gpio);
++
++    if (clnt->addr != RAFI_GS_I2C_ADDR) {
++        PERROR("Invalid device address=%i", clnt->addr);
++        return NULL;
++    }
++
++    thiz = kmalloc(sizeof(*thiz), GFP_KERNEL);
++    if (NULL == thiz) {
++        PERROR("In kmalloc().");
++        goto error_0;
++    }
++
++    irq = gpio_to_irq(gpio);
++    if (irq < 0) {
++        PERROR("In gpio_to_irq(): %i", irq);
++        goto error_1;
++    }
++
++    PDEBUG("irq=%i", irq);
++
++    memset(thiz, 0, sizeof(*thiz));
++
++    sema_init(&thiz->clnt_lock, 1);
++    thiz->clnt = clnt;
++
++    init_waitqueue_head(&thiz->report_queue);
++    thiz->report_delivered = 0;
++    spin_lock_init(&thiz->report_lock);
++
++    thiz->gpio = gpio;
++    thiz->irq = irq;
++    spin_lock_init(&thiz->obs_lock);
++    INIT_WORK(&thiz->work, work_fn);
++    INIT_LIST_HEAD(&thiz->ts_obs);
++
++    for (i = 0; i < RAFI_GS_MAX_KEYS; ++i) {
++        INIT_LIST_HEAD(&thiz->key_obs[i]);
++    }
++
++    err = device_create_file(&clnt->dev, &dev_attr_config);
++    if (err) {
++        PERROR("In device_create_file(): %i", err);
++        goto error_1;
++    }
++
++    err = device_create_file(&clnt->dev, &dev_attr_sw_version);
++    if (err) {
++        PERROR("In device_create_file(): %i", err);
++        goto error_2;
++    }
++
++    PDEBUG("Leaved.");
++
++    return thiz;
++
++error_2:
++
++    device_remove_file(&thiz->clnt->dev, &dev_attr_config);
++
++error_1:
++
++    kfree(thiz);
++
++error_0:
++
++    return NULL;
++}
++
++
++void
++rafi_gs_device_destroy(struct rafi_gs_device * thiz)
++{
++    unsigned int i;
++    struct list_head * key_obs_pos;
++    struct list_head * ts_obs_pos;
++    struct key_obs * key_obs;
++    struct ts_obs * ts_obs;
++
++    free_irq(thiz->irq, thiz);
++
++    device_remove_file(&thiz->clnt->dev, &dev_attr_sw_version);
++    device_remove_file(&thiz->clnt->dev, &dev_attr_config);
++
++    for (i = 0; i < RAFI_GS_MAX_KEYS; ++i) {
++        list_for_each(key_obs_pos, &thiz->key_obs[i]) {
++            key_obs = list_entry(key_obs_pos, struct key_obs, list);
++            key_obs->obs->dtor(key_obs->obs);
++        }
++    }
++
++    list_for_each(ts_obs_pos, &thiz->ts_obs) {
++        ts_obs = list_entry(ts_obs_pos, struct ts_obs, list);
++        ts_obs->obs->dtor(ts_obs->obs);
++    }
++
++    kfree(thiz);
++}
++
++
++int
++rafi_gs_device_reg_ts_obs(struct rafi_gs_device * thiz,
++                           struct rafi_obs_ts * ts_obs)
++{
++    struct ts_obs * entry;
++
++    entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++    if (NULL == entry) {
++        PERROR("In kmalloc().");
++        return -ENOMEM;
++    }
++
++    INIT_LIST_HEAD(&entry->list);
++    entry->obs = ts_obs;
++
++    spin_lock(&thiz->obs_lock);
++        list_add(&entry->list, &thiz->ts_obs);
++    spin_unlock(&thiz->obs_lock);
++
++    return 0;
++}
++
++
++int
++rafi_gs_device_reg_key_obs(struct rafi_gs_device * thiz,
++                            unsigned int key,
++                            struct rafi_obs_key * key_obs)
++{
++    struct key_obs * entry;
++
++    if (key >= RAFI_GS_MAX_KEYS) {
++        PERROR("key=%u too big (max=%u)", key, RAFI_GS_MAX_KEYS);
++        return -EINVAL;
++    }
++
++    entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++    if (NULL == entry) {
++        PERROR("In kmalloc().");
++        return -ENOMEM;
++    }
++
++    INIT_LIST_HEAD(&entry->list);
++    entry->obs = key_obs;
++
++    spin_lock(&thiz->obs_lock);
++        list_add(&entry->list, &thiz->key_obs[key]);
++    spin_unlock(&thiz->obs_lock);
++
++    return 0;
++}
++
++
++int
++rafi_gs_device_start(struct rafi_gs_device * thiz)
++{
++    int err;
++
++    err = request_irq(thiz->irq, irq_handler, IRQF_SHARED | IRQF_TRIGGER_LOW, RAFI_GS_NAME, thiz);
++    if (err < 0) {
++        PERROR("In request_irq(): %i", err);
++        return err;
++    }
++
++    return 0;
++}
+diff --git a/drivers/input/touchscreen/rafi_gs_device.h b/drivers/input/touchscreen/rafi_gs_device.h
+new file mode 100644
+index 0000000..ecdadc4
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_gs_device.h
+@@ -0,0 +1,33 @@
++#ifndef _RAFI_GS_DEVICE_H_
++#define _RAFI_GS_DEVICE_H_
++
++
++struct rafi_gs_device;
++struct rafi_obs_ts;
++struct rafi_obs_key;
++
++struct i2c_client;
++struct i2c_device_id;
++
++
++struct rafi_gs_device *
++rafi_gs_device_create(struct i2c_client * clnt, const struct i2c_device_id * id, unsigned int gpio);
++
++
++void
++rafi_gs_device_destroy(struct rafi_gs_device * thiz);
++
++
++int
++rafi_gs_device_reg_ts_obs(struct rafi_gs_device * thiz, struct rafi_obs_ts * ts_obs);
++
++
++int
++rafi_gs_device_reg_key_obs(struct rafi_gs_device * thiz, unsigned int key, struct rafi_obs_key * key_obs);
++
++
++int
++rafi_gs_device_start(struct rafi_gs_device * thiz);
++
++
++#endif
+diff --git a/drivers/input/touchscreen/rafi_key_input.c b/drivers/input/touchscreen/rafi_key_input.c
+new file mode 100644
+index 0000000..2f9dbc2
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_key_input.c
+@@ -0,0 +1,98 @@
++#include "rafi_key_input.h"
++
++#include "rafi_obs.h"
++#include "rafi_gs.h"
++
++#include <linux/slab.h>
++#include <linux/input.h>
++#include <linux/string.h>
++
++
++struct rafi_key_input {
++    struct rafi_obs_key obs;
++    struct input_dev * input_dev;
++    char phys[32];
++};
++
++
++static void
++virt_dtor(struct rafi_obs_key * thiz)
++{
++    struct rafi_key_input * base = container_of(thiz, struct rafi_key_input, obs);
++
++    input_unregister_device(base->input_dev);
++    kfree(thiz);
++}
++
++
++static void
++virt_down(struct rafi_obs_key * thiz)
++{
++    struct rafi_key_input * base = container_of(thiz, struct rafi_key_input, obs);
++
++    input_report_key(base->input_dev, BTN_TOUCH, 1);
++    input_sync(base->input_dev);
++}
++
++
++static void
++virt_up(struct rafi_obs_key * thiz)
++{
++    struct rafi_key_input * base = container_of(thiz, struct rafi_key_input, obs);
++
++    input_report_key(base->input_dev, BTN_TOUCH, 0);
++    input_sync(base->input_dev);
++}
++
++
++struct rafi_obs_key *
++rafi_key_input_ctor(const char * phys, unsigned int phys_idx)
++{
++    int err;
++    struct rafi_key_input * thiz;
++    static unsigned int idx = 0;
++    char input_dev_name[32];
++
++    thiz = kmalloc(sizeof(*thiz), GFP_KERNEL);
++    if (NULL == thiz) {
++        PERROR("In kmalloc().");
++        return NULL;
++    }
++
++    memset(thiz, 0, sizeof(*thiz));
++	snprintf(thiz->phys, sizeof(thiz->phys), "%s/input%i", phys, phys_idx);
++
++    rafi_obs_key_init(&thiz->obs, virt_dtor, virt_down, virt_up);
++
++    thiz->input_dev = input_allocate_device();
++    if (NULL == thiz->input_dev) {
++        PERROR("In input_allocate_device().");
++        goto error_1;
++    }
++
++    snprintf(input_dev_name, sizeof(input_dev_name), "rafi_key%i", idx++);
++    thiz->input_dev->name = kstrdup(input_dev_name, GFP_KERNEL);
++    thiz->input_dev->phys = thiz->phys;
++    thiz->input_dev->id.bustype = BUS_I2C;
++    input_set_drvdata(thiz->input_dev, thiz);
++
++    input_set_capability(thiz->input_dev, EV_KEY, BTN_TOUCH);
++
++    err = input_register_device(thiz->input_dev);
++    if (err < 0) {
++        PERROR("In input_register_device(): %i.", err);
++        goto error_2;
++    }
++
++    return &thiz->obs;
++
++error_2:
++
++    input_free_device(thiz->input_dev);
++
++error_1:
++
++    kfree(thiz);
++
++    return NULL;
++}
+diff --git a/drivers/input/touchscreen/rafi_key_input.h b/drivers/input/touchscreen/rafi_key_input.h
+new file mode 100644
+index 0000000..516d2f6
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_key_input.h
+@@ -0,0 +1,16 @@
++#ifndef _RAFI_KEY_INPUT_H_
++#define _RAFI_KEY_INPUT_H_
++
++
++#include "rafi_obs.h"
++
++
++struct rafi_obs_key *
++rafi_key_input_ctor(const char * phys, unsigned int phys_idx);
++
++
++void
++rafi_key_input_dtor(struct rafi_obs_key * thiz);
++
++
++#endif
+diff --git a/drivers/input/touchscreen/rafi_obs.h b/drivers/input/touchscreen/rafi_obs.h
+new file mode 100644
+index 0000000..0807af1
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_obs.h
+@@ -0,0 +1,48 @@
++#ifndef RAFI_OBS_H
++#define RAFI_OBS_H
++
++
++/* Touch screen event observer. */
++struct rafi_obs_ts {
++    void (*dtor)(struct rafi_obs_ts * thiz);
++    void (*down)(struct rafi_obs_ts * thiz, unsigned int finger, unsigned int x, unsigned int y);
++    void (*move)(struct rafi_obs_ts * thiz, unsigned int finger, int x, int y);
++    void (*up)(struct rafi_obs_ts * thiz, unsigned int finger);
++};
++
++
++static inline void
++rafi_obs_ts_init(struct rafi_obs_ts * thiz,
++                 void (*dtor)(struct rafi_obs_ts * thiz),
++                 void (*down)(struct rafi_obs_ts * thiz, unsigned int finger, unsigned int x, unsigned int y),
++                 void (*move)(struct rafi_obs_ts * thiz, unsigned int finger, int x, int y),
++                 void (*up)(struct rafi_obs_ts * thiz, unsigned int finger))
++{
++    thiz->dtor = dtor;
++    thiz->down = down;
++    thiz->move = move;
++    thiz->up = up;
++}
++
++
++/* Key event observer. */
++struct rafi_obs_key {
++    void (*dtor)(struct rafi_obs_key * thiz);
++    void (*down)(struct rafi_obs_key * thiz);
++    void (*up)(struct rafi_obs_key * thiz);
++};
++
++
++static inline void
++rafi_obs_key_init(struct rafi_obs_key * thiz,
++                  void (*dtor)(struct rafi_obs_key * thiz),
++                  void (*down)(struct rafi_obs_key * thiz),
++                  void (*up)(struct rafi_obs_key * thiz))
++{
++    thiz->dtor = dtor;
++    thiz->down = down;
++    thiz->up = up;
++}
++
++
++#endif
+diff --git a/drivers/input/touchscreen/rafi_ts_input.c b/drivers/input/touchscreen/rafi_ts_input.c
+new file mode 100644
+index 0000000..cdef808
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_ts_input.c
+@@ -0,0 +1,315 @@
++#include "rafi_ts_input.h"
++
++#include "rafi_obs.h"
++#include "rafi_gs.h"
++
++#include <linux/slab.h>
++#include <linux/input.h>
++
++
++enum rafi_ts_input_state {
++    RAFI_TS_INPUT_STATE_UNTOUCHED,
++    RAFI_TS_INPUT_STATE_SINGLE_TOUCH,
++    RAFI_TS_INPUT_STATE_MULTI_TOUCH,
++};
++
++
++#define RAFI_TS_INPUT_MAX_FINGERS      2
++
++
++struct rafi_ts_finger
++{
++    unsigned int down;
++    unsigned int x;
++    unsigned int y;
++};
++
++
++struct rafi_ts_input {
++    struct rafi_obs_ts obs;
++    struct input_dev * input_dev;
++    enum rafi_ts_input_state state;
++    struct rafi_ts_finger fingers[RAFI_TS_INPUT_MAX_FINGERS];
++    char phys[32];
++};
++
++
++static enum rafi_ts_input_state
++get_finger_state(struct rafi_ts_input * thiz)
++{
++    int fingers = 0;
++    int i;
++
++    for (i = 0; i < RAFI_TS_INPUT_MAX_FINGERS; ++i) {
++        if (thiz->fingers[i].down) {
++            ++fingers;
++        }
++    }
++
++    if (fingers >= 2) {
++        return RAFI_TS_INPUT_STATE_MULTI_TOUCH;
++    } else if (fingers == 1) {
++        return RAFI_TS_INPUT_STATE_SINGLE_TOUCH;
++    }
++
++    return RAFI_TS_INPUT_STATE_UNTOUCHED;
++}
++
++
++static void
++virt_dtor(struct rafi_obs_ts * thiz)
++{
++    struct rafi_ts_input * base = container_of(thiz, struct rafi_ts_input, obs);
++
++    input_unregister_device(base->input_dev);
++    kfree(thiz);
++}
++
++
++static void
++emit_button_down(struct rafi_ts_input * thiz)
++{
++    input_report_key(thiz->input_dev, BTN_TOUCH, 1);
++    input_sync(thiz->input_dev);
++}
++
++
++static void
++emit_button_up(struct rafi_ts_input * thiz)
++{
++    input_report_key(thiz->input_dev, BTN_TOUCH, 0);
++    input_sync(thiz->input_dev);
++}
++
++
++static void
++emit_single_touch(struct rafi_ts_input * thiz, unsigned int x, unsigned int y)
++{
++    input_report_abs(thiz->input_dev, ABS_X, x);
++    input_report_abs(thiz->input_dev, ABS_Y, y);
++    input_sync(thiz->input_dev);
++}
++
++
++static void
++emit_multi_touch(struct rafi_ts_input * thiz)
++{
++    int i;
++    int at_least_one = 0;
++
++    for (i = 0; i < RAFI_TS_INPUT_MAX_FINGERS; ++i) {
++        if (thiz->fingers[i].down) {
++            input_report_abs(thiz->input_dev, ABS_MT_POSITION_X, thiz->fingers[i].x);
++            input_report_abs(thiz->input_dev, ABS_MT_POSITION_Y, thiz->fingers[i].y);
++            input_mt_sync(thiz->input_dev);
++            at_least_one = 1;
++        }
++    }
++
++    if (0 == at_least_one) {
++        input_mt_sync(thiz->input_dev);
++    }
++
++    input_sync(thiz->input_dev);
++}
++
++
++static void
++virt_down(struct rafi_obs_ts * thiz, unsigned int finger, unsigned int x, unsigned int y)
++{
++    struct rafi_ts_input * base = container_of(thiz, struct rafi_ts_input, obs);
++
++    if (finger >= RAFI_TS_INPUT_MAX_FINGERS) {
++        PERROR("Ignore finger %u", finger);
++    }
++
++    switch (base->state) {
++        case RAFI_TS_INPUT_STATE_UNTOUCHED:
++            base->fingers[finger].down = 1;
++            base->fingers[finger].x = x;
++            base->fingers[finger].y = y;
++
++            emit_button_down(base);
++            emit_single_touch(base, x, y);
++
++            base->state = RAFI_TS_INPUT_STATE_SINGLE_TOUCH;
++
++            break;
++        case RAFI_TS_INPUT_STATE_SINGLE_TOUCH:
++        case RAFI_TS_INPUT_STATE_MULTI_TOUCH:
++            if (0 == base->fingers[finger].down) {
++                base->fingers[finger].down = 1;
++                base->fingers[finger].x = x;
++                base->fingers[finger].y = y;
++
++                emit_button_down(base);
++                emit_multi_touch(base);
++
++                base->state = RAFI_TS_INPUT_STATE_MULTI_TOUCH;
++            } else {
++                PERROR("Finger %u already down!", finger);
++            }
++
++            break;
++        default:
++            break;
++    }
++}
++
++
++static void
++virt_move(struct rafi_obs_ts * thiz, unsigned int finger, int x, int y)
++{
++    struct rafi_ts_input * base = container_of(thiz, struct rafi_ts_input, obs);
++
++    if (finger >= RAFI_TS_INPUT_MAX_FINGERS) {
++        PERROR("Ignore finger %u", finger);
++    }
++
++    switch (base->state) {
++        case RAFI_TS_INPUT_STATE_UNTOUCHED:
++            PERROR("No finger down yet but received move for finger %u!", finger);
++
++            virt_down(thiz, finger, x, y);
++
++            break;
++        case RAFI_TS_INPUT_STATE_SINGLE_TOUCH:
++            if (1 == base->fingers[finger].down) {
++                base->fingers[finger].x = x;
++                base->fingers[finger].y = y;
++
++                emit_single_touch(base, x, y);
++            } else {
++                PERROR("Finger %u not down yet but received move!", finger);
++
++                virt_down(thiz, finger, x, y);
++            }
++
++            break;
++        case RAFI_TS_INPUT_STATE_MULTI_TOUCH:
++            if (1 == base->fingers[finger].down) {
++                base->fingers[finger].x = x;
++                base->fingers[finger].y = y;
++
++                emit_multi_touch(base);
++            } else {
++                PERROR("Finger %u not down yet but received move!", finger);
++
++                virt_down(thiz, finger, x, y);
++            }
++
++            break;
++        default:
++            break;
++    }
++}
++
++
++static void
++virt_up(struct rafi_obs_ts * thiz, unsigned int finger)
++{
++    struct rafi_ts_input * base = container_of(thiz, struct rafi_ts_input, obs);
++
++    if (finger >= RAFI_TS_INPUT_MAX_FINGERS) {
++        PERROR("Ignore finger %u", finger);
++    }
++
++    switch (base->state) {
++        case RAFI_TS_INPUT_STATE_UNTOUCHED:
++            PERROR("No finger down yet but received up for finger %u!", finger);
++            break;
++        case RAFI_TS_INPUT_STATE_SINGLE_TOUCH:
++            if (1 == base->fingers[finger].down) {
++                base->fingers[finger].down = 0;
++                base->fingers[finger].x = 0;
++                base->fingers[finger].y = 0;
++
++                emit_button_up(base);
++
++                base->state = RAFI_TS_INPUT_STATE_UNTOUCHED;
++            } else {
++                PERROR("Finger %u not down yet but received up!", finger);
++            }
++
++            break;
++        case RAFI_TS_INPUT_STATE_MULTI_TOUCH:
++            if (1 == base->fingers[finger].down) {
++                enum rafi_ts_input_state finger_state;
++
++                base->fingers[finger].down = 0;
++                base->fingers[finger].x = 0;
++                base->fingers[finger].y = 0;
++
++                emit_multi_touch(base);
++
++                finger_state = get_finger_state(base);
++                if (finger_state == RAFI_TS_INPUT_STATE_UNTOUCHED) {
++                    emit_button_up(base);
++                    base->state = RAFI_TS_INPUT_STATE_UNTOUCHED;
++                }
++            } else {
++                PERROR("Finger %u not down yet but received up!", finger);
++            }
++
++            break;
++        default:
++            break;
++    }
++}
++
++
++struct rafi_obs_ts *
++rafi_ts_input_ctor(const char * phys, unsigned int phys_idx)
++{
++    int err;
++    struct rafi_ts_input * thiz;
++
++    thiz = kmalloc(sizeof(*thiz), GFP_KERNEL);
++    if (NULL == thiz) {
++        PERROR("In kmalloc().");
++        return NULL;
++    }
++
++    memset(thiz, 0, sizeof(*thiz));
++	snprintf(thiz->phys, sizeof(thiz->phys), "%s/input%i", phys, phys_idx);
++
++    rafi_obs_ts_init(&thiz->obs, virt_dtor, virt_down, virt_move, virt_up);
++
++    thiz->input_dev = input_allocate_device();
++    if (NULL == thiz->input_dev) {
++        PERROR("In input_allocate_device().");
++        goto error_1;
++    }
++
++    thiz->input_dev->name = RAFI_GS_NAME;
++    thiz->input_dev->phys = thiz->phys;
++    thiz->input_dev->id.bustype = BUS_I2C;
++    input_set_drvdata(thiz->input_dev, thiz);
++
++    input_set_capability(thiz->input_dev, EV_ABS, ABS_X);
++    input_set_capability(thiz->input_dev, EV_ABS, ABS_Y);
++    input_set_capability(thiz->input_dev, EV_KEY, BTN_TOUCH);
++
++    input_set_abs_params(thiz->input_dev, ABS_X, 0, 800, 0, 0);
++    input_set_abs_params(thiz->input_dev, ABS_Y, 0, 480, 0, 0);
++    input_set_abs_params(thiz->input_dev, ABS_MT_POSITION_X, 0, 800, 0, 0);
++    input_set_abs_params(thiz->input_dev, ABS_MT_POSITION_Y, 0, 480, 0, 0);
++
++    err = input_register_device(thiz->input_dev);
++    if (err < 0) {
++        PERROR("In input_register_device(): %i.", err);
++        goto error_2;
++    }
++
++    return &thiz->obs;
++
++error_2:
++
++    input_free_device(thiz->input_dev);
++
++error_1:
++
++    kfree(thiz);
++
++    return NULL;
++}
+diff --git a/drivers/input/touchscreen/rafi_ts_input.h b/drivers/input/touchscreen/rafi_ts_input.h
+new file mode 100644
+index 0000000..b04e612
+--- /dev/null
++++ b/drivers/input/touchscreen/rafi_ts_input.h
+@@ -0,0 +1,16 @@
++#ifndef _RAFI_TS_INPUT_H_
++#define _RAFI_TS_INPUT_H_
++
++
++#include "rafi_obs.h"
++
++
++struct rafi_obs_ts *
++rafi_ts_input_ctor(const char * phys, unsigned int phys_idx);
++
++
++void
++rafi_ts_input_dtor(struct rafi_obs_ts * thiz);
++
++
++#endif
+diff --git a/include/linux/input/rafi_gs.h b/include/linux/input/rafi_gs.h
+new file mode 100644
+index 0000000..1477e48
+--- /dev/null
++++ b/include/linux/input/rafi_gs.h
+@@ -0,0 +1,23 @@
++#ifndef _LINUX_INPUT_RAFI_GS_H_
++#define _LINUX_INPUT_RAFI_GS_H_
++
++
++#define RAFI_GS_NAME                   "rafi_gs" /**< Unique I2C device driver name for touchscreen. */
++#define RAFI_GS_KEY_NAME               "rafi_gs_key" /**< Unique I2C device driver name for key emulation. */
++
++#define RAFI_GS_I2C_ADDR               0x45 /**< The I2C address of the RAFI_GS controller. */
++
++#define RAFI_GS_MAX_KEYS               32 /**< The maximum number of keys supported. */
++
++
++#ifdef __KERNEL__
++
++struct rafi_gs_platform_data {
++    unsigned int gpio; /**< The GPIO line connected to the 'Change Line'. */
++    unsigned int keys; /**< The number of keys implemented with the custom application. */
++};
++
++#endif
++
++
++#endif
+-- 
+2.6.6
+

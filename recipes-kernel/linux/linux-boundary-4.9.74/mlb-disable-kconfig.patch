@@ -1,0 +1,35 @@
+From 9e25d05275a554e46fbd3d02e68599dac266922e Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 22 Feb 2017 09:26:23 +0100
+Subject: [PATCH] Remove MLB Kconfig selection
+
+Do not automatically select MLB driver.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/mach-imx/Kconfig | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
+index bd63d87..1a06466 100644
+--- a/arch/arm/mach-imx/Kconfig
++++ b/arch/arm/mach-imx/Kconfig
+@@ -581,7 +581,6 @@ config SOC_IMX6Q
+ 	select PCI_DOMAINS if PCI
+ 	select PINCTRL_IMX6Q
+ 	select SOC_IMX6
+-	select MXC_MLB150
+ 
+ 	help
+ 	  This enables support for Freescale i.MX6 Quad processor.
+@@ -604,7 +603,6 @@ config SOC_IMX6SX
+ 	select HAVE_IMX_RPMSG
+ 	select RPMSG
+ 	select IMX_SEMA4
+-	select MXC_MLB150
+ 	select KEYBOARD_SNVS_PWRKEY
+ 
+ 	help
+-- 
+2.6.6
+
