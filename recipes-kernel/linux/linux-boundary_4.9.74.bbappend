@@ -18,9 +18,9 @@ SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://fix-fb_memcpy_tofb.patch \
 	file://support-mitsubishi-touch-controller.patch \
+	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 "
 
-#	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch 
 #	file://ENET_REF_CLK.patch 
 
 SRC_URI_append_himx0294 = " \
