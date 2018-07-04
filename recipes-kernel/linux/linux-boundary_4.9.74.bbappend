@@ -57,6 +57,7 @@ SRC_URI_append_himx0294 = " \
 	file://rafi-touchscreen-support.patch \
 	file://rafi-touchscreen-event-report.patch \
 	file://mlb-pll.patch \
+        file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
 "
 
 #	file://tty-imx-disable-dma.patch 
