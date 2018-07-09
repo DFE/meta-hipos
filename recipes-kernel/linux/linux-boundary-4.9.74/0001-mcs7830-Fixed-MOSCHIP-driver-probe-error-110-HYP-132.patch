@@ -1,0 +1,108 @@
+From 9460e34822ec2efb3b9326fe5ba18a722f86a66d Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 24 May 2018 21:12:13 +0200
+Subject: [PATCH] mcs7830: Fixed MOSCHIP driver probe error -110, HYP-13235
+
+Signed-off-by: Benjamin Reikowski <reikowski@dresearch-fe.de>
+---
+ drivers/net/usb/mcs7830.c | 48 ++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 45 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/usb/mcs7830.c b/drivers/net/usb/mcs7830.c
+index 4f345bd4e6e2..69efad613bda 100644
+--- a/drivers/net/usb/mcs7830.c
++++ b/drivers/net/usb/mcs7830.c
+@@ -394,19 +394,28 @@ static void mcs7830_data_set_multicast(struct net_device *net)
+ static int mcs7830_apply_base_config(struct usbnet *dev)
+ {
+ 	int ret;
++	/* millisecs we wait to let the MOSCHIP re-init after a PHY reset
++	   this time doubles after every reset up to 800ms */
++	int fix_recovery = 200;
++	/* # of times we try to reset the PHY when we catch an error */
++	int fix_retry = 3;
++/* our entry point for re-configuring the PHY after a reset */
++in:
++	if (fix_retry <= 0)
++		goto out;
+ 
+ 	/* re-configure known MAC (suspend case etc.) */
+ 	ret = mcs7830_hif_set_mac_address(dev, dev->net->dev_addr);
+ 	if (ret) {
+ 		dev_info(&dev->udev->dev, "Cannot set MAC address\n");
+-		goto out;
++		goto reset;
+ 	}
+ 
+ 	/* Set up PHY */
+ 	ret = mcs7830_set_autoneg(dev, 0);
+ 	if (ret) {
+ 		dev_info(&dev->udev->dev, "Cannot set autoneg\n");
+-		goto out;
++		goto reset;
+ 	}
+ 
+ 	mcs7830_hif_update_multicast_hash(dev);
+@@ -416,6 +425,19 @@ static int mcs7830_apply_base_config(struct usbnet *dev)
+ 	ret = 0;
+ out:
+ 	return ret;
++/* heres our reset routine */
++reset:
++	/* reset the PHY */
++	mcs7830_write_phy(dev, MII_BMCR, BMCR_RESET);
++	/* give the MOSCHIP some time to re-init */
++	msleep(fix_recovery);
++	/* double recovery time and decrement retry counter */
++	fix_retry -= 1;
++	fix_recovery *= 2;
++	/* add to syslog that sth happened */
++	printk(KERN_ERR "={MOSCHIP}= trying to recover PHY. remaining retrys=%d.", fix_retry);
++	/* retry */
++	goto in;
+ }
+ 
+ /* credits go to asix_set_multicast */
+@@ -486,6 +508,15 @@ static int mcs7830_bind(struct usbnet *dev, struct usb_interface *udev)
+ 	struct net_device *net = dev->net;
+ 	int ret;
+ 	int retry;
++	/* millisecs we wait to let the MOSCHIP re-init after a PHY reset
++	   this time doubles after every reset up to 800ms */
++	int fix_recovery = 200;
++	/* # of times we try to reset the PHY when we catch an error */
++	int fix_retry = 3;
++/* our entry point for re-configuring the PHY after a reset */
++in:
++	if (fix_retry <= 0)
++		goto out;
+ 
+ 	/* Initial startup: Gather MAC address setting from EEPROM */
+ 	ret = -EINVAL;
+@@ -493,7 +524,17 @@ static int mcs7830_bind(struct usbnet *dev, struct usb_interface *udev)
+ 		ret = mcs7830_hif_get_mac_address(dev, net->dev_addr);
+ 	if (ret) {
+ 		dev_warn(&dev->udev->dev, "Cannot read MAC address\n");
+-		goto out;
++		/* reset the PHY */
++		mcs7830_write_phy(dev, MII_BMCR, BMCR_RESET);
++		/* give the MOSCHIP some time to re-init */
++		msleep(fix_recovery);
++		/* double recovery time and decrement retry counter */
++		fix_retry -= 1;
++		fix_recovery *= 2;
++		/* add to syslog that sth happened */
++		printk(KERN_ERR "={MOSCHIP}= trying to recover PHY. remaining retrys=%d.", fix_retry);
++		/* try again */
++		goto in;
+ 	}
+ 
+ 	mcs7830_data_set_multicast(net);
+@@ -640,3 +681,4 @@ module_usb_driver(mcs7830_driver);
+ 
+ MODULE_DESCRIPTION("USB to network adapter MCS7830)");
+ MODULE_LICENSE("GPL");
++
+-- 
+2.13.5
+

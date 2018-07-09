@@ -1,0 +1,38 @@
+From 17cb51d6492fab8e6770f31ea525bb8284c34947 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 9 May 2018 15:50:54 +0200
+Subject: [PATCH] add drtw6869 to Kconfig and Makefile, HYP-16401
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/media/pci/Kconfig  | 1 +
+ drivers/media/pci/Makefile | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/media/pci/Kconfig b/drivers/media/pci/Kconfig
+index da28e68c87d8..8acc33d3643c 100644
+--- a/drivers/media/pci/Kconfig
++++ b/drivers/media/pci/Kconfig
+@@ -17,6 +17,7 @@ source "drivers/media/pci/tw5864/Kconfig"
+ source "drivers/media/pci/tw68/Kconfig"
+ source "drivers/media/pci/tw686x/Kconfig"
+ source "drivers/media/pci/zoran/Kconfig"
++source "drivers/media/pci/drtw6869/Kconfig"
+ endif
+ 
+ if MEDIA_ANALOG_TV_SUPPORT
+diff --git a/drivers/media/pci/Makefile b/drivers/media/pci/Makefile
+index a7e8af0f64a7..b8c3c083a89e 100644
+--- a/drivers/media/pci/Makefile
++++ b/drivers/media/pci/Makefile
+@@ -26,6 +26,7 @@ obj-$(CONFIG_VIDEO_SAA7134) += saa7134/
+ obj-$(CONFIG_VIDEO_SAA7164) += saa7164/
+ obj-$(CONFIG_VIDEO_TW68) += tw68/
+ obj-$(CONFIG_VIDEO_TW686X) += tw686x/
++obj-$(CONFIG_VIDEO_DRTW6869) += drtw6869/
+ obj-$(CONFIG_VIDEO_DT3155) += dt3155/
+ obj-$(CONFIG_VIDEO_MEYE) += meye/
+ obj-$(CONFIG_STA2X11_VIP) += sta2x11/
+-- 
+2.13.5
+
