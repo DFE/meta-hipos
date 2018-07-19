@@ -366,6 +366,7 @@
 };
 
 &uart1 {
+	dma-names = "", "tx";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1_2>;
 	status = "okay";
