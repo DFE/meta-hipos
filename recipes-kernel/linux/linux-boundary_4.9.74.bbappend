@@ -19,6 +19,7 @@ SRC_URI_append = " \
 	file://fix-fb_memcpy_tofb.patch \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
+	file://1byte-serial-trigger.patch \
 "
 
 #	file://ENET_REF_CLK.patch 

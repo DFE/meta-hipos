@@ -1,0 +1,19 @@
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index 0e367ebbfae5..00b2e6b09a82 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -1205,10 +1205,10 @@ static int start_rx_dma(struct imx_port *sport)
+        return 0;
+ }
+
+-#define TXTL_DEFAULT 2 /* reset default */
+-#define RXTL_DEFAULT ((uart_console(&sport->port)) ? 1 : 16) /* reset default */
+-#define TXTL_DMA 8 /* DMA burst setting */
+-#define RXTL_DMA 9 /* DMA burst setting */
++#define TXTL_DEFAULT 2 /* reset default */
++#define RXTL_DEFAULT ((uart_console(&sport->port)) ? 1 : 1) /* reset default */
++#define TXTL_DMA 8 /* DMA burst setting */
++#define RXTL_DMA 9 /* DMA burst setting */
+
+ static void imx_setup_ufcr(struct imx_port *sport,
+                          unsigned char txwl, unsigned char rxwl)
