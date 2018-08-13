@@ -1,0 +1,27 @@
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index fbc38888252b..70dbab0bc7c5 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -7360,8 +7360,17 @@ int alloc_contig_range(unsigned long start, unsigned long end,
+ 
+ 	/* Make sure the range is really isolated. */
+ 	if (test_pages_isolated(outer_start, end, false)) {
+-		pr_info_ratelimited("%s: [%lx, %lx) PFNs busy\n",
+-			__func__, outer_start, end);
++		static unsigned long cooldown;
++		static unsigned int count;
++
++		if(time_after(jiffies, cooldown)) {
++			cooldown = jiffies + 10 * HZ;
++			pr_info_ratelimited("%s: [%lx, %lx) PFNs busy. %i previous warnings have been suppressed\n",
++				__func__, outer_start, end, count);
++			count = 0;
++		} else {
++			count++;
++		}
+ 		ret = -EBUSY;
+ 		goto done;
+ 	}
+-- 
+2.16.4
+
