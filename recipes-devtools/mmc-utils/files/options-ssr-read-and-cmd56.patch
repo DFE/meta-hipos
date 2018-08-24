@@ -1,21 +1,21 @@
-From f42dd8adee28e415000271d5faaf652e30b92c64 Mon Sep 17 00:00:00 2001
+From e6fb16fc58e0b280759f118852acada87fba93c2 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Sat, 31 Mar 2018 17:16:26 +0200
+Date: Fri, 24 Aug 2018 10:00:32 +0200
 Subject: [PATCH] New options ssr read and cmd56
 
-Option ssr read
+Option ssr read:
 The content of the SSR register is output.
 
-Option cmd56
+Option cmd56:
 SD card command CMD56 is executed with arguments to read the Apacer SMART data.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- mmc.c      |  11 +++++++
+ mmc.c      |  11 ++++++
  mmc.h      |   3 ++
- mmc_cmds.c | 108 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.c | 116 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  mmc_cmds.h |   2 ++
- 4 files changed, 124 insertions(+)
+ 4 files changed, 132 insertions(+)
 
 diff --git a/mmc.c b/mmc.c
 index 50c9c9e..011c4bd 100644
@@ -40,10 +40,10 @@ index 50c9c9e..011c4bd 100644
  };
  
 diff --git a/mmc.h b/mmc.h
-index fa49df6..2f67f13 100644
+index 285c1f1..e0ab489 100644
 --- a/mmc.h
 +++ b/mmc.h
-@@ -202,3 +202,6 @@
+@@ -194,3 +194,6 @@
  
  #define MMC_RSP_R1	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
  #define MMC_RSP_R1B	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE|MMC_RSP_BUSY)
@@ -51,10 +51,10 @@ index fa49df6..2f67f13 100644
 +#define SD_APP_SD_STATUS 13   /* adtc, R1 */
 +#define SD_GEN_CMD 56 /* adtc, R1 */
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index d7215bb..2e52326 100644
+index 44623fe..910a057 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -2575,3 +2575,111 @@ out:
+@@ -2613,3 +2613,119 @@ out:
  	return ret;
  #endif
  }
@@ -102,8 +102,12 @@ index d7215bb..2e52326 100644
 +	char data_in[512];
 +	int fd, ret;
 +	char *device;
-+	CHECK(!(nargs == 2),
-+			"Usage: mmc cmd56 <device>\n", exit(1));
++
++	if(nargs != 2) {
++		fprintf(stderr, "Usage: mmc cmd56 <device>\n");
++		exit(1);
++	}
++
 +	device = argv[nargs-1];
 +	fd = open(device, O_RDWR);
 +	if (fd < 0) {
@@ -149,8 +153,12 @@ index d7215bb..2e52326 100644
 +	char data_in[64];
 +	int fd, ret;
 +	char *device;
-+	CHECK(!(nargs == 2),
-+			"Usage: ssr read <device>\n", exit(1));
++
++	if (nargs != 2) {
++		fprintf(stderr, "Usage: ssr read <device>\n");
++		exit(1);
++	}
++
 +	device = argv[nargs-1];
 +	fd = open(device, O_RDWR);
 +	if (fd < 0) {
@@ -177,5 +185,5 @@ index 9d3246c..35d087b 100644
 +int do_read_ssr(int argc, char **argv);
 +int do_cmd56(int argc, char **argv);
 -- 
-2.13.5
+2.16.4
 
