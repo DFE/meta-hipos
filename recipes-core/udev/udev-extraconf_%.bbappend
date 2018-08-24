@@ -1,4 +1,4 @@
-RDEPENDS_${PN} += " stat "
+RDEPENDS_${PN} += " coreutils "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
