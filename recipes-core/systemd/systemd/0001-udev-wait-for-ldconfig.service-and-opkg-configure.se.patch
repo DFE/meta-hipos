@@ -17,8 +17,8 @@ index 1e04d11..ab6a13b 100644
  Documentation=man:udev(7) man:systemd-udevd.service(8)
  DefaultDependencies=no
  Wants=systemd-udevd.service
--After=systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-hwdb-update.service
-+After=systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-hwdb-update.service ldconfig.service opkg-configure.service
+-After=systemd-udevd-kernel.socket systemd-udevd-control.socket
++After=systemd-udevd-kernel.socket systemd-udevd-control.socket ldconfig.service opkg-configure.service
  Before=sysinit.target
  ConditionPathIsReadWrite=/sys
  
