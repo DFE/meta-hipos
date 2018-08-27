@@ -14,9 +14,6 @@
 
 #define CONFIG_MACH_TYPE	3769
 
-#include <asm/arch/imx-regs.h>
-#include <asm/imx-common/gpio.h>
-
 #define CONFIG_CMDLINE_TAG
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_INITRD_TAG
@@ -37,7 +34,9 @@
 #define CONFIG_USB_ETH_CDC
 #define CONFIG_NETCONSOLE
 
+#if 0
 #define CONFIG_CMD_FUSE
+#endif
 #ifdef CONFIG_CMD_FUSE
 #define CONFIG_MXC_OCOTP
 #endif
@@ -114,7 +113,9 @@
 #define CONFIG_CMD_USB
 #define CONFIG_CMD_FAT
 #define CONFIG_USB_EHCI
+#if 0
 #define CONFIG_USB_EHCI_MX6
+#endif
 #define CONFIG_USB_STORAGE
 #define CONFIG_USB_HOST_ETHER
 #define CONFIG_USB_ETHER_ASIX
@@ -127,7 +128,9 @@
 #define CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP
 
 /* Miscellaneous commands */
+#if 0
 #define CONFIG_CMD_BMODE
+#endif
 
 /* Framebuffer and LCD */
 #define CONFIG_VIDEO_IPUV3
