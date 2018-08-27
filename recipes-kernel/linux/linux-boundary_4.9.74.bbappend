@@ -3,8 +3,6 @@ COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-4.9.74:"
 
-require recipes-kernel/linux/linux-dtb.inc
-
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
 SRCREV_tw6869 = "${AUTOREV}"
