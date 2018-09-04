@@ -60,6 +60,7 @@ SRC_URI_append_himx0294 = " \
 	file://mlb-pll.patch \
         file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
 	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch \
+	file://pixcir-touch-moving-mode-HYP-19464.patch \
 "
 
 #	file://tty-imx-disable-dma.patch 
