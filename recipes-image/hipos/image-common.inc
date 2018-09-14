@@ -126,13 +126,6 @@ IMAGE_INSTALL += "  \
 # smb support
 IMAGE_INSTALL += " samba-systemd "
 
-# http/webdav support
-IMAGE_INSTALL += "         \
-    lighttpd               \
-    lighttpd-module-webdav \
-    lighttpd-module-alias  \
-"
-
 # file system tools
 IMAGE_INSTALL += "      \
     e2fsprogs           \
