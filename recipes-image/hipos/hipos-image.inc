@@ -9,3 +9,10 @@ IMAGE_INSTALL_append_himx0294 += " \
   libdrtp-demo \
 "
 
+# http/webdav support
+IMAGE_INSTALL += "         \
+    lighttpd               \
+    lighttpd-module-webdav \
+    lighttpd-module-alias  \
+"
+
