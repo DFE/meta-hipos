@@ -1,0 +1,154 @@
+From ce501bc2774d4ee933f597814a216f028946caae Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 1 Oct 2018 09:24:27 +0200
+Subject: [PATCH] Watchdog driver: Update the prescaler calculation
+
+to ensure equal timeout for different LPC bus frequencies
+---
+ drivers/watchdog/kempld_wdt.c | 60 +++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 55 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/watchdog/kempld_wdt.c b/drivers/watchdog/kempld_wdt.c
+index 2f3b049ea301..5e2bd49b640a 100644
+--- a/drivers/watchdog/kempld_wdt.c
++++ b/drivers/watchdog/kempld_wdt.c
+@@ -1,7 +1,7 @@
+ /*
+  * Kontron PLD watchdog driver
+  *
+- * Copyright (c) 2010-2013 Kontron Europe GmbH
++ * Copyright (c) 2010-2018 Kontron Europe GmbH
+  * Author: Michael Brunner <michael.brunner@kontron.com>
+  *
+  * This program is free software; you can redistribute it and/or modify
+@@ -141,6 +141,7 @@ static int kempld_wdt_set_stage_timeout(struct kempld_wdt_data *wdt_data,
+ {
+ 	struct kempld_device_data *pld = wdt_data->pld;
+ 	u32 prescaler;
++	u64 adjusted_prescaler;
+ 	u64 stage_timeout64;
+ 	u32 stage_timeout;
+ 	u32 remainder;
+@@ -157,6 +158,15 @@ static int kempld_wdt_set_stage_timeout(struct kempld_wdt_data *wdt_data,
+ 		return -EINVAL;
+ 
+ 	stage_timeout64 = (u64)timeout * pld->pld_clock;
++
++	/* adjust prescaler to maintain same timeout for different LPC bus frequencies */
++
++	if (pld->pld_clock == KEMPLD_CLK_25_MHZ || pld->pld_clock == KEMPLD_CLK_24_MHZ)
++	{
++		adjusted_prescaler = (pld->pld_clock * (u64)prescaler) / KEMPLD_CLK;
++		prescaler = (u32)adjusted_prescaler;
++	}
++
+ 	remainder = do_div(stage_timeout64, prescaler);
+ 	if (remainder)
+ 		stage_timeout64++;
+@@ -188,6 +198,7 @@ static unsigned int kempld_wdt_get_timeout(struct kempld_wdt_data *wdt_data,
+ 	unsigned int timeout;
+ 	u64 stage_timeout;
+ 	u32 prescaler;
++	u64 adjusted_prescaler;
+ 	u32 remainder;
+ 	u8 stage_cfg;
+ 
+@@ -198,6 +209,14 @@ static unsigned int kempld_wdt_get_timeout(struct kempld_wdt_data *wdt_data,
+ 	stage_timeout = kempld_read32(pld, KEMPLD_WDT_STAGE_TIMEOUT(stage->id));
+ 	prescaler = kempld_prescaler[STAGE_CFG_GET_PRESCALER(stage_cfg)];
+ 
++	/* adjust prescaler to maintain same timeout for different LPC bus frequencies */
++
++	if (pld->pld_clock == KEMPLD_CLK_25_MHZ || pld->pld_clock == KEMPLD_CLK_24_MHZ)
++	{
++		adjusted_prescaler = (pld->pld_clock * (u64)prescaler) / KEMPLD_CLK;
++		prescaler = (u32)adjusted_prescaler;
++	}
++
+ 	stage_timeout = (stage_timeout & stage->mask) * prescaler;
+ 	remainder = do_div(stage_timeout, pld->pld_clock);
+ 	if (remainder)
+@@ -220,8 +239,23 @@ static int kempld_wdt_set_timeout(struct watchdog_device *wdd,
+ 	timeout_stage = &wdt_data->stage[STAGE_TIMEOUT];
+ 	pretimeout_stage = &wdt_data->stage[STAGE_PRETIMEOUT];
+ 
++	if (!timeout_stage->mask)
++		return -ENXIO;
++
++	if (timeout <= wdt_data->pretimeout)
++		return -EINVAL;
++
++	wdd->timeout = timeout;
++
+ 	if (pretimeout_stage->mask && wdt_data->pretimeout > 0)
++	{
++		ret = kempld_wdt_set_stage_timeout(wdt_data, pretimeout_stage,
++							timeout - wdt_data->pretimeout);
++		if (ret)
++			return ret;
++
+ 		timeout = wdt_data->pretimeout;
++	}
+ 
+ 	ret = kempld_wdt_set_stage_action(wdt_data, timeout_stage,
+ 						ACTION_RESET);
+@@ -232,7 +266,6 @@ static int kempld_wdt_set_timeout(struct watchdog_device *wdd,
+ 	if (ret)
+ 		return ret;
+ 
+-	wdd->timeout = timeout;
+ 	return 0;
+ }
+ 
+@@ -241,15 +274,17 @@ static int kempld_wdt_set_pretimeout(struct watchdog_device *wdd,
+ {
+ 	struct kempld_wdt_data *wdt_data = watchdog_get_drvdata(wdd);
+ 	struct kempld_wdt_stage *pretimeout_stage;
++	struct kempld_wdt_stage *timeout_stage;
+ 	u8 action = ACTION_NONE;
+ 	int ret;
+ 
++	timeout_stage = &wdt_data->stage[STAGE_TIMEOUT];
+ 	pretimeout_stage = &wdt_data->stage[STAGE_PRETIMEOUT];
+ 
+ 	if (!pretimeout_stage->mask)
+ 		return -ENXIO;
+ 
+-	if (pretimeout > wdd->timeout)
++	if (pretimeout >= wdd->timeout)
+ 		return -EINVAL;
+ 
+ 	if (pretimeout > 0)
+@@ -259,12 +294,27 @@ static int kempld_wdt_set_pretimeout(struct watchdog_device *wdd,
+ 						action);
+ 	if (ret)
+ 		return ret;
+-	ret = kempld_wdt_set_stage_timeout(wdt_data, pretimeout_stage,
+-						wdd->timeout - pretimeout);
++
++	if (pretimeout > 0)
++		ret = kempld_wdt_set_stage_timeout(wdt_data, pretimeout_stage,
++							wdd->timeout - pretimeout);
++	else
++		ret = kempld_wdt_set_stage_timeout(wdt_data, pretimeout_stage,
++							pretimeout);
++
+ 	if (ret)
+ 		return ret;
+ 
+ 	wdt_data->pretimeout = pretimeout;
++
++	/* adjust timeout stage for pretimeout stage setting */
++	if (timeout_stage->mask && wdd->timeout > 0 && pretimeout > 0)
++		ret = kempld_wdt_set_stage_timeout(wdt_data, timeout_stage,
++							pretimeout);
++
++	if (ret)
++		return ret;
++
+ 	return 0;
+ }
+ 
+-- 
+2.16.4
+

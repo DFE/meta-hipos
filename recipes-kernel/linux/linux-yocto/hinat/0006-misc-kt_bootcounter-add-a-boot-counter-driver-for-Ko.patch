@@ -1,0 +1,296 @@
+From d036f85881924d7c28494ad735a5244871624503 Mon Sep 17 00:00:00 2001
+From: "Yuk-Lin Soo, Alex" <YukLin.Soo@kontron.com>
+Date: Fri, 1 Jun 2018 17:54:01 +0800
+Subject: [PATCH] Add driver for reading Boot Counter from SMBIOS table
+
+---
+ drivers/misc/Kconfig          |   9 ++
+ drivers/misc/Makefile         |   1 +
+ drivers/misc/kt_bootcounter.c | 244 ++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 254 insertions(+)
+ create mode 100644 drivers/misc/kt_bootcounter.c
+
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index bfaaabe..a9a1168 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -515,6 +515,15 @@ config VEXPRESS_SYSCFG
+ 	  bus. System Configuration interface is one of the possible means
+ 	  of generating transactions on this bus.
+ 
++config KT_BOOTCOUNTER
++	tristate "Kontron Boot Counter driver for KT boards"
++	help
++	  The boot counter driver allows to access the boot counter functionality
++	  on Kontron KT boards.
++
++	  To compile this driver as a module, choose M here: the module will
++	  be called kt_bootcounter.
++
+ source "drivers/misc/c2port/Kconfig"
+ source "drivers/misc/eeprom/Kconfig"
+ source "drivers/misc/cb710/Kconfig"
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index 506d8ae..a40c8ba 100644
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -55,5 +55,6 @@ obj-y				+= mic/
+ obj-$(CONFIG_GENWQE)		+= genwqe/
+ obj-$(CONFIG_ECHO)		+= echo/
+ obj-$(CONFIG_VEXPRESS_SYSCFG)	+= vexpress-syscfg.o
++obj-$(CONFIG_KT_BOOTCOUNTER)	+= kt_bootcounter.o
+ obj-$(CONFIG_CXL_BASE)		+= cxl/
+ obj-$(CONFIG_INTEL_ISH_CLIENT)	+= intel-ish-client/
+diff --git a/drivers/misc/kt_bootcounter.c b/drivers/misc/kt_bootcounter.c
+new file mode 100644
+index 0000000..9b17705
+--- /dev/null
++++ b/drivers/misc/kt_bootcounter.c
+@@ -0,0 +1,244 @@
++/*
++ * kt_bootcounter.c - Bootcounter Driver for KT Kontron boards.
++ *
++ * Copyright (C) 2017-2018 Kontron Asia Pacific Design
++ * Author: Alex Soo <YukLin.Soo@kontron.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/dmi.h>
++
++#define BOOTCOUNTER_STRUCT_TYPE		161	/* Kontron bootcounter SMBIOS structure type */
++#define BOOTCOUNTER_OFFSET		12	/* Bootcounter offset in SMBIOS structure */
++#define BOOTCOUNTER_SIZE		8	/* memory size in bytes storing boot count */
++
++#define DRV_PFX				"kt_bootcounter"
++
++static unsigned long boot_counter;
++
++/* SMBIOS OEM Type 161 structure
++ * Running-time Data Block
++ */
++typedef struct OemType161Info_s {
++	struct dmi_header Hdr;		/* 0x00 Smbios structure Header */
++	uint32_t KEUID;			/* 0x04 KEU ID="KEU" for Kontron Europe */
++	uint8_t StructRev;		/* 0x08 Structure revision, 1.0 (0x10) for this version */
++	uint8_t Reserved[3];		/* 0x09 Reserved */
++	uint8_t BootCounter[8];		/* 0x0C Boot counter value.  */
++	uint8_t RunningTime[8];		/* 0x14 Running time value.  */
++} OemType161Info_t;
++
++OemType161Info_t bc_dmi_header;
++
++static const struct dmi_system_id kontron_bc_dmi_table[] = {
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "mITX-E38"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "pITX-E38"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTQM77/mITX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTQ77/FLEX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTA70/mITX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTA75/FLEX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTQ87/mITX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KTQM87/mITX"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "SMARC-sXAL"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "mITX-APL"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "pITX-APL"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KBox A-203"),
++		},
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "Qseven-Q7ALi"),
++		},
++	},
++	{ },
++};
++
++static ssize_t kt_bc_show(struct device *dev,
++	struct device_attribute *attr, char *buf)
++{
++	return sprintf(buf, "%ld\n", boot_counter);
++}
++
++static DEVICE_ATTR(kt_bootcounter, S_IRUGO, kt_bc_show, NULL);
++
++static void read_counter_data(OemType161Info_t *hdr)
++{
++	int i;
++	int start;
++
++	start = BOOTCOUNTER_SIZE - 1;
++
++	for (i = 0; i < sizeof(boot_counter); i++) {
++		boot_counter |= hdr->BootCounter[start - i] << (i*8);
++	}
++
++	return;
++}
++
++static void dmi_check_bootcounter_entry(const struct dmi_header *dm, void *data)
++{
++	OemType161Info_t *hdr = data;
++	uint8_t bc_value;
++	int i;
++
++	if (dm->type != BOOTCOUNTER_STRUCT_TYPE)
++		return;
++
++	for (i = 0; i < BOOTCOUNTER_SIZE; i++) {
++		hdr->BootCounter[i] = *((uint8_t *)dm + BOOTCOUNTER_OFFSET + i);
++	}
++
++	read_counter_data(hdr);
++
++	return;
++}
++
++static int kt_bc_probe(struct platform_device *pdev)
++{
++	int err;
++	struct resource *reqst = NULL;
++	int i;
++	unsigned char m;
++
++	if (!dmi_check_system(kontron_bc_dmi_table)) {
++		pr_err("%s: No such device\n", __func__);
++		return -ENODEV;
++	}
++
++	err = device_create_file(&pdev->dev, &dev_attr_kt_bootcounter);
++	if (err)
++		goto exit_kfree;
++
++	dmi_walk(dmi_check_bootcounter_entry, &bc_dmi_header);
++
++	return 0;
++
++exit_kfree:
++	device_remove_file(&pdev->dev, &dev_attr_kt_bootcounter);
++	return err;
++}
++
++static int kt_bc_remove(struct platform_device *pdev)
++{
++	device_remove_file(&pdev->dev, &dev_attr_kt_bootcounter);
++	return 0;
++}
++
++static struct platform_driver kt_bc_driver = {
++	.probe		= kt_bc_probe,
++	.remove		= kt_bc_remove,
++	.driver		= {
++		.name	= DRV_PFX,
++		.owner	= THIS_MODULE,
++	},
++};
++
++static struct platform_device *kt_bc_device;
++
++static int __init kt_bc_init(void)
++{
++	int ret;
++
++	ret = platform_driver_register(&kt_bc_driver);
++	if (ret)
++		return ret;
++	kt_bc_device = platform_device_register_simple(DRV_PFX,
++								-1, NULL, 0);
++
++	if (IS_ERR(kt_bc_device)) {
++		platform_driver_unregister(&kt_bc_driver);
++		return PTR_ERR(kt_bc_device);
++	}
++	return 0;
++}
++
++static void __exit kt_bc_exit(void)
++{
++	platform_device_unregister(kt_bc_device);
++	platform_driver_unregister(&kt_bc_driver);
++}
++
++module_init(kt_bc_init);
++module_exit(kt_bc_exit);
++
++MODULE_AUTHOR("Alex Soo <YukLin.Soo@kontron.com>");
++MODULE_DESCRIPTION("Kontron Bootcounter Driver for KT boards");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:kt_bootcounter");
+-- 
+1.9.1
+

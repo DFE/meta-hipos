@@ -1,0 +1,31 @@
+From 6ee456d8fb7ef66baf1a51541f72992592ef9540 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 1 Oct 2018 09:21:23 +0200
+Subject: [PATCH] SMBus driver: handle SMBus transactions with polling method
+
+Configure SMBus controller on Kontron SMARC-sXALi board to handle transactions with
+polling method
+---
+ drivers/i2c/busses/i2c-i801.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/i2c/busses/i2c-i801.c b/drivers/i2c/busses/i2c-i801.c
+index 8eac00efadc1..c82e91cf9e9d 100644
+--- a/drivers/i2c/busses/i2c-i801.c
++++ b/drivers/i2c/busses/i2c-i801.c
+@@ -1529,6 +1529,12 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
+ 		priv->features |= FEATURE_HOST_NOTIFY;
+ 		break;
+ 
++	case PCI_DEVICE_ID_INTEL_BROXTON_SMBUS:
++		priv->features |= FEATURE_SMBUS_PEC;
++		priv->features |= FEATURE_I2C_BLOCK_READ;
++		priv->features |= FEATURE_BLOCK_BUFFER;
++		break;
++
+ 	case PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF0:
+ 	case PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF1:
+ 	case PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF2:
+-- 
+2.16.4
+

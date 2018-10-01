@@ -1,0 +1,409 @@
+From e0a10b9ec6653cfaa431516db5637ca586b5e295 Mon Sep 17 00:00:00 2001
+From: mak <mak@localhost.localdomain>
+Date: Wed, 22 Jul 2015 15:03:45 +0300
+Subject: [PATCH 1/4] Merge ptn3460 support updated for linux-4.4.3
+
+commit ab8123de84923619036b1d5c994aef28ecf7f903
+Author: Vadim V. Vlasov <vvlasov@dev.rtsoft.ru>
+Date:   Fri Feb 20 20:29:31 2015 +0300
+
+    Fix frequency and brightness issues.
+
+    Signed-off-by: Andrey Rusalin <arusalin@dev.rtsoft.ru>
+
+commit eb241ae4733360ca9168e4502291f331d406e193
+Author: Andrey Rusalin <arusalin@dev.rtsoft.ru>
+Date:   Fri Dec 19 15:53:28 2014 +0300
+
+    video: backlight: add a backlight driver for NXP PTN3460
+
+      This driver provides a standard Linux interface for controlling brightness
+      level of LVDS display connected to the NXP PTN3460 converter. The
+      driver also allows:
+       - to select which method of brightness control will be used(normal/inverted
+      PWM);
+       - to select a default PWM frequency.
+
+      Signed-off-by: Viktor Krasnov <vkrasnov@dev.rtsoft.ru>
+      Signed-off-by: Andrey Rusalin <arusalin@dev.rtsoft.ru>
+---
+ drivers/video/backlight/Kconfig             |   6 +
+ drivers/video/backlight/Makefile            |   1 +
+ drivers/video/backlight/Makefile.rej        |  10 +
+ drivers/video/backlight/ptn3460_backlight.c | 318 ++++++++++++++++++++++++++++
+ 4 files changed, 335 insertions(+)
+ create mode 100644 drivers/video/backlight/Makefile.rej
+ create mode 100644 drivers/video/backlight/ptn3460_backlight.c
+
+diff --git a/drivers/video/backlight/Kconfig b/drivers/video/backlight/Kconfig
+index 2d9923a..849f7f6 100644
+--- a/drivers/video/backlight/Kconfig
++++ b/drivers/video/backlight/Kconfig
+@@ -451,6 +451,12 @@ config BACKLIGHT_BD6107
+ 	help
+ 	  If you have a Rohm BD6107 say Y to enable the backlight driver.
+ 
++config BACKLIGHT_PTN3460
++	tristate "PTN3460 Backlight"
++	depends on BACKLIGHT_CLASS_DEVICE && I2C
++	help
++	  If you have a NXP PTN3460 say Y to enable the backlight driver.
++
+ endif # BACKLIGHT_CLASS_DEVICE
+ 
+ endif # BACKLIGHT_LCD_SUPPORT
+diff --git a/drivers/video/backlight/Makefile b/drivers/video/backlight/Makefile
+index d67073f..a36cfff 100644
+--- a/drivers/video/backlight/Makefile
++++ b/drivers/video/backlight/Makefile
+@@ -49,6 +49,7 @@ obj-$(CONFIG_BACKLIGHT_OT200)		+= ot200_bl.o
+ obj-$(CONFIG_BACKLIGHT_PANDORA)		+= pandora_bl.o
+ obj-$(CONFIG_BACKLIGHT_PCF50633)	+= pcf50633-backlight.o
+ obj-$(CONFIG_BACKLIGHT_PWM)		+= pwm_bl.o
++obj-$(CONFIG_BACKLIGHT_PTN3460)         += ptn3460_backlight.o
+ obj-$(CONFIG_BACKLIGHT_SAHARA)		+= kb3886_bl.o
+ obj-$(CONFIG_BACKLIGHT_SKY81452)	+= sky81452-backlight.o
+ obj-$(CONFIG_BACKLIGHT_TOSA)		+= tosa_bl.o
+diff --git a/drivers/video/backlight/Makefile.rej b/drivers/video/backlight/Makefile.rej
+new file mode 100644
+index 0000000..b13f2a1
+--- /dev/null
++++ b/drivers/video/backlight/Makefile.rej
+@@ -0,0 +1,10 @@
++--- drivers/video/backlight/Makefile
+++++ drivers/video/backlight/Makefile
++@@ -48,6 +48,7 @@
++ obj-$(CONFIG_BACKLIGHT_OT200)		+= ot200_bl.o
++ obj-$(CONFIG_BACKLIGHT_PANDORA)		+= pandora_bl.o
++ obj-$(CONFIG_BACKLIGHT_PCF50633)	+= pcf50633-backlight.o
+++obj-$(CONFIG_BACKLIGHT_PTN3460)		+= ptn3460_backlight.o
++ obj-$(CONFIG_BACKLIGHT_PWM)		+= pwm_bl.o
++ obj-$(CONFIG_BACKLIGHT_SAHARA)		+= kb3886_bl.o
++ obj-$(CONFIG_BACKLIGHT_TOSA)		+= tosa_bl.o
+diff --git a/drivers/video/backlight/ptn3460_backlight.c b/drivers/video/backlight/ptn3460_backlight.c
+new file mode 100644
+index 0000000..fce0197
+--- /dev/null
++++ b/drivers/video/backlight/ptn3460_backlight.c
+@@ -0,0 +1,318 @@
++/*
++ *  ptn3460_backlight.c - Backlight Driver for PTN3460.
++ *  Driver supports PWM control for the PTN3460 eDP to LVDS bridge, which is
++ *  installed on the following Kontron boards:
++ *	- Kontron KTQM87/mITX.
++ *
++ *  Copyright (c) 2013 Kontron
++ *  Author: Viktor Krasnov <vkrasnov@dev.rtsoft.ru>
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License 2 as published
++ *  by the Free Software Foundation.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program; see the file COPYING.  If not, write to
++ *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/init.h>
++#include <linux/backlight.h>
++#include <linux/i2c.h>
++
++#define PTN3460_MAX_BACKLIGHT	100
++
++#define DRV_PFX			"ptn3460_backlight: "
++#define PTN3460_I2C_ADDRESS		0x60
++#define PTN3460_PWM_BITCOUNT_OFFSET	0x8f
++#define PTN3460_PWM_VALUE_OFFSET	0x90
++#define PTN3460_PWM_FREQUENCY_OFFSET	0x92
++
++#define PTN3460_PWM_DEFAULT_FREQ	0x1d
++
++#define PTN3460_ID_OFFSET	0xec
++#ifdef __BIG_ENDIAN
++#define PTN3460_ID_WORD0	0x1234
++#define PTN3460_ID_WORD1	0x5678
++#else
++#define PTN3460_ID_WORD0	0x3412
++#define PTN3460_ID_WORD1	0x7856
++#endif
++
++static int param_bl_type = 1;
++module_param(param_bl_type, uint, 0);
++MODULE_PARM_DESC(param_bl_type, " Brightness mode: 0 - normal PWM, 1 - inverted PWM");
++
++static int param_bl_freq = 0;
++module_param(param_bl_freq, uint, 0);
++MODULE_PARM_DESC(param_bl_freq, " PWM frequency (Hz - 200..100000)");
++
++static const unsigned short normal_i2c[] = { PTN3460_I2C_ADDRESS, I2C_CLIENT_END };
++
++enum bl_type {
++	bl_type_pwm = 0,
++	bl_type_pwm_inv = 1
++};
++
++struct ptn3460_bl_data {
++	struct i2c_client *i2c;
++	struct backlight_device *bl;
++	u8 backlight_type;
++	u8 backlight_frequency;
++	u8 backlight_bitcount;
++};
++
++static void
++ptn3460_set_backlight(struct ptn3460_bl_data *data, int brightness)
++{
++	struct i2c_client *i2c = data->i2c;
++	u16 pwm_value;
++	int bitcount = data->backlight_bitcount;
++
++	brightness >>= (16 - bitcount);
++#ifdef __BIG_ENDIAN
++	pwm_value = brightness;
++#else
++	pwm_value = (brightness >> 8) | (brightness << 8);
++#endif
++
++	i2c_smbus_write_word_data(i2c, PTN3460_PWM_VALUE_OFFSET, pwm_value);
++}
++
++static void
++ptn3460_bl_set_frequency_and_bitcount(struct ptn3460_bl_data *data)
++{
++	struct i2c_client *i2c = data->i2c;
++	i2c_smbus_write_byte_data(i2c, PTN3460_PWM_FREQUENCY_OFFSET,
++					data->backlight_frequency & 0xff);
++	i2c_smbus_write_byte_data(i2c, PTN3460_PWM_BITCOUNT_OFFSET,
++					data->backlight_bitcount);
++}
++
++static int
++ptn3460_bl_update_status(struct backlight_device *dev)
++{
++	struct backlight_properties *props = &dev->props;
++	struct ptn3460_bl_data *data = dev_get_drvdata(&dev->dev);
++	int brightness = props->brightness;
++
++	if (data->backlight_type == bl_type_pwm_inv)
++		brightness = 0xffff - (brightness * 0xffff) / 100;
++	else
++		brightness = (brightness * 0xffff) / 100;
++
++	ptn3460_set_backlight(data, brightness);
++
++	return 0;
++}
++
++static int
++ptn3460_get_brightness(struct backlight_device *dev)
++{
++	struct backlight_properties *props = &dev->props;
++
++	return props->brightness;
++}
++
++static const struct backlight_ops ptn3460_bl_ops = {
++	.get_brightness = ptn3460_get_brightness,
++	.update_status = ptn3460_bl_update_status,
++};
++
++#ifdef CONFIG_PM
++static int
++ptn3460_bl_suspend(struct device *dev)
++{
++	struct i2c_client *client = to_i2c_client(dev);
++	struct ptn3460_bl_data *data = i2c_get_clientdata(client);
++	ptn3460_set_backlight(data, 0);
++	return 0;
++}
++
++static int
++ptn3460_bl_resume(struct device *dev)
++{
++	struct i2c_client *client = to_i2c_client(dev);
++	struct ptn3460_bl_data *data = i2c_get_clientdata(client);
++	ptn3460_bl_set_frequency_and_bitcount(data);
++	ptn3460_bl_update_status(data->bl);
++	return 0;
++}
++
++static const struct dev_pm_ops ptn3460_bl_dev_pm_ops = {
++        .suspend = ptn3460_bl_suspend,
++        .resume = ptn3460_bl_resume,
++};
++
++#define PTN3460_DEV_PM_OPTS (&ptn3460_bl_dev_pm_ops)
++#else
++#define PTN3460_DEV_PM_OPTS NULL
++#endif /* CONFIG_PM */
++
++static int
++ptn3460_bl_detect(struct i2c_client *client, struct i2c_board_info *info)
++{
++	struct i2c_adapter *adapter = client->adapter;
++	int address = client->addr;
++	const char *name = NULL;
++
++	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
++		return -ENODEV;
++
++	if (address != PTN3460_I2C_ADDRESS)
++		return -ENODEV;
++
++	if (i2c_smbus_read_word_data(client, PTN3460_ID_OFFSET) == PTN3460_ID_WORD0 &&
++		i2c_smbus_read_word_data(client, PTN3460_ID_OFFSET + 2) == PTN3460_ID_WORD1)
++		name = "ptn3460_backlight";
++	if (!name) {
++		printk(DRV_PFX "Unsupported chip at 0x%02x\n", address);
++		return -ENODEV;
++	}
++
++	strlcpy(info->type, name, I2C_NAME_SIZE);
++
++	return 0;
++}
++
++static int ptn3460_bl_probe(struct i2c_client *client,
++		       const struct i2c_device_id *id)
++{
++	struct backlight_properties props;
++	int ret;
++
++	struct ptn3460_bl_data *data =
++	    kzalloc(sizeof (struct ptn3460_bl_data), GFP_KERNEL);
++	if (!data)
++		return -ENOMEM;
++	i2c_set_clientdata(client, data);
++	data->i2c = client;
++
++	memset(&props, 0, sizeof (struct backlight_properties));
++	props.max_brightness = PTN3460_MAX_BACKLIGHT;
++	props.type = BACKLIGHT_RAW;
++	data->bl = backlight_device_register("ptn3460_backlight",
++					     &client->dev, data,
++					     &ptn3460_bl_ops, &props);
++	if (IS_ERR(data->bl))
++		return PTR_ERR(data->bl);
++
++	if ((param_bl_type != bl_type_pwm)  &&
++				(param_bl_type != bl_type_pwm_inv)) {
++		pr_err("Incorrect backlight type is selected! Setting to bl_type_pwm\n");
++		param_bl_type = bl_type_pwm;
++	}
++	data->backlight_type = param_bl_type;
++
++	ret = i2c_smbus_read_byte_data(client, PTN3460_PWM_BITCOUNT_OFFSET);
++	if (ret < 0) {
++		pr_err("Can't read bitcount value! Assuming default (0x0c)\n");
++		data->backlight_bitcount = 0xc;
++	} else if (ret < 8 || ret > 16) {
++		data->backlight_bitcount = (ret < 8) ? 8 : 16;
++		pr_notice("Invalid bitcount value (%02x). Adjusting to %d\n",
++				ret, data->backlight_bitcount);
++	} else {
++		data->backlight_bitcount = ret;
++	}
++	ret = i2c_smbus_read_byte_data(client, PTN3460_PWM_FREQUENCY_OFFSET);
++	if (ret < 0) {
++		pr_err("Can't read frequency value! Assuming default (0x1d)\n");
++		data->backlight_frequency = 0x1d;
++		data->backlight_bitcount = 12;
++	} else {
++		data->backlight_frequency = ret;
++	}
++
++	if (param_bl_freq > 0) {
++		int divisor, bitcount;
++		divisor = 27000000 / param_bl_freq;
++		if (divisor < 256) {
++			pr_notice("Frequency out of range. Using 100000\n");
++			divisor = 0x200;
++		} else if (divisor > 0x200000) { /* approx. 12Hz */
++			pr_notice("Frequency out of range. Using 12\n");
++			divisor = 0x200000;
++		}
++		bitcount = data->backlight_bitcount;
++		if ((divisor >> bitcount) <= 0xff &&
++			(divisor >> bitcount) > 2) {
++			/* can use default bitcount */
++			data->backlight_frequency = divisor >> bitcount;
++		} else {
++			for (bitcount = 8; (divisor >> bitcount) > 0xff; bitcount++)
++				;
++			data->backlight_frequency = divisor >> bitcount;
++			data->backlight_bitcount = bitcount;
++		}
++	}
++
++	data->bl->props.brightness = PTN3460_MAX_BACKLIGHT;
++
++	ptn3460_bl_set_frequency_and_bitcount(data);
++
++	ptn3460_bl_update_status(data->bl);
++
++	return 0;
++}
++
++static int ptn3460_bl_remove(struct i2c_client *client)
++{
++	struct ptn3460_bl_data *data = i2c_get_clientdata(client);
++
++	backlight_device_unregister(data->bl);
++	data->bl = NULL;
++
++	kfree(data);
++
++	return 0;
++}
++
++static const struct i2c_device_id ptn3460_bl_id[] = {
++	{"ptn3460_backlight", 0},
++	{},
++};
++
++MODULE_DEVICE_TABLE(i2c, ptn3460_bl_id);
++
++
++static struct i2c_driver ptn3460_bl_driver = {
++	.class = I2C_CLASS_HWMON,
++	.driver = {
++		   .name = "ptn3460_backlight",
++		   .owner = THIS_MODULE,
++		   .pm = PTN3460_DEV_PM_OPTS,
++		   },
++	.probe = ptn3460_bl_probe,
++	.remove = ptn3460_bl_remove,
++	.id_table = ptn3460_bl_id,
++	.detect = ptn3460_bl_detect,
++	.address_list = normal_i2c,
++};
++
++static int __init ptn3460_bl_init(void)
++{
++	return i2c_add_driver(&ptn3460_bl_driver);
++}
++
++static void __exit ptn3460_bl_exit(void)
++{
++	i2c_del_driver(&ptn3460_bl_driver);
++}
++
++module_init(ptn3460_bl_init);
++module_exit(ptn3460_bl_exit);
++
++MODULE_AUTHOR("Viktor Krasnov <vkrasnov@dev.rtsoft.ru>");
++MODULE_DESCRIPTION("Backlight Driver for PTN3460");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("i2c:ptn3460_backlight");
+-- 
+1.9.1
+

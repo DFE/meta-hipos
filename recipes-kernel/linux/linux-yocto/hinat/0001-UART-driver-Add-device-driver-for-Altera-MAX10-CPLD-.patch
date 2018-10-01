@@ -1,0 +1,715 @@
+From d4a5964747eb0db376faa2d5c7d314a14d8e28bd Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 1 Oct 2018 09:18:57 +0200
+Subject: [PATCH] UART driver: Add device driver for Altera MAX10 CPLD's 16550A
+
+UARTs on Kontron SMARC/Q7 Apollo Lake boards
+---
+ drivers/mfd/intel-lpss-pci.c               |   2 +
+ drivers/mfd/intel-lpss.c                   |  22 ++
+ drivers/mfd/kempld-core.c                  |  72 ++++-
+ drivers/tty/serial/8250/8250_kempld_uart.c | 425 +++++++++++++++++++++++++++++
+ drivers/tty/serial/8250/Kconfig            |   8 +
+ drivers/tty/serial/8250/Makefile           |   1 +
+ drivers/tty/serial/serial_core.c           |   4 +-
+ include/linux/mfd/kempld.h                 |   5 +-
+ 8 files changed, 534 insertions(+), 5 deletions(-)
+ create mode 100644 drivers/tty/serial/8250/8250_kempld_uart.c
+
+diff --git a/drivers/mfd/intel-lpss-pci.c b/drivers/mfd/intel-lpss-pci.c
+index d1c46de89eb4..065f62e27959 100644
+--- a/drivers/mfd/intel-lpss-pci.c
++++ b/drivers/mfd/intel-lpss-pci.c
+@@ -31,6 +31,8 @@ static int intel_lpss_pci_probe(struct pci_dev *pdev,
+ 	if (ret)
+ 		return ret;
+ 
++	dev_dbg(&pdev->dev, "%s: device %s is enabled\n", __func__, pci_name(pdev));
++
+ 	info = devm_kmemdup(&pdev->dev, (void *)id->driver_data, sizeof(*info),
+ 			    GFP_KERNEL);
+ 	if (!info)
+diff --git a/drivers/mfd/intel-lpss.c b/drivers/mfd/intel-lpss.c
+index 0e0ab9bb1530..4445e2e8fa51 100644
+--- a/drivers/mfd/intel-lpss.c
++++ b/drivers/mfd/intel-lpss.c
+@@ -27,6 +27,7 @@
+ #include <linux/property.h>
+ #include <linux/seq_file.h>
+ #include <linux/io-64-nonatomic-lo-hi.h>
++#include <linux/pci.h>
+ 
+ #include "intel-lpss.h"
+ 
+@@ -221,11 +222,14 @@ static void intel_lpss_ltr_hide(struct intel_lpss *lpss)
+ static int intel_lpss_assign_devs(struct intel_lpss *lpss)
+ {
+ 	const struct mfd_cell *cell;
++	struct pci_dev *pdev;
+ 	unsigned int type;
+ 
+ 	type = lpss->caps & LPSS_PRIV_CAPS_TYPE_MASK;
+ 	type >>= LPSS_PRIV_CAPS_TYPE_SHIFT;
+ 
++	pdev = to_pci_dev(lpss->dev);
++
+ 	switch (type) {
+ 	case LPSS_DEV_I2C:
+ 		cell = &intel_lpss_i2c_cell;
+@@ -240,6 +244,15 @@ static int intel_lpss_assign_devs(struct intel_lpss *lpss)
+ 		return -ENODEV;
+ 	}
+ 
++	if (type == LPSS_DEV_UART)
++	{
++		if (PCI_FUNC(pdev->devfn) == 0)
++		{
++			pr_info("%s: the HSUART %s is not supported\n", __func__, pci_name(pdev));
++			return -ENODEV;
++		}
++	}
++
+ 	lpss->cell = devm_kmemdup(lpss->dev, cell, sizeof(*cell), GFP_KERNEL);
+ 	if (!lpss->cell)
+ 		return -ENOMEM;
+@@ -385,6 +398,8 @@ int intel_lpss_probe(struct device *dev,
+ 		     const struct intel_lpss_platform_info *info)
+ {
+ 	struct intel_lpss *lpss;
++	struct pci_dev *pdev;
++	int val;
+ 	int ret;
+ 
+ 	if (!info || !info->mem || info->irq <= 0)
+@@ -399,12 +414,19 @@ int intel_lpss_probe(struct device *dev,
+ 	if (!lpss->priv)
+ 		return -ENOMEM;
+ 
++	dev_dbg(&pdev->dev, "%s: iomem physical start 0x%x ioremap address: 0x%p\n", __func__, info->mem->start, lpss->priv);
++
++	pdev = to_pci_dev(dev);
++
+ 	lpss->info = info;
+ 	lpss->dev = dev;
+ 	lpss->caps = readl(lpss->priv + LPSS_PRIV_CAPS);
+ 
+ 	dev_set_drvdata(dev, lpss);
+ 
++	dev_dbg(&pdev->dev, "%s: PCI function: %d, lpss caps: 0x%x current state: 0x%x channel state: 0x%x \n",
++				__func__, PCI_FUNC(pdev->devfn), lpss->caps, pdev->current_state, pdev->error_state);
++
+ 	ret = intel_lpss_assign_devs(lpss);
+ 	if (ret)
+ 		return ret;
+diff --git a/drivers/mfd/kempld-core.c b/drivers/mfd/kempld-core.c
+index 55d824b3a808..41bbf5fe0e99 100644
+--- a/drivers/mfd/kempld-core.c
++++ b/drivers/mfd/kempld-core.c
+@@ -1,7 +1,7 @@
+ /*
+  * Kontron PLD MFD core driver
+  *
+- * Copyright (c) 2010-2013 Kontron Europe GmbH
++ * Copyright (c) 2010-2018 Kontron Europe GmbH
+  * Author: Michael Brunner <michael.brunner@kontron.com>
+  *
+  * This program is free software; you can redistribute it and/or modify
+@@ -107,19 +107,32 @@ static const struct mfd_cell kempld_devs[] = {
+ static int kempld_register_cells_generic(struct kempld_device_data *pld)
+ {
+ 	struct mfd_cell devs[KEMPLD_MAX_DEVS];
+-	int i = 0;
++	int feature_notsupported[KEMPLD_MAX_DEVS];
++	int i = 0, j = 0, k;
+ 
+ 	if (pld->feature_mask & KEMPLD_FEATURE_BIT_I2C)
+ 		devs[i++] = kempld_devs[KEMPLD_I2C];
++	else
++		feature_notsupported[j++] = KEMPLD_I2C;
+ 
+ 	if (pld->feature_mask & KEMPLD_FEATURE_BIT_WATCHDOG)
+ 		devs[i++] = kempld_devs[KEMPLD_WDT];
++	else
++		feature_notsupported[j++] = KEMPLD_WDT;
+ 
+ 	if (pld->feature_mask & KEMPLD_FEATURE_BIT_GPIO)
+ 		devs[i++] = kempld_devs[KEMPLD_GPIO];
++	else
++		feature_notsupported[j++] = KEMPLD_GPIO;
+ 
+ 	if (pld->feature_mask & KEMPLD_FEATURE_MASK_UART)
+ 		devs[i++] = kempld_devs[KEMPLD_UART];
++	else
++		feature_notsupported[j++] = KEMPLD_UART;
++
++	if (i < KEMPLD_MAX_DEVS)
++		for (k = 0; k < j; k++)
++			pr_warn("%s: CPLD feature %s is not implemented!\n", __func__, kempld_devs[feature_notsupported[k]].name);
+ 
+ 	return mfd_add_devices(pld->dev, -1, devs, i, NULL, 0, NULL);
+ }
+@@ -150,6 +163,16 @@ static int kempld_create_platform_device(const struct dmi_system_id *id)
+ 	if (!kempld_pdev)
+ 		return -ENOMEM;
+ 
++#if 0
++	/* For Apollo Lake-I platform, set LPC bus frequency to 25MHZ */
++	if (!strcmp(id->ident, "SXAL") || !strcmp(id->ident, "MAPL") || \
++	    !strcmp(id->ident, "PAPL") || !strcmp(id->ident, "KBOX") || \
++	    !strcmp(id->ident, "Q7AL"))
++	{
++		pdata->pld_clock = KEMPLD_CLK_25_MHZ;
++	}
++#endif
++
+ 	ret = platform_device_add_data(kempld_pdev, pdata, sizeof(*pdata));
+ 	if (ret)
+ 		goto err;
+@@ -800,6 +823,51 @@ static const struct dmi_system_id kempld_dmi_table[] __initconst = {
+ 		.driver_data = (void *)&kempld_platform_data_generic,
+ 		.callback = kempld_create_platform_device,
+ 	},
++	{
++		.ident = "SXAL",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "SMARC-sXAL"),
++		},
++		.driver_data = (void *)&kempld_platform_data_generic,
++		.callback = kempld_create_platform_device,
++	},
++	{
++		.ident = "MAPL",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "mITX-APL"),
++		},
++		.driver_data = (void *)&kempld_platform_data_generic,
++		.callback = kempld_create_platform_device,
++	},
++	{
++		.ident = "PAPL",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "pITX-APL"),
++		},
++		.driver_data = (void *)&kempld_platform_data_generic,
++		.callback = kempld_create_platform_device,
++	},
++	{
++		.ident = "KBOX",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "KBox A-203"),
++		},
++		.driver_data = (void *)&kempld_platform_data_generic,
++		.callback = kempld_create_platform_device,
++	},
++	{
++		.ident = "Q7AL",
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "Kontron"),
++			DMI_MATCH(DMI_BOARD_NAME, "Qseven-Q7ALi"),
++		},
++		.driver_data = (void *)&kempld_platform_data_generic,
++		.callback = kempld_create_platform_device,
++	},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(dmi, kempld_dmi_table);
+diff --git a/drivers/tty/serial/8250/8250_kempld_uart.c b/drivers/tty/serial/8250/8250_kempld_uart.c
+new file mode 100644
+index 000000000000..c22e5c0a23e9
+--- /dev/null
++++ b/drivers/tty/serial/8250/8250_kempld_uart.c
+@@ -0,0 +1,425 @@
++/*
++ * Kontron PLD UART driver
++ *
++ * Copyright (c) 2016-2018 Kontron Asia Pacific Design
++ * Author:  <Alex Soo, YukLin.Soo@kontron.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License 2 as published
++ * by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/major.h>
++#include <linux/delay.h>
++#include <linux/dmi.h>
++#include <linux/interrupt.h>
++#include <linux/ioport.h>
++#include <linux/io.h>
++#include <linux/tty.h>
++#include <linux/device.h>
++#include <linux/errno.h>
++#include <linux/serial.h>
++#include <linux/serial_core.h>
++#include <linux/serial_reg.h>
++#include <linux/serial_8250.h>
++#include <linux/platform_device.h>
++#include <linux/mfd/kempld.h>
++
++#include "8250.h"
++
++#define KEMPLD_UART_DEV_NAME			"ttyS%d"
++#define KEMPLD_UART_MAJOR_NUMBER		TTY_MAJOR
++#define KEMPLD_UART_MINOR_NUMBER		66
++#define KEMPLD_NR_UARTS				2
++#define KEMPLD_UART_REGION_SIZE			8
++
++/***** UART Hardware Specs ******/
++
++/* LPC Index/Data register I/O space */
++#define KEMPLD_UART_CFG_REG_UART0_INDEX		0x30
++#define KEMPLD_UART_CFG_REG_UART1_INDEX		0x31
++#define KEMPLD_UART_CFG_REG_UART2_INDEX		0x32
++#define KEMPLD_UART_CFG_REG_UART3_INDEX		0x33
++
++/* LPC index/data UART commands */
++#define KEMPLD_UART_DISABLE			0x7F
++#define KEMPLD_UART_ENABLE			0x80
++#define KEMPLD_UART_SET_IOBASE_3F8		0x00
++#define KEMPLD_UART_SET_IOBASE_2F8		0x10
++#define KEMPLD_UART_SET_IOBASE_3E8		0x20
++#define KEMPLD_UART_SET_IOBASE_2E8		0x30
++
++/* UART IRQs */
++#define KEMPLD_UART0_IRQ			10
++#define KEMPLD_UART1_IRQ			11
++
++/* UART Port I/O space */
++#define KEMPLD_UART_BASE_ADDR_3F8		0x3F8
++#define KEMPLD_UART_BASE_ADDR_2F8		0x2F8
++#define KEMPLD_UART_BASE_ADDR_3E8		0x3E8
++#define KEMPLD_UART_BASE_ADDR_2E8		0x2E8
++
++/* UART line index */
++#define KEMPLD_UART_LINE_INDEX_START		2
++
++/* UART baudrate */
++#define KEMPLD_UART_BAUDRATE_600		600
++#define KEMPLD_UART_BAUDRATE_1200		1200
++#define KEMPLD_UART_BAUDRATE_1800		1800
++#define KEMPLD_UART_BAUDRATE_2400		2400
++#define KEMPLD_UART_BAUDRATE_4800		4800
++#define KEMPLD_UART_BAUDRATE_9600		9600
++#define KEMPLD_UART_BAUDRATE_19200		19200
++#define KEMPLD_UART_BAUDRATE_38400		38400
++#define KEMPLD_UART_BAUDRATE_57600		57600
++#define KEMPLD_UART_BAUDRATE_115200		115200
++
++/* UART DLL values for different baud rates */
++#define KEMPLD_UART_DLL_B600			192
++#define KEMPLD_UART_DLL_B1200			96
++#define KEMPLD_UART_DLL_B1800			64
++#define KEMPLD_UART_DLL_B2400			48
++#define KEMPLD_UART_DLL_B4800			24
++#define KEMPLD_UART_DLL_B9600			12
++#define KEMPLD_UART_DLL_B19200			6
++#define KEMPLD_UART_DLL_B38400			3
++#define KEMPLD_UART_DLL_B57600			2
++#define KEMPLD_UART_DLL_B115200			1
++
++/* UART internal frequency dividers */
++#define KEMPLD_UART_LPC_33_MHZ_FREQ_DIVIDER	18
++#define KEMPLD_UART_LPC_25_MHZ_FREQ_DIVIDER	14
++#define KEMPLD_UART_LPC_24_MHZ_FREQ_DIVIDER	13
++
++/* UART sampling rate */
++#define KEMPLD_UART_MAX_BAUD_RATE		KEMPLD_UART_BAUDRATE_115200
++#define KEMPLD_UART_MAX_SAMPLING_RATE		KEMPLD_UART_MAX_BAUD_RATE * 16
++
++/* UART configurations */
++#define KEMPLD_UART_CONFIG(x)			(((x) >> 3) & 0x7)
++#define KEMPLD_UART_CONFIG_INVALID		0xFF
++
++enum {
++	KEMPLD_UART_PORT_0 = 0,
++	KEMPLD_UART_PORT_1,
++};
++
++static const u8 kempld_uart_port_iobase_sel[] = {
++	[KEMPLD_UART_PORT_0] = KEMPLD_UART_SET_IOBASE_3E8,
++	[KEMPLD_UART_PORT_1] = KEMPLD_UART_SET_IOBASE_2E8,
++};
++
++static const u16 kempld_uart_port_iobase_addrs[] = {
++	[KEMPLD_UART_PORT_0] = KEMPLD_UART_BASE_ADDR_3E8,
++	[KEMPLD_UART_PORT_1] = KEMPLD_UART_BASE_ADDR_2E8,
++};
++
++static const u8 kempld_uart_port_irq_sel[] = {
++	[KEMPLD_UART_PORT_0] = KEMPLD_UART0_IRQ,
++	[KEMPLD_UART_PORT_1] = KEMPLD_UART1_IRQ,
++};
++
++struct kempld_uart_data {
++	struct kempld_device_data *pld;
++	struct uart_8250_port uart_8250_ports[KEMPLD_NR_UARTS];
++	int num_ports;
++};
++
++/* UART device */
++unsigned int kempld_uart_internal_freq;
++
++static void kempld_uart_serial_out(struct uart_port *p, int offset, int value)
++{
++	outb(value, p->iobase + (offset << p->regshift));
++}
++
++static unsigned int kempld_uart_serial_in(struct uart_port *p, int offset)
++{
++	unsigned int value;
++	value = inb(p->iobase + (offset << p->regshift));
++	return value;
++}
++
++static int kempld_uart_serial_dl_read(struct uart_8250_port *up)
++{
++	return serial_in(up, UART_DLL) | serial_in(up, UART_DLM) << 8;
++}
++
++static void kempld_uart_serial_dl_write(struct uart_8250_port *up, int value)
++{
++	serial_out(up, UART_DLL, value & 0xff);
++	serial_out(up, UART_DLM, value >> 8 & 0xff);
++}
++
++static int kempld_uart_handle_irq(struct uart_port *p)
++{
++	unsigned int iir = p->serial_in(p, UART_IIR);
++
++	dev_dbg(p->dev, "%s: ttyS%d, irq: %d\n", __func__, p->line, p->irq);
++
++	if (serial8250_handle_irq(p, iir)) {
++		return 1;
++	}
++
++	return 0;
++}
++
++static void kempld_uart_set_termios(struct uart_port *p, struct ktermios *termios,
++			            struct ktermios *old)
++{
++	struct kempld_uart_data *uart_data = p->private_data;
++
++	dev_dbg(p->dev, "%s: ttyS%d\n", __func__, p->line);
++
++	if (dmi_match(DMI_BOARD_NAME, "SMARC-sXAL"))
++	{
++		if (old && (!(old->c_cflag & CRTSCTS) && (termios->c_cflag & CRTSCTS)))
++		{
++			pr_err("%s: Kontron SMARC sXAL target board does not support RS232 hardware flow control RTS/CTS\n", __func__);
++		}
++	}
++
++	serial8250_do_set_termios(p, termios, old);
++}
++
++static void kempld_uart_config_port(struct kempld_device_data *pld, int line, u8 uart_index, u8 uart_cfg)
++{
++	struct uart_8250_port *up;
++	struct uart_port *port;
++	u8 cfg;
++	u8 line_status;
++	u8 line_ctrl;
++
++	up = serial8250_get_port(line);
++	port = &up->port;
++
++	dev_dbg(port->dev, "%s: uart line: %d, iobase: 0x%lx\n", __func__, line, port->iobase);
++
++	/* Enable and Configure the UART port */
++	cfg = kempld_read8(pld, uart_index);
++	cfg |= KEMPLD_UART_ENABLE | uart_cfg;
++	kempld_write8(pld, uart_index, cfg);
++
++	if (!request_region(port->iobase, port->mapsize, "kempld-uart")) {
++		dev_dbg(port->dev, "I/O region (0x%lx-0x%lx) has already been allocated for /dev/ttyS%d\n", port->iobase, port->iobase + port->mapsize - 1, line);
++	}
++
++	port->membase = (unsigned char __iomem *)ioport_map(port->iobase, port->mapsize);
++
++	/* Check if the I/O region is allocated */
++	if (!port->membase)
++		pr_err("%s: remap of I/O region (0x%lx) failed\n", __func__, port->iobase);
++
++	dev_dbg(port->dev, "/dev/ttyS%d mapped to IO memory: 0x%p\n", line, port->membase);
++
++	/* read back IER register */
++	cfg = serial_in(up, UART_IER);
++	dev_dbg(port->dev, "/dev/ttyS%d: Before enable UART interrupt, IER register: 0x%x\n", line, cfg);
++
++	/* Enable the UART interrupts */
++	cfg |= UART_IER_RDI | UART_IER_THRI | UART_IER_RLSI | UART_IER_MSI;
++	serial_out(up, UART_IER, cfg);
++	cfg = serial_in(up, UART_IER);
++	dev_dbg(port->dev, "/dev/ttyS%d: After enabled UART interupt, IER register: 0x%x\n", line, cfg);
++
++	/* Configure the FIFO control register */
++	cfg = serial_in(up, UART_FCR);
++	dev_dbg(port->dev, "/dev/ttyS%d: FIFO control register, FCR: 0x%x\n", line, cfg);
++	cfg |= UART_FCR_ENABLE_FIFO | UART_FCR_R_TRIG_11;
++	dev_dbg(port->dev, "/dev/ttyS%d: After enabled UART FIFO, FCR: 0x%x\n", line, cfg);
++	serial_out(up, UART_FCR, cfg);
++
++	line_status = serial_in(up, UART_LSR);
++	dev_dbg(port->dev, "/dev/ttyS%d: line status register: 0x%x\n", line, line_status);
++
++	line_ctrl = serial_in(up, UART_LCR);
++	dev_dbg(port->dev, "/dev/ttyS%d: line control register: 0x%x\n", line, line_ctrl);
++}
++
++static int kempld_uart_register_ports(struct platform_device *pdev, struct kempld_uart_data *cpld_uarts)
++{
++	struct uart_8250_port *up;
++	struct uart_port *port;
++	struct kempld_device_data *pld;
++	int i;
++	u8 reg_index;
++	u8 uart_cfg;
++
++	pld = cpld_uarts->pld;
++
++	/* Enable UART ports and configure their IO base address */
++	for (i = 0, reg_index = KEMPLD_UART_CFG_REG_UART0_INDEX; i < cpld_uarts->num_ports; i++, reg_index++)
++	{
++		up = &cpld_uarts->uart_8250_ports[i];
++		port = &up->port;
++
++		port->private_data = cpld_uarts;
++
++		/* set I/O port address */
++		port->iobase = kempld_uart_port_iobase_addrs[i];
++		port->mapsize = KEMPLD_UART_REGION_SIZE;
++		port->mapbase = 0;
++		port->irq = kempld_uart_port_irq_sel[i];
++		port->dev = &pdev->dev;
++		port->iotype = UPIO_PORT;
++		port->flags = UPF_BOOT_AUTOCONF | UPF_FIXED_TYPE | UPF_FIXED_PORT | UPF_SOFT_FLOW;
++		port->type = PORT_16550A;
++		port->uartclk = kempld_uart_internal_freq;
++		port->fifosize = 16;
++		port->regshift = 0;
++		port->handle_irq = kempld_uart_handle_irq;
++		port->serial_in = kempld_uart_serial_in;
++		port->serial_out = kempld_uart_serial_out;
++		port->set_termios = kempld_uart_set_termios;
++		spin_lock_init(&port->lock);
++
++		up->capabilities = UART_CAP_FIFO;
++		up->dl_read = kempld_uart_serial_dl_read;
++		up->dl_write = kempld_uart_serial_dl_write;
++
++		port->line = serial8250_register_8250_port(up);	/* register the port to 8250 core */
++
++		if (port->line < 0)
++		{
++			pr_err("%s: serial8250_register_8250_port() at 0x%04lx, irq: %d \n",
++				__func__, (unsigned long)port->iobase, port->irq);
++			return -EINVAL;
++		}
++
++		uart_cfg = kempld_uart_port_iobase_sel[i] | kempld_uart_port_irq_sel[i];
++		kempld_uart_config_port(pld, port->line, reg_index, uart_cfg);
++	}
++
++	platform_set_drvdata(pdev, cpld_uarts);
++
++	return 0;
++}
++
++static int kempld_uart_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct kempld_device_data *pld = dev_get_drvdata(dev->parent);		/* from parent device kempld */
++	struct kempld_platform_data *pdata = dev_get_platdata(pld->dev);	/* from parent device kempld */
++	struct kempld_uart_data *uart_data;
++	u8 cpld_uarts_config;	/* CPLD UARTs implementation */
++	u8 cpld_uarts_number;	/* number of CPLD UART devices  */
++
++	if ((pld->info.spec_major < 2) || (pld->info.spec_major == 2 && pld->info.spec_minor < 5)) {
++		pr_err("%s: Driver only supports UART devices compatible to CPLD spec, rev 2.5 or higher\n", __func__);
++		return -ENODEV;
++	}
++
++	dev_dbg(&pdev->dev, "%s: CPLD's major spec: %u minor spec: %u\n", __func__, pld->info.spec_major, pld->info.spec_minor);
++
++	if (pld->feature_mask == 0) {
++		pr_err("%s: the CPLD feature mask is %d!\n", __func__, pld->feature_mask);
++		return -ENODEV;
++	}
++
++	/* Read UART configuration from CPLD feature register */
++	cpld_uarts_config = (u8)KEMPLD_UART_CONFIG(pld->feature_mask);
++
++	switch (cpld_uarts_config)
++	{
++		case 0x00:
++				cpld_uarts_number = 0;
++				break;
++		case 0x01:
++				cpld_uarts_number = 1;
++				break;
++		case 0x02:
++				cpld_uarts_number = 2;
++				break;
++		case 0x03:
++				cpld_uarts_number = 3;
++				break;
++		case 0x04:
++				cpld_uarts_number = 4;
++				break;
++		default:
++				cpld_uarts_config = KEMPLD_UART_CONFIG_INVALID;
++	}
++
++	if (cpld_uarts_config == KEMPLD_UART_CONFIG_INVALID) {
++		pr_err("%s: error! invalid CPLD UARTs implementation: 0x%x!\n", __func__, cpld_uarts_config);
++		return -ENODEV;
++	}
++	else {
++		pr_info("%s: %d CPLD UART ports is implemented\n", __func__, cpld_uarts_number);
++	}
++
++	if (cpld_uarts_number <= 0) {
++		pr_err("%s: error! the CPLD does not implement any UARTs!\n", __func__);
++		return -ENODEV;
++	}
++	else if (cpld_uarts_number > KEMPLD_NR_UARTS) {
++		cpld_uarts_number = KEMPLD_NR_UARTS;
++	}
++
++	uart_data = devm_kzalloc(dev, sizeof(*uart_data), GFP_KERNEL);
++	if (!uart_data)
++		return -ENOMEM;
++
++	uart_data->pld = pld;
++	uart_data->num_ports = cpld_uarts_number;
++
++	/* calculate UART internal frequency under different LPC bus frequency */
++	if (pld->pld_clock == KEMPLD_CLK)
++		kempld_uart_internal_freq = pdata->pld_clock / KEMPLD_UART_LPC_33_MHZ_FREQ_DIVIDER;
++	else if (pld->pld_clock == KEMPLD_CLK_25_MHZ)
++		kempld_uart_internal_freq = pdata->pld_clock / KEMPLD_UART_LPC_25_MHZ_FREQ_DIVIDER;
++	else if (pld->pld_clock == KEMPLD_CLK_24_MHZ)
++		kempld_uart_internal_freq = pdata->pld_clock / KEMPLD_UART_LPC_24_MHZ_FREQ_DIVIDER;
++
++	if (kempld_uart_internal_freq < KEMPLD_UART_MAX_SAMPLING_RATE)
++		kempld_uart_internal_freq = KEMPLD_UART_MAX_SAMPLING_RATE;
++
++	/* Enable, configure, and register the UARTs */
++	kempld_get_mutex(pld);
++	kempld_uart_register_ports(pdev, uart_data);
++	kempld_release_mutex(pld);
++
++	return 0;
++}
++
++static int kempld_uart_remove(struct platform_device *pdev)
++{
++	int i;
++	struct uart_8250_port *up;
++	struct uart_port *port;
++	struct kempld_uart_data *cpld_uarts = platform_get_drvdata(pdev);
++
++	for (i = 0; i < cpld_uarts->num_ports; i++)
++	{
++		up = &cpld_uarts->uart_8250_ports[i];
++		port = &up->port;
++
++		if (port->dev == &pdev->dev)
++			serial8250_unregister_port(port->line);
++	}
++
++	return 0;
++}
++
++static struct platform_driver kempld_uart_driver = {
++	.driver = {
++			.name = "kempld-uart",
++	},
++	.probe = kempld_uart_probe,
++	.remove = kempld_uart_remove,
++};
++
++module_platform_driver(kempld_uart_driver);
++
++MODULE_DESCRIPTION("KEM PLD UART Driver");
++MODULE_AUTHOR("Alex Soo, YukLin.Soo@kontron.com");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:kempld-uart");
+diff --git a/drivers/tty/serial/8250/Kconfig b/drivers/tty/serial/8250/Kconfig
+index a5c0ef1e7695..92e98d815384 100644
+--- a/drivers/tty/serial/8250/Kconfig
++++ b/drivers/tty/serial/8250/Kconfig
+@@ -479,6 +479,14 @@ config SERIAL_8250_PXA
+ 	  applicable to both devicetree and legacy boards, and early console is
+ 	  part of its support.
+ 
++config SERIAL_8250_KEMPLD
++	tristate "Kontron PLD 16550A UARTs"
++	depends on MFD_KEMPLD && SERIAL_8250
++	help
++	  This enables support for the Kontron CPLD UART ports.
++	  To compile this driver as a module, choose M here: the
++	  module will be called 8250_kempld_uart.
++
+ config SERIAL_OF_PLATFORM
+ 	tristate "Devicetree based probing for 8250 ports"
+ 	depends on SERIAL_8250 && OF
+diff --git a/drivers/tty/serial/8250/Makefile b/drivers/tty/serial/8250/Makefile
+index 18751bc63a84..ccb162fc5174 100644
+--- a/drivers/tty/serial/8250/Makefile
++++ b/drivers/tty/serial/8250/Makefile
+@@ -36,6 +36,7 @@ obj-$(CONFIG_SERIAL_8250_LPSS)		+= 8250_lpss.o
+ obj-$(CONFIG_SERIAL_8250_MID)		+= 8250_mid.o
+ obj-$(CONFIG_SERIAL_8250_MOXA)		+= 8250_moxa.o
+ obj-$(CONFIG_SERIAL_8250_PXA)		+= 8250_pxa.o
++obj-$(CONFIG_SERIAL_8250_KEMPLD)	+= 8250_kempld_uart.o
+ obj-$(CONFIG_SERIAL_OF_PLATFORM)	+= 8250_of.o
+ 
+ CFLAGS_8250_ingenic.o += -I$(srctree)/scripts/dtc/libfdt
+diff --git a/drivers/tty/serial/serial_core.c b/drivers/tty/serial/serial_core.c
+index 6e0ab3333f62..f8c9b5949c4a 100644
+--- a/drivers/tty/serial/serial_core.c
++++ b/drivers/tty/serial/serial_core.c
+@@ -2472,8 +2472,8 @@ int uart_register_driver(struct uart_driver *drv)
+ 	normal->type		= TTY_DRIVER_TYPE_SERIAL;
+ 	normal->subtype		= SERIAL_TYPE_NORMAL;
+ 	normal->init_termios	= tty_std_termios;
+-	normal->init_termios.c_cflag = B9600 | CS8 | CREAD | HUPCL | CLOCAL;
+-	normal->init_termios.c_ispeed = normal->init_termios.c_ospeed = 9600;
++	normal->init_termios.c_cflag = B115200 | CS8 | CREAD | HUPCL | CLOCAL;
++	normal->init_termios.c_ispeed = normal->init_termios.c_ospeed = 115200;
+ 	normal->flags		= TTY_DRIVER_REAL_RAW | TTY_DRIVER_DYNAMIC_DEV;
+ 	normal->driver_state    = drv;
+ 	tty_set_operations(normal, &uart_ops);
+diff --git a/include/linux/mfd/kempld.h b/include/linux/mfd/kempld.h
+index 26e0b469e567..6b463ff4e172 100644
+--- a/include/linux/mfd/kempld.h
++++ b/include/linux/mfd/kempld.h
+@@ -45,7 +45,10 @@
+ #define KEMPLD_CFG_GPIO_I2C_MUX		(1 << 0)
+ #define KEMPLD_CFG_BIOS_WP		(1 << 7)
+ 
+-#define KEMPLD_CLK			33333333
++#define KEMPLD_CLK_33_MHZ		33333333
++#define KEMPLD_CLK_25_MHZ		25000000
++#define KEMPLD_CLK_24_MHZ		24000000
++#define KEMPLD_CLK			KEMPLD_CLK_33_MHZ
+ 
+ #define	KEMPLD_TYPE_RELEASE		0x0
+ #define	KEMPLD_TYPE_DEBUG		0x1
+-- 
+2.16.4
+
