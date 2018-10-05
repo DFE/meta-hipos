@@ -10,6 +10,3 @@ SRC_URI_append = " \
                file://systemd-udev-service-remove-MountFlags.patch \
 "
 
-SRC_URI_append_nitrogen6x = " \
-               file://0001-systemd-add-watchdog.patch \
-"
