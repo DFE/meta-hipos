@@ -1,6 +1,6 @@
-From eb126c897543bcb05398f5da5bd29db68cd59b9c Mon Sep 17 00:00:00 2001
-From: edisonf <edison.fernandez@ridgerun.com>
-Date: Thu, 27 Apr 2017 16:03:01 -0600
+From ba16e88f35c867a3cdf3f4f1fb4b3b6684bc113e Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 9 Oct 2018 15:26:09 +0200
 Subject: [PATCH] adding gstperf
 
 ---
@@ -410,25 +410,25 @@ index 0000000..a0d0eda
 +	)
 +
 diff --git a/wscript b/wscript
-index 3b9daee..7ca3d6e 100644
+index 2777262..896b0e2 100644
 --- a/wscript
 +++ b/wscript
-@@ -200,6 +200,7 @@ def configure(conf):
+@@ -212,6 +212,7 @@ def configure(conf):
  	conf.recurse('src/eglvivsink')
  	if not conf.options.build_for_android:
- 		conf.recurse('src/v4l2src')
+ 		conf.recurse('src/v4l2video')
 +	conf.recurse('src/perf')
  	conf.recurse('src/audio')
  
  
-@@ -217,6 +218,7 @@ def build(bld):
+@@ -229,6 +230,7 @@ def build(bld):
  	bld.recurse('src/eglvivsink')
  	if not bld.env['BUILD_FOR_ANDROID']:
- 		bld.recurse('src/v4l2src')
+ 		bld.recurse('src/v4l2video')
 +	bld.recurse('src/perf')
  	bld.recurse('src/audio')
  	bld.recurse('src/blitter')
  	bld.recurse('src/compositor')
 -- 
-1.9.1
+2.16.4
 
