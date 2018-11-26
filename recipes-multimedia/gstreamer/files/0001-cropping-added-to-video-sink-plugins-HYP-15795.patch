@@ -1,19 +1,20 @@
-From a038534f76a40d08e7a8d0473bd6b8b82bd3d0a0 Mon Sep 17 00:00:00 2001
+From 3ce0e9c26ffefeb5975b6a74e39393633e790a63 Mon Sep 17 00:00:00 2001
 From: Sascha Dierberg <dierberg@dresearch-fe.de>
 Date: Tue, 20 Dec 2016 08:27:58 +0100
 Subject: [PATCH] cropping added to video sink plugins HYP-15795
 
 Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+
 ---
  src/blitter/video_sink.c | 149 +++++++++++++++++++++++++++++++++++++++++++++++
  src/blitter/video_sink.h |   3 +
  2 files changed, 152 insertions(+)
 
 diff --git a/src/blitter/video_sink.c b/src/blitter/video_sink.c
-index 3aacdcc..d014dfc 100644
+index b2848b9..9729566 100644
 --- a/src/blitter/video_sink.c
 +++ b/src/blitter/video_sink.c
-@@ -51,6 +51,10 @@ enum
+@@ -53,6 +53,10 @@ enum
  	PROP_WINDOW_Y_COORD,
  	PROP_WINDOW_WIDTH,
  	PROP_WINDOW_HEIGHT,
@@ -24,7 +25,7 @@ index 3aacdcc..d014dfc 100644
  	PROP_LEFT_MARGIN,
  	PROP_TOP_MARGIN,
  	PROP_RIGHT_MARGIN,
-@@ -72,6 +76,10 @@ enum
+@@ -76,6 +80,10 @@ enum
  #define DEFAULT_RIGHT_MARGIN 0
  #define DEFAULT_BOTTOM_MARGIN 0
  
@@ -35,7 +36,7 @@ index 3aacdcc..d014dfc 100644
  
  G_DEFINE_ABSTRACT_TYPE(GstImxBlitterVideoSink, gst_imx_blitter_video_sink, GST_TYPE_VIDEO_SINK)
  
-@@ -281,6 +289,54 @@ static void gst_imx_blitter_video_sink_class_init(GstImxBlitterVideoSinkClass *k
+@@ -308,6 +316,54 @@ static void gst_imx_blitter_video_sink_class_init(GstImxBlitterVideoSinkClass *k
  			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
  		)
  	);
@@ -90,7 +91,7 @@ index 3aacdcc..d014dfc 100644
  }
  
  
-@@ -422,6 +478,41 @@ static void gst_imx_blitter_video_sink_set_property(GObject *object, guint prop_
+@@ -472,6 +528,41 @@ static void gst_imx_blitter_video_sink_set_property(GObject *object, guint prop_
  			break;
  		}
  
@@ -132,7 +133,7 @@ index 3aacdcc..d014dfc 100644
  		case PROP_WINDOW_X_COORD:
  		{
  			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
-@@ -553,6 +644,30 @@ static void gst_imx_blitter_video_sink_get_property(GObject *object, guint prop_
+@@ -613,6 +704,30 @@ static void gst_imx_blitter_video_sink_get_property(GObject *object, guint prop_
  			GST_IMX_BLITTER_VIDEO_SINK_UNLOCK(blitter_video_sink);
  			break;
  
@@ -163,7 +164,7 @@ index 3aacdcc..d014dfc 100644
  		case PROP_LEFT_MARGIN:
  			GST_IMX_BLITTER_VIDEO_SINK_LOCK(blitter_video_sink);
  			g_value_set_uint(value, blitter_video_sink->canvas.margin_left);
-@@ -851,6 +966,40 @@ static GstFlowReturn gst_imx_blitter_video_sink_show_frame(GstVideoSink *video_s
+@@ -930,6 +1045,40 @@ static GstFlowReturn gst_imx_blitter_video_sink_show_frame(GstVideoSink *video_s
  		if (blitter_video_sink->canvas_needs_update)
  			gst_imx_blitter_video_sink_update_canvas(blitter_video_sink, &(blitter_video_sink->last_source_region));
  	}
@@ -205,10 +206,10 @@ index 3aacdcc..d014dfc 100644
  	{
  		/* Force an update if this frame has no crop metadata but the last one did */
 diff --git a/src/blitter/video_sink.h b/src/blitter/video_sink.h
-index fa558c3..9fde197 100644
+index 6151d0e..d766b6c 100644
 --- a/src/blitter/video_sink.h
 +++ b/src/blitter/video_sink.h
-@@ -81,6 +81,9 @@ struct _GstImxBlitterVideoSink
+@@ -82,6 +82,9 @@ struct _GstImxBlitterVideoSink
  
  	gint window_x_coord, window_y_coord;
  	guint window_width, window_height;
@@ -218,6 +219,3 @@ index fa558c3..9fde197 100644
  
  	GstVideoInfo input_video_info, output_video_info;
  
--- 
-2.6.6
-

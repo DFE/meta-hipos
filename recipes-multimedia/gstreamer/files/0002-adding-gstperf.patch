@@ -1,4 +1,4 @@
-From ba16e88f35c867a3cdf3f4f1fb4b3b6684bc113e Mon Sep 17 00:00:00 2001
+From 22e20de829191a292beca02a62ddfd2961b6e322 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Tue, 9 Oct 2018 15:26:09 +0200
 Subject: [PATCH] adding gstperf
@@ -429,6 +429,3 @@ index 2777262..896b0e2 100644
  	bld.recurse('src/audio')
  	bld.recurse('src/blitter')
  	bld.recurse('src/compositor')
--- 
-2.16.4
-

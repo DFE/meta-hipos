@@ -1,19 +1,20 @@
-From 5cb592d176e2c5317db7955d853f652b2d243592 Mon Sep 17 00:00:00 2001
+From 984b5d14456916241f6332b292aec1c0b3cd1c88 Mon Sep 17 00:00:00 2001
 From: Sascha Dierberg <dierberg@dresearch-fe.de>
 Date: Wed, 28 Sep 2016 08:44:25 +0200
 Subject: [PATCH] new property framerate-numerator added to decoder-base
 
 Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+
 ---
  src/vpu/encoder_base.c | 28 ++++++++++++++++++++++++++--
  src/vpu/encoder_base.h |  1 +
  2 files changed, 27 insertions(+), 2 deletions(-)
 
 diff --git a/src/vpu/encoder_base.c b/src/vpu/encoder_base.c
-index 458aec1..92537a1 100644
+index b1f097f..782e13f 100644
 --- a/src/vpu/encoder_base.c
 +++ b/src/vpu/encoder_base.c
-@@ -37,7 +37,8 @@ enum
+@@ -38,7 +38,8 @@ enum
  	PROP_BITRATE,
  	PROP_SLICE_SIZE,
  	PROP_INTRA_REFRESH,
@@ -23,7 +24,7 @@ index 458aec1..92537a1 100644
  };
  
  
-@@ -46,6 +47,7 @@ enum
+@@ -48,6 +49,7 @@ enum
  #define DEFAULT_SLICE_SIZE        0
  #define DEFAULT_INTRA_REFRESH     0
  #define DEFAULT_ME_SEARCH_RANGE   IMX_VPU_ENC_ME_SEARCH_RANGE_256x128
@@ -31,7 +32,7 @@ index 458aec1..92537a1 100644
  
  #define GST_IMX_VPU_ENCODER_ALLOCATOR_MEM_TYPE "ImxVpuEncMemory2"
  
-@@ -178,6 +180,18 @@ static void gst_imx_vpu_encoder_base_class_init(GstImxVpuEncoderBaseClass *klass
+@@ -194,6 +196,18 @@ static void gst_imx_vpu_encoder_base_class_init(GstImxVpuEncoderBaseClass *klass
  			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
  		)
  	);
@@ -50,7 +51,7 @@ index 458aec1..92537a1 100644
  }
  
  
-@@ -204,6 +218,7 @@ static void gst_imx_vpu_encoder_base_init(GstImxVpuEncoderBase *vpu_encoder_base
+@@ -221,6 +235,7 @@ static void gst_imx_vpu_encoder_base_init(GstImxVpuEncoderBase *vpu_encoder_base
  	vpu_encoder_base->slice_size       = DEFAULT_SLICE_SIZE;
  	vpu_encoder_base->intra_refresh    = DEFAULT_INTRA_REFRESH;
  	vpu_encoder_base->me_search_range  = DEFAULT_ME_SEARCH_RANGE;
@@ -58,7 +59,7 @@ index 458aec1..92537a1 100644
  }
  
  
-@@ -240,6 +255,9 @@ static void gst_imx_vpu_encoder_base_set_property(GObject *object, guint prop_id
+@@ -260,6 +275,9 @@ static void gst_imx_vpu_encoder_base_set_property(GObject *object, guint prop_id
  		case PROP_ME_SEARCH_RANGE:
  			vpu_encoder_base->me_search_range = g_value_get_enum(value);
  			break;
@@ -68,7 +69,7 @@ index 458aec1..92537a1 100644
  		default:
  			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
  			break;
-@@ -268,6 +286,9 @@ static void gst_imx_vpu_encoder_base_get_property(GObject *object, guint prop_id
+@@ -291,6 +309,9 @@ static void gst_imx_vpu_encoder_base_get_property(GObject *object, guint prop_id
  		case PROP_ME_SEARCH_RANGE:
  			g_value_set_enum(value, vpu_encoder_base->me_search_range);
  			break;
@@ -78,8 +79,8 @@ index 458aec1..92537a1 100644
  		default:
  			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
  			break;
-@@ -367,7 +388,10 @@ static gboolean gst_imx_vpu_encoder_base_set_format(GstVideoEncoder *encoder, Gs
- 	vpu_encoder_base->open_params.color_format = IMX_VPU_COLOR_FORMAT_YUV420; /* derived classes can set a different format */
+@@ -393,7 +414,10 @@ static gboolean gst_imx_vpu_encoder_base_set_format(GstVideoEncoder *encoder, Gs
+ 	vpu_encoder_base->open_params.color_format = (GST_VIDEO_INFO_FORMAT(&(state->info)) == GST_VIDEO_FORMAT_GRAY8) ? IMX_VPU_COLOR_FORMAT_YUV400 : IMX_VPU_COLOR_FORMAT_YUV420;
  	vpu_encoder_base->open_params.frame_width = GST_VIDEO_INFO_WIDTH(&(state->info));
  	vpu_encoder_base->open_params.frame_height = GST_VIDEO_INFO_HEIGHT(&(state->info));
 -	vpu_encoder_base->open_params.frame_rate_numerator = GST_VIDEO_INFO_FPS_N(&(state->info));
@@ -91,10 +92,10 @@ index 458aec1..92537a1 100644
  	vpu_encoder_base->open_params.bitrate = vpu_encoder_base->bitrate;
  	vpu_encoder_base->open_params.gop_size = vpu_encoder_base->gop_size;
 diff --git a/src/vpu/encoder_base.h b/src/vpu/encoder_base.h
-index 73a42f7..6d19918 100644
+index d3aeaa9..854ebfa 100644
 --- a/src/vpu/encoder_base.h
 +++ b/src/vpu/encoder_base.h
-@@ -94,6 +94,7 @@ struct _GstImxVpuEncoderBase
+@@ -95,6 +95,7 @@ struct _GstImxVpuEncoderBase
  	gint slice_size;
  	guint intra_refresh;
  	ImxVpuEncMESearchRanges me_search_range;
@@ -102,6 +103,3 @@ index 73a42f7..6d19918 100644
  
  	/* These are used during the actual encoding. The output buffer
  	 * is allocated and mapped to receive the encoded data. */
--- 
-2.6.6
-

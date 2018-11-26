@@ -1,4 +1,4 @@
-From 121ee26d888ab241a47ef6902a6e858e90ae9eb4 Mon Sep 17 00:00:00 2001
+From 1ce7ad41c6a5eecfbbd1e43b7af5dc4214c7f309 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Thu, 11 May 2017 11:14:37 +0200
 Subject: [PATCH] perf: Add parameter print-label
@@ -6,6 +6,7 @@ Subject: [PATCH] perf: Add parameter print-label
 Parameter print-label adds a custom-made label to output.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+
 ---
  src/perf/gstperf.c | 19 +++++++++++++++++--
  src/perf/gstperf.h |  1 +
@@ -83,6 +84,3 @@ index 5aaa407..293b67d 100644
  };
  
  struct _GstPerfClass
--- 
-2.6.6
-
