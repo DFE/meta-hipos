@@ -1,4 +1,4 @@
-From 9f20fd2db04c0c2b16c60e05f0b0ec58488d4bfe Mon Sep 17 00:00:00 2001
+From 89ad411c7ee97bf3ce589e440b803f36749c500c Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Wed, 22 Feb 2017 08:23:22 +0100
 Subject: [PATCH] Rafi touchscreen support
@@ -6,6 +6,7 @@ Subject: [PATCH] Rafi touchscreen support
 Add rafi touchscreen support.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+
 ---
  drivers/input/touchscreen/Kconfig          |    7 +
  drivers/input/touchscreen/Makefile         |    1 +
@@ -32,12 +33,12 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  create mode 100644 include/linux/input/rafi_gs.h
 
 diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
-index 485c191..4e14bed 100644
+index bb56d2c8ce29..b640921eddd4 100644
 --- a/drivers/input/touchscreen/Kconfig
 +++ b/drivers/input/touchscreen/Kconfig
-@@ -15,6 +15,13 @@ config OF_TOUCHSCREEN
+@@ -15,6 +15,13 @@ config TOUCHSCREEN_PROPERTIES
  	def_tristate INPUT
- 	depends on INPUT && OF
+ 	depends on INPUT
  
 +config TOUCHSCREEN_RAFI_GS
 +	bool "RAFI glasscape touchscreen controller @ I2C bus"
@@ -50,7 +51,7 @@ index 485c191..4e14bed 100644
  	tristate "Marvell 88PM860x touchscreen"
  	depends on MFD_88PM860X
 diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
-index 2bfe27b..41de3fa 100644
+index d495cfa28d7c..b75497ad83b6 100644
 --- a/drivers/input/touchscreen/Makefile
 +++ b/drivers/input/touchscreen/Makefile
 @@ -7,6 +7,7 @@
@@ -63,7 +64,7 @@ index 2bfe27b..41de3fa 100644
  obj-$(CONFIG_TOUCHSCREEN_AD7879)	+= ad7879.o
 diff --git a/drivers/input/touchscreen/rafi_gs.c b/drivers/input/touchscreen/rafi_gs.c
 new file mode 100644
-index 0000000..a7b5aa8
+index 000000000000..b8907f795791
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_gs.c
 @@ -0,0 +1,239 @@
@@ -308,7 +309,7 @@ index 0000000..a7b5aa8
 +module_exit(rafi_gs_exit);
 diff --git a/drivers/input/touchscreen/rafi_gs.h b/drivers/input/touchscreen/rafi_gs.h
 new file mode 100644
-index 0000000..9d7927e
+index 000000000000..9d7927eb2fb6
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_gs.h
 @@ -0,0 +1,49 @@
@@ -363,7 +364,7 @@ index 0000000..9d7927e
 +#endif
 diff --git a/drivers/input/touchscreen/rafi_gs_device.c b/drivers/input/touchscreen/rafi_gs_device.c
 new file mode 100644
-index 0000000..76a2108
+index 000000000000..149257cc8e2a
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_gs_device.c
 @@ -0,0 +1,1322 @@
@@ -1691,7 +1692,7 @@ index 0000000..76a2108
 +}
 diff --git a/drivers/input/touchscreen/rafi_gs_device.h b/drivers/input/touchscreen/rafi_gs_device.h
 new file mode 100644
-index 0000000..ecdadc4
+index 000000000000..ecdadc479965
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_gs_device.h
 @@ -0,0 +1,33 @@
@@ -1730,7 +1731,7 @@ index 0000000..ecdadc4
 +#endif
 diff --git a/drivers/input/touchscreen/rafi_key_input.c b/drivers/input/touchscreen/rafi_key_input.c
 new file mode 100644
-index 0000000..2f9dbc2
+index 000000000000..2f9dbc2546c3
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_key_input.c
 @@ -0,0 +1,98 @@
@@ -1834,7 +1835,7 @@ index 0000000..2f9dbc2
 +}
 diff --git a/drivers/input/touchscreen/rafi_key_input.h b/drivers/input/touchscreen/rafi_key_input.h
 new file mode 100644
-index 0000000..516d2f6
+index 000000000000..516d2f635f97
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_key_input.h
 @@ -0,0 +1,16 @@
@@ -1856,7 +1857,7 @@ index 0000000..516d2f6
 +#endif
 diff --git a/drivers/input/touchscreen/rafi_obs.h b/drivers/input/touchscreen/rafi_obs.h
 new file mode 100644
-index 0000000..0807af1
+index 000000000000..0807af18843a
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_obs.h
 @@ -0,0 +1,48 @@
@@ -1910,7 +1911,7 @@ index 0000000..0807af1
 +#endif
 diff --git a/drivers/input/touchscreen/rafi_ts_input.c b/drivers/input/touchscreen/rafi_ts_input.c
 new file mode 100644
-index 0000000..cdef808
+index 000000000000..cdef8087d786
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_ts_input.c
 @@ -0,0 +1,315 @@
@@ -2231,7 +2232,7 @@ index 0000000..cdef808
 +}
 diff --git a/drivers/input/touchscreen/rafi_ts_input.h b/drivers/input/touchscreen/rafi_ts_input.h
 new file mode 100644
-index 0000000..b04e612
+index 000000000000..b04e612aae51
 --- /dev/null
 +++ b/drivers/input/touchscreen/rafi_ts_input.h
 @@ -0,0 +1,16 @@
@@ -2253,7 +2254,7 @@ index 0000000..b04e612
 +#endif
 diff --git a/include/linux/input/rafi_gs.h b/include/linux/input/rafi_gs.h
 new file mode 100644
-index 0000000..1477e48
+index 000000000000..1477e482a416
 --- /dev/null
 +++ b/include/linux/input/rafi_gs.h
 @@ -0,0 +1,23 @@
@@ -2280,6 +2281,3 @@ index 0000000..1477e48
 +
 +
 +#endif
--- 
-2.6.6
-

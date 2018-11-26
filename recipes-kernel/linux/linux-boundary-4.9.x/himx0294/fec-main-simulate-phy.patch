@@ -1,4 +1,4 @@
-From f1badac74a3b857654321722d95569a9494776d2 Mon Sep 17 00:00:00 2001
+From 122268befe3640f0dca1abb0755525bf8f5a2f4f Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Wed, 9 May 2018 16:39:50 +0200
 Subject: [PATCH] net: fec_main: Simulate phy
@@ -9,15 +9,16 @@ imoc boards and a 100Mbit/s connection on dvrec boards.
 Do not disable reference clock if it is needed by the switch
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+
 ---
  drivers/net/ethernet/freescale/fec_main.c | 132 +++++++++++++++++++++++++++++-
  1 file changed, 130 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
-index 3442474544e5..26759c602929 100644
+index cd43e7685c32..e536a56b9dd7 100644
 --- a/drivers/net/ethernet/freescale/fec_main.c
 +++ b/drivers/net/ethernet/freescale/fec_main.c
-@@ -1877,6 +1877,111 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
+@@ -1913,6 +1913,111 @@ static int fec_enet_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
  	return ret;
  }
  
@@ -129,8 +130,8 @@ index 3442474544e5..26759c602929 100644
  static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
  {
  	struct fec_enet_private *fep = netdev_priv(ndev);
-@@ -1905,6 +2010,17 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
- 				goto failed_clk_ref;
+@@ -1946,6 +2051,17 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
+ 				goto failed_clk_2x_txclk;
  		}
  	} else {
 +		/*
@@ -147,7 +148,7 @@ index 3442474544e5..26759c602929 100644
  		if (fep->clk_enet_out)
  			clk_disable_unprepare(fep->clk_enet_out);
  		if (fep->clk_ptp) {
-@@ -2095,8 +2211,8 @@ static int fec_enet_mii_init(struct platform_device *pdev)
+@@ -2141,8 +2257,8 @@ static int fec_enet_mii_init(struct platform_device *pdev)
  	}
  
  	fep->mii_bus->name = "fec_enet_mii_bus";
@@ -158,7 +159,7 @@ index 3442474544e5..26759c602929 100644
  	snprintf(fep->mii_bus->id, MII_BUS_ID_SIZE, "%s-%x",
  		pdev->name, fep->dev_id + 1);
  	fep->mii_bus->priv = fep;
-@@ -3554,6 +3670,18 @@ fec_probe(struct platform_device *pdev)
+@@ -3687,6 +3803,18 @@ fec_probe(struct platform_device *pdev)
  
  	fec_enet_of_parse_stop_mode(pdev);
  
@@ -177,6 +178,3 @@ index 3442474544e5..26759c602929 100644
  	if (of_get_property(np, "fsl,magic-packet", NULL))
  		fep->wol_flag |= FEC_WOL_HAS_MAGIC_PACKET;
  
--- 
-2.13.5
-
