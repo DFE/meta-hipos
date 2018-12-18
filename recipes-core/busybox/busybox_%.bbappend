@@ -2,10 +2,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
-	file://busybox-tar.sh \
+	file://0001-Disable-unsafe-symlink-check-HYP-19186.patch \
 "
 
-do_install_append() {
-	install -d ${D}${sysconfdir}/profile.d
-	install -m 0644 ${WORKDIR}/busybox-tar.sh ${D}${sysconfdir}/profile.d/
-}
