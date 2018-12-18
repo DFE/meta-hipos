@@ -11,7 +11,11 @@ SRC_URI_append = " \
                file://himx0294.conf \
 "
 
+CONFFILES_${PN} += " \
+                ${sysconfdir}/systemd/system.conf.d/himx0294.conf \
+"
+
 do_install_append() {
-	install -d ${D}${sysconfdir}/system.conf.d
-	install -m 0644 ${WORKDIR}/himx0294.conf ${D}${sysconfdir}/system.conf.d/
+	install -d ${D}${sysconfdir}/systemd/system.conf.d
+	install -m 0644 ${WORKDIR}/himx0294.conf ${D}${sysconfdir}/systemd/system.conf.d/
 }
