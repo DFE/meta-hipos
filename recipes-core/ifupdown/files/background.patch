@@ -22,7 +22,7 @@ index b5f5da2..592b0ab 100644
      pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
          elsif (execable("/sbin/pump"))
 -    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
-+    udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
++    systemd-run --quiet --service-type=forking --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
          elsif (execable("/sbin/udhcpc"))
      dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
