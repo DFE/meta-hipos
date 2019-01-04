@@ -19,6 +19,12 @@ for IRQ in *; do
 	fi
 done
 
+# Deactivate memory tuning HYP-19186
+# With yocto sumo branch the timing has changed.
+# To determine the current behavoir, the memory tuning is deactivated.
+# The memory tuning must then be adapted to the new behavior.
+sleep infinity
+
 wait_sec=0;
 
 while true
