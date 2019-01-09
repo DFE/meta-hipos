@@ -1,9 +1,9 @@
-From 9573184f11eaae6f50609e43b4dd80c90650a054 Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <schuknecht@bfg11k-0.internal.dresearch-fe.de>
-Date: Mon, 17 Dec 2018 21:00:14 +0100
+From 38f32ae86fcbd1e244b5467d3fbfeab8c2c22a5f Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 9 Jan 2019 08:47:54 +0100
 Subject: [PATCH] Add IPU_QUEUE_TASK mutex HYP-19476
 
-Add mutex for IPU_QUEUE_TASK ioctl to avoid error:
+Add mutex in ipu_queue_task function to avoid error:
 kernel: mxc_ipu mxc_ipu: ERR: [0xeceb6400] no-0x36ac350, timeout:1000ms!
 kernel: mxc_ipu mxc_ipu: ERR: no-0x36ac350,ipu_queue_task err:-110
 
@@ -13,7 +13,7 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 4 insertions(+)
 
 diff --git a/drivers/mxc/ipu3/ipu_device.c b/drivers/mxc/ipu3/ipu_device.c
-index ab44a41facb1..5903fa47542a 100644
+index ab44a41facb1..0a3dfad20120 100644
 --- a/drivers/mxc/ipu3/ipu_device.c
 +++ b/drivers/mxc/ipu3/ipu_device.c
 @@ -349,6 +349,7 @@ struct ipu_alloc_list {
@@ -24,17 +24,23 @@ index ab44a41facb1..5903fa47542a 100644
  static struct ipu_channel_tabel	ipu_ch_tbl;
  static LIST_HEAD(ipu_task_list);
  static DEFINE_SPINLOCK(ipu_task_list_lock);
-@@ -3508,7 +3509,10 @@ static long mxc_ipu_ioctl(struct file *file,
- 					 sizeof(struct ipu_task)))
- 				return -EFAULT;
- 			pr_debug("%s: %dx%d to %dx%d\n", __func__, task.input.width, task.input.height, task.output.width, task.output.height);
-+			/* Use lock to avoid error "kernel: mxc_ipu mxc_ipu: ERR: [0xeceb6400] no-0x36ac350, timeout:1000ms!" MST HYP-19476 */
-+			mutex_lock(&ipu_queue_task_lock);
- 			ret = ipu_queue_task(&task);
-+			mutex_unlock(&ipu_queue_task_lock);
- 			break;
- 		}
- 	case IPU_ALLOC:
+@@ -3408,6 +3409,8 @@ int ipu_queue_task(struct ipu_task *task)
+ 	tsk->task_no = tmp_task_no << 4;
+ 	init_waitqueue_head(&tsk->task_waitq);
+ 
++	/* Use lock to avoid error "kernel: mxc_ipu mxc_ipu: ERR: [0xeceb6400] no-0x36ac350, timeout:1000ms!" MST HYP-19476 */
++	mutex_lock(&ipu_queue_task_lock);
+ 	spin_lock_irqsave(&ipu_task_list_lock, flags);
+ 	list_add_tail(&tsk->node, &ipu_task_list);
+ 	tsk->task_in_list = 1;
+@@ -3417,6 +3420,7 @@ int ipu_queue_task(struct ipu_task *task)
+ 
+ 	ret = wait_event_timeout(tsk->task_waitq, atomic_read(&tsk->done),
+ 						msecs_to_jiffies(tsk->timeout));
++	mutex_unlock(&ipu_queue_task_lock);
+ 	if (0 == ret) {
+ 		/* note: the timeout should larger than the internal timeout!*/
+ 		ret = -ETIMEDOUT;
 -- 
 2.16.4
 
