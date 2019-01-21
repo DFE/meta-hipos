@@ -1,0 +1,42 @@
+From b9106037d2c0bf66786c30439b9279cbe52470cc Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 21 Jan 2019 11:09:51 +0100
+Subject: [PATCH] Disable workaround MLK-11444 HYP-20171
+
+The workaround MLK-11444 ata fixes Error ERR009598 documented in errata.
+This significatly decreases SATA write speed. As long as the error is not
+observed, the workaround can be deactivated.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/ata/ahci_imx.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/ata/ahci_imx.c b/drivers/ata/ahci_imx.c
+index 150d443b5b7c..6b0c9700da18 100644
+--- a/drivers/ata/ahci_imx.c
++++ b/drivers/ata/ahci_imx.c
+@@ -649,6 +649,12 @@ static int imx_ahci_probe(struct platform_device *pdev)
+ 	reg_val = clk_get_rate(imxpriv->ahb_clk) / 1000;
+ 	writel(reg_val, hpriv->mmio + IMX_TIMER1MS);
+ 
++	/* The following workaround fixes Error ERR009598 documented in errata.
++	 * This significatly decreases SATA write speed.
++	 * As long as the error is not observed, the workaround can be deactivated.
++	 * HYP-20171 MST
++	 */
++#if 0
+ 	/*
+ 	* Due to IP bug on the Synopsis 3.00 SATA version,
+ 	* which is present on mx6q, and not on mx53,
+@@ -666,6 +672,7 @@ static int imx_ahci_probe(struct platform_device *pdev)
+ 			goto disable_sata;
+ 		}
+ 	}
++#endif
+ 
+ 	ret = ahci_platform_init_host(pdev, hpriv, &ahci_imx_port_info,
+ 				      &ahci_platform_sht);
+-- 
+2.16.4
+
