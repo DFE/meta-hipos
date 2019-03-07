@@ -22,16 +22,9 @@
 /* Size of malloc() pool */
 #define CONFIG_SYS_MALLOC_LEN		(10 * 1024 * 1024)
 
-#define CONFIG_BOARD_EARLY_INIT_F
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_MISC_INIT_R
-#define CONFIG_MXC_GPIO
-#define CONFIG_CMD_GPIO
-#define CONFIG_CI_UDC
 #define CONFIG_USBD_HS
-#define CONFIG_USB_GADGET_DUALSPEED
-#define CONFIG_USB_ETHER
-#define CONFIG_USB_ETH_CDC
 #define CONFIG_NETCONSOLE
 
 #if 0
@@ -44,11 +37,7 @@
 #define CONFIG_MXC_UART
 #define CONFIG_MXC_UART_BASE	       UART2_BASE
 
-#define CONFIG_CMD_SF
 #ifdef CONFIG_CMD_SF
-#define CONFIG_SPI_FLASH
-#define CONFIG_SPI_FLASH_MACRONIX
-#define CONFIG_MXC_SPI
 #define CONFIG_SF_DEFAULT_BUS  0
 #define CONFIG_SF_DEFAULT_CS   0
 #define CONFIG_SF_DEFAULT_SPEED 25000000
@@ -56,7 +45,6 @@
 #endif
 
 /* I2C Configs */
-#define CONFIG_CMD_I2C
 #define CONFIG_SYS_I2C
 #define CONFIG_SYS_I2C_MXC
 #define CONFIG_SYS_I2C_MXC_I2C1		/* enable I2C bus 1 */
@@ -66,57 +54,35 @@
 #define CONFIG_I2C_EDID
 
 /* MMC Configs */
-#define CONFIG_FSL_ESDHC
 #define CONFIG_FSL_USDHC
 #define CONFIG_SYS_FSL_ESDHC_ADDR      0
 #define CONFIG_SYS_FSL_USDHC_NUM       2
 
-#define CONFIG_CMD_MMC
 #define CONFIG_GENERIC_MMC
 #define CONFIG_BOUNCE_BUFFER
-#define CONFIG_CMD_EXT2
-#define CONFIG_CMD_EXT4
-#define CONFIG_CMD_EXT4_WRITE
-#define CONFIG_CMD_FAT
-#define CONFIG_DOS_PARTITION
-
-#ifdef CONFIG_MX6Q
-#define CONFIG_CMD_SATA
-#endif
 
 /*
  * SATA Configs
  */
 #ifdef CONFIG_CMD_SATA
-#define CONFIG_DWC_AHSATA
 #define CONFIG_SYS_SATA_MAX_DEVICE	1
 #define CONFIG_DWC_AHSATA_PORT_ID	0
 #define CONFIG_DWC_AHSATA_BASE_ADDR	SATA_ARB_BASE_ADDR
 #define CONFIG_LBA48
-#define CONFIG_LIBATA
 #endif
 
-#define CONFIG_CMD_PING
-#define CONFIG_CMD_DHCP
-#define CONFIG_CMD_MII
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
 #define IMX_FEC_BASE			ENET_BASE_ADDR
 #define CONFIG_FEC_XCV_TYPE		RGMII
 #define CONFIG_ETHPRIME			"FEC"
 #define CONFIG_FEC_MXC_PHYADDR		6
-#define CONFIG_PHYLIB
-#define CONFIG_PHY_MICREL
-#define CONFIG_PHY_MICREL_KSZ9021
 
 /* USB Configs */
-#define CONFIG_CMD_USB
-#define CONFIG_CMD_FAT
 #define CONFIG_USB_EHCI
 #if 0
 #define CONFIG_USB_EHCI_MX6
 #endif
-#define CONFIG_USB_STORAGE
 #define CONFIG_USB_HOST_ETHER
 #define CONFIG_USB_ETHER_ASIX
 #define CONFIG_USB_ETHER_MCS7830
@@ -125,7 +91,6 @@
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET	/* For OTG port */
 #define CONFIG_MXC_USB_PORTSC	(PORT_PTS_UTMI | PORT_PTS_PTW)
 #define CONFIG_MXC_USB_FLAGS	0
-#define CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP
 
 /* Miscellaneous commands */
 #if 0
@@ -134,12 +99,10 @@
 
 /* Framebuffer and LCD */
 #define CONFIG_VIDEO_IPUV3
-#define CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE
 #define CONFIG_VIDEO_BMP_RLE8
 #define CONFIG_SPLASH_SCREEN
 #define CONFIG_BMP_16BPP
 #define CONFIG_IPUV3_CLK 260000000
-#define CONFIG_CMD_HDMIDETECT
 #define CONFIG_IMX_HDMI
 #define CONFIG_IMX_VIDEO_SKIP
 
@@ -154,7 +117,6 @@
 #define CONFIG_PREBOOT                 ""
 
 #define CONFIG_LOADADDR			       0x12000000
-#define CONFIG_SYS_TEXT_BASE	       0x17800000
 
 /*
  * auto boot
@@ -162,8 +124,6 @@
 #define CONFIG_AUTOBOOT_KEYED
 #define CONFIG_AUTOBOOT_STOP_STR "."
 #define CONFIG_ZERO_BOOTDELAY_CHECK
-#undef CONFIG_BOOTDELAY
-#define CONFIG_BOOTDELAY 0
 #define CONFIG_AUTOBOOT_PROMPT \
                         "Press . to abort autoboot in %d seconds\n",bootdelay
 
@@ -214,11 +174,8 @@
 		"setenv bootroot /dev/mmcblk" CONFIG_DEFAULT_LINUX_DEV "p2; run do_boot\0"
 
 /* Miscellaneous configurable options */
-#define CONFIG_SYS_LONGHELP
-#define CONFIG_SYS_HUSH_PARSER
 #undef CONFIG_SYS_PROMPT
 #define CONFIG_SYS_PROMPT	       "U-Boot > "
-#define CONFIG_AUTO_COMPLETE
 #undef CONFIG_SYS_CBSIZE
 #define CONFIG_SYS_CBSIZE	       1024
 
@@ -233,8 +190,6 @@
 #define CONFIG_SYS_MEMTEST_SCRATCH     0x10800000
 
 #define CONFIG_SYS_LOAD_ADDR	       CONFIG_LOADADDR
-
-#define CONFIG_CMDLINE_EDITING
 
 /* Physical Memory Map */
 #define CONFIG_NR_DRAM_BANKS	       1
@@ -266,22 +221,6 @@
 #define CONFIG_ENV_SPI_MODE		CONFIG_SF_DEFAULT_MODE
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
 #endif
-
-#define CONFIG_CMD_BOOTZ
-
-#ifndef CONFIG_SYS_DCACHE_OFF
-#define CONFIG_CMD_CACHE
-#endif
-
-#define CONFIG_CMD_BMP
-
-#define CONFIG_CMD_TIME
-#define CONFIG_CMD_MEMTEST
-#define CONFIG_SYS_ALT_MEMTEST
-
-#define CONFIG_CMD_BOOTZ
-#define CONFIG_SUPPORT_RAW_INITRD
-#define CONFIG_CMD_FS_GENERIC
 
 /*
  * PCI express
