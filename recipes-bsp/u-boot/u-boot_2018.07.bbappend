@@ -1,8 +1,4 @@
-require recipes-bsp/u-boot/u-boot_2018.07.bb
-
-COMPATIBLE_MACHINE = "himx0294"
-
-PR = "r11"
+FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-${PV}:${THISDIR}/u-boot:${THISDIR}/files:"
 
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
