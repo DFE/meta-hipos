@@ -119,7 +119,6 @@ IMAGE_INSTALL += "  \
     tcpdump         \
     iperf3          \
     procps          \
-    wireless-tools  \
     init-ifupdown   \
 "
 
