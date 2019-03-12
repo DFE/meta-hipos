@@ -1,6 +1,6 @@
-From 23bdf1eac04a729f42a74ae73c4b8c26e7c0348f Mon Sep 17 00:00:00 2001
-From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 30 Jan 2017 14:28:01 +0100
+From b1ef41195d30c3dfe6c24a0c62b5446e8a7e1b1a Mon Sep 17 00:00:00 2001
+From: Steffen Sledz <sledz@dresearch-fe.de>
+Date: Tue, 12 Mar 2019 13:43:08 +0000
 Subject: [PATCH] ahci_imx: reset sata phy HYP-16664
 
 Without additional IMX6Q reset the SATA link is down on dvrec MX6QP boards.
@@ -11,10 +11,10 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/ata/ahci_imx.c b/drivers/ata/ahci_imx.c
-index 69422dc..6b2a90d 100644
+index 992eb456ae63..da5fe2315bc8 100644
 --- a/drivers/ata/ahci_imx.c
 +++ b/drivers/ata/ahci_imx.c
-@@ -274,6 +274,11 @@ static int imx_sata_enable(struct ahci_host_priv *hpriv)
+@@ -520,6 +520,11 @@ static int imx_sata_enable(struct ahci_host_priv *hpriv)
  		udelay(50);
  		regmap_update_bits(imxpriv->gpr, IOMUXC_GPR5,
  				   BIT(11), BIT(11));
@@ -23,9 +23,9 @@ index 69422dc..6b2a90d 100644
 +		 * dvrec MX6QP boards. MST 30.1.2017
 +		 */
 +		ret = imx_sata_phy_reset(hpriv);
+ 	} else if (imxpriv->type == AHCI_IMX8QM) {
+ 		ret = imx8_sata_enable(hpriv);
  	}
- 
- 	if (ret) {
 -- 
-2.6.6
+2.20.1
 
