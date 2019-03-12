@@ -22,7 +22,7 @@ SRC_URI_append_himx0294 = " \
 "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-himx0294:"
+FILESEXTRAPATHS_prepend_himx0294 := "${THISDIR}/u-boot-${PV}/himx0294:"
 
 do_configure_prepend_himx0294 () {
 	mkdir -p ${S}/board/freescale/himx0294
