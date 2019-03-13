@@ -1,0 +1,49 @@
+From 89cb00333b8002ae068f2f1f20f50399cc674311 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 13 Mar 2019 12:56:17 +0100
+Subject: [PATCH] backport: avg_bitrate calculation critical warning fix
+
+The avg_bitrate is an unsigned int, so the gst_util_uin64_scale() function can't
+be used for it, as it expects signed integers for the fraction parts arguments.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ libs/gst/base/gstbaseparse.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/libs/gst/base/gstbaseparse.c b/libs/gst/base/gstbaseparse.c
+index 34e85b1..751fdb1 100644
+--- a/libs/gst/base/gstbaseparse.c
++++ b/libs/gst/base/gstbaseparse.c
+@@ -1809,11 +1809,17 @@ gst_base_parse_update_bitrates (GstBaseParse * parse, GstBaseParseFrame * frame)
+   /* duration should be valid by now,
+    * either set by subclass or maybe based on fps settings */
+   if (GST_BUFFER_DURATION_IS_VALID (buffer) && parse->priv->acc_duration != 0) {
++    guint64 avg_bitrate;
++
+     /* Calculate duration of a frame from buffer properties */
+     frame_dur = GST_BUFFER_DURATION (buffer);
+-    parse->priv->avg_bitrate = (8 * parse->priv->data_bytecount * GST_SECOND) /
+-        parse->priv->acc_duration;
++    avg_bitrate = gst_util_uint64_scale (GST_SECOND,
++        8 * parse->priv->data_bytecount, parse->priv->acc_duration);
++
++    if (avg_bitrate > G_MAXUINT)
++      return;
+ 
++    parse->priv->avg_bitrate = (guint) avg_bitrate;
+   } else {
+     /* No way to figure out frame duration (is this even possible?) */
+     return;
+@@ -1859,7 +1865,7 @@ gst_base_parse_update_bitrates (GstBaseParse * parse, GstBaseParseFrame * frame)
+ 
+     /* Only update the tag on a 2% change */
+     if (parse->priv->post_avg_bitrate && parse->priv->avg_bitrate) {
+-      guint64 diffprev = gst_util_uint64_scale_int (100,
++      guint64 diffprev = gst_util_uint64_scale (100,
+           ABSDIFF (parse->priv->avg_bitrate, parse->priv->posted_avg_bitrate),
+           parse->priv->avg_bitrate);
+       if (diffprev >= UPDATE_THRESHOLD)
+-- 
+2.16.4
+
