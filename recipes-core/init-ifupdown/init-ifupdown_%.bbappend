@@ -13,7 +13,7 @@ do_install_append() {
 	install -m 0755 ${S}/ethconfig ${D}${sysconfdir}/network/if-up.d
 }
 
-pkg_postinst_${PN}() {
+pkg_postinst_ontarget_${PN}() {
 	update-rc.d networking defaults
 }
 
