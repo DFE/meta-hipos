@@ -11,6 +11,7 @@ SRC_URI_append = " \
 	file://0001-cropping-added-to-video-sink-plugins-HYP-15795.patch \
 	file://0002-adding-gstperf.patch \
 	file://0003-perf-parameter-print-label.patch \
+	file://0001-Close-VPU-decoder-instance-HYP-20302.patch \
 "
 
 # This is a workaround until waf is fixed in oe-core
