@@ -1,0 +1,26 @@
+From 2da0a91e3870a84564c01ff4bb8a4044211f28b8 Mon Sep 17 00:00:00 2001
+From: Sascha Dierberg <dierberg@dresearch-fe.de>
+Date: Mon, 18 Mar 2019 11:44:18 +0100
+Subject: [PATCH] WA for decoder close bit buffer flush HYP-20606
+
+Signed-off-by: Sascha Dierberg <dierberg@dresearch-fe.de>
+---
+ imxvpuapi/imxvpuapi_vpulib.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/imxvpuapi/imxvpuapi_vpulib.c b/imxvpuapi/imxvpuapi_vpulib.c
+index e118152..0de0b22 100644
+--- a/imxvpuapi/imxvpuapi_vpulib.c
++++ b/imxvpuapi/imxvpuapi_vpulib.c
+@@ -1117,7 +1117,7 @@ ImxVpuDecReturnCodes imx_vpu_dec_close(ImxVpuDecoder *decoder)
+ 
+ 
+ 	/* Flush the VPU bit buffer */
+-	if (decoder->codec_format != IMX_VPU_CODEC_FORMAT_MJPEG)
++	if (decoder->internal_framebuffers && decoder->codec_format != IMX_VPU_CODEC_FORMAT_MJPEG)
+ 	{
+ 		dec_ret = vpu_DecBitBufferFlush(decoder->handle);
+ 		ret = IMX_VPU_DEC_HANDLE_ERROR("could not flush decoder", dec_ret);
+-- 
+2.16.4
+
