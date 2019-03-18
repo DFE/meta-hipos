@@ -477,6 +477,9 @@
 };
 
 &mlb {
+	clocks = <&clks IMX6QDL_CLK_MLB>,
+		 <&clks IMX6QDL_CLK_PLL8_MLB>;
+	clock-names = "mlb", "pll8_mlb";
 	pinctrl-names = "default";
 #if 0
 	pinctrl-0 = <&pinctrl_mlb_2>;
