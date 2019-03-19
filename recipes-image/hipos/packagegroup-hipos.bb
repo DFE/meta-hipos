@@ -32,15 +32,12 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtconnectivity-qmlplugins \
     qtlocation-plugins \
     qtlocation-qmlplugins \
-    qtwebkit \
-    qtwebkit-qmlplugins \
 "
 
 RDEPENDS_packagegroup-hipos-qt-examples = "\
     cinematicexperience \
     qtsmarthome \
     qt5everywheredemo \
-    qtwebkit-examples-examples \
 "
 
 RDEPENDS_packagegroup-hipos-gstreamer = "\
