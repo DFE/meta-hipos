@@ -9,8 +9,15 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/gpsd:"
 # | collect2: error: ld returned 1 exit status
 LDFLAGS_prepend = " -lm "
 
+SRC_URI += " \
+    file://gpsd.service \
+"
+
 # for HydraIP we do not need gpsd.socket unit
 do_install_append() {
     rm -f ${D}${systemd_unitdir}/system/${PN}.socket
+
+    install -d ${D}${systemd_unitdir}/system/
+    install -m 0644 ${WORKDIR}/${BPN}.service ${D}${systemd_unitdir}/system/${BPN}.service
 }
 SYSTEMD_SERVICE_${PN} = "${PN}.service"
