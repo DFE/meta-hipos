@@ -19,35 +19,5 @@ for IRQ in *; do
 	fi
 done
 
-# Deactivate memory tuning HYP-19186
-# With yocto sumo branch the timing has changed.
-# To determine the current behavoir, the memory tuning is deactivated.
-# The memory tuning must then be adapted to the new behavior.
 sleep infinity
 
-wait_sec=0;
-
-while true
-do
-	/bin/sleep $((wait_sec))
-	buffers_count="$(awk '{ print ($(NF-2)+($(NF-1)*2)+(($NF)*4)) }' < /proc/buddyinfo | head -n 1)";
-	wait_sec=$((buffers_count/8))
-
-	# use "sync" to get free buffers
-	if [ ${buffers_count} -le 8  ]; then
-		/bin/echo "DMA: sync";
-		/bin/sync;
-	fi
-	if [ ${buffers_count} -le 64 ]; then
-		# drop caches to collect unused slab objects and pagecache buffers
-		/bin/echo 3 > /proc/sys/vm/drop_caches;
-	elif [ ${buffers_count} -le 96 ]; then
-		# drop caches to collect pagecache buffers
-                /bin/echo 1 > /proc/sys/vm/drop_caches;
-        fi
-	if [ ${buffers_count} -le 16 ]; then
-                # compact memory to get more big continuous free memory
-                /bin/echo "DMA: compact_memory";
-		/bin/echo 1 >/proc/sys/vm/compact_memory;
-        fi
-done
