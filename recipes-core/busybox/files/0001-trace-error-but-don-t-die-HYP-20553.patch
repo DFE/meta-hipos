@@ -1,0 +1,41 @@
+From 1603fe2fc9c6da47d86c72e6f8874914d5c2c611 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 27 Mar 2019 17:08:54 +0100
+Subject: [PATCH] Trace error but don't die HYP-20553
+
+If symlinks cannot be created, the previous busybox tar issued a warning
+trace and continued working. The current busybox tar aborts at this
+point.
+In order to be able to process Diag-USB sticks, the previous behavior is
+restored.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ archival/libarchive/unsafe_symlink_target.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/archival/libarchive/unsafe_symlink_target.c b/archival/libarchive/unsafe_symlink_target.c
+index 492c2ec..f0aea78 100644
+--- a/archival/libarchive/unsafe_symlink_target.c
++++ b/archival/libarchive/unsafe_symlink_target.c
+@@ -18,7 +18,7 @@ void FAST_FUNC create_or_remember_link(llist_t **link_placeholders,
+ 	}
+ 	if (symlink(target, linkname) != 0) {
+ 		/* shared message */
+-		bb_perror_msg_and_die("can't create %slink '%s' to '%s'",
++		bb_perror_msg("can't create %slink '%s' to '%s'",
+ 			"sym", linkname, target
+ 		);
+ 	}
+@@ -32,7 +32,7 @@ void FAST_FUNC create_links_from_list(llist_t *list)
+ 		target = list->data + 1 + strlen(list->data + 1) + 1;
+ 		if ((*list->data ? link : symlink) (target, list->data + 1)) {
+ 			/* shared message */
+-			bb_error_msg_and_die("can't create %slink '%s' to '%s'",
++			bb_error_msg("can't create %slink '%s' to '%s'",
+ 				*list->data ? "hard" : "sym",
+ 				list->data + 1, target
+ 			);
+-- 
+2.16.4
+
