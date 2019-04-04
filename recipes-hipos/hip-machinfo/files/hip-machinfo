@@ -38,19 +38,27 @@ case $(grep Hardware /proc/cpuinfo | cut -d:  -f2) in
 	*OXE810*   | *hipox*)  MACHINE="hipox";  SUBMACHINE=""; GET_SUBMACHINE=false;;
 esac
 
-# check for devices with kernel device tree, HYP-12510
-# Avoid warning: command substitution: ignored null byte in input HYP-18363
-# See: https://stackoverflow.com/questions/46163678/get-rid-of-warning-command-substitution-ignored-null-byte-in-input
-case $(tr -d '\0' </proc/device-tree/model 2> /dev/null) in
-	DResearch\ Fahrzeugelektronik\ GmbH\ himx0294) MACHINE="himx0294"; SUBMACHINE="imoc";;
-	dfe,himx0294-imoc)   MACHINE="himx0294"; SUBMACHINE="imoc";;
-	dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
-	dfe,himx0294-dvmon)  MACHINE="himx0294"; SUBMACHINE="dvmon";;
-	dfe,himx0294-dvrec)  MACHINE="himx0294"; SUBMACHINE="dvrec";;
-	dfe,himx0294-ipcam)  MACHINE="himx0294"; SUBMACHINE="ipcam";;
-	dfe,hikirk)          MACHINE="hikirk";   SUBMACHINE=""; GET_SUBMACHINE=false;;
-	# add checks for other submachines here
+# check for hinat
+case $(grep "model name" /proc/cpuinfo) in
+	*E3930*) MACHINE="hinat"; SUBMACHINE="iprec";;
 esac
+
+if [ -f /proc/device-tree/model ];
+then
+	# check for devices with kernel device tree, HYP-12510
+	# Avoid warning: command substitution: ignored null byte in input HYP-18363
+	# See: https://stackoverflow.com/questions/46163678/get-rid-of-warning-command-substitution-ignored-null-byte-in-input
+	case $(tr -d '\0' </proc/device-tree/model 2> /dev/null) in
+		DResearch\ Fahrzeugelektronik\ GmbH\ himx0294) MACHINE="himx0294"; SUBMACHINE="imoc";;
+		dfe,himx0294-imoc)   MACHINE="himx0294"; SUBMACHINE="imoc";;
+		dfe,himx0294-ivap)   MACHINE="himx0294"; SUBMACHINE="ivap";;
+		dfe,himx0294-dvmon)  MACHINE="himx0294"; SUBMACHINE="dvmon";;
+		dfe,himx0294-dvrec)  MACHINE="himx0294"; SUBMACHINE="dvrec";;
+		dfe,himx0294-ipcam)  MACHINE="himx0294"; SUBMACHINE="ipcam";;
+		dfe,hikirk)          MACHINE="hikirk";   SUBMACHINE=""; GET_SUBMACHINE=false;;
+		# add checks for other submachines here
+	esac
+fi
 
 $GET_MACHINE && echo -n $MACHINE
 $GET_MACHINE && $GET_SUBMACHINE && echo -n "-"
