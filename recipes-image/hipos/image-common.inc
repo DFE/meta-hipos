@@ -76,6 +76,14 @@ IMAGE_INSTALL_append_himx0294 += " \
   fsl-alsa-plugins \
 "
 
+IMAGE_INSTALL_append_hinat += " \
+  libdrbcc                  \
+  drbcc                     \
+  hipos-device-info         \
+  hipos-time                \
+  hip-machinfo              \
+"
+
 IMAGE_INSTALL_append_imx6qsabrelite += " \
   tslib \
   tslib-calibrate \
