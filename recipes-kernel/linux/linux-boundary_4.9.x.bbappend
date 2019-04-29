@@ -61,6 +61,7 @@ SRC_URI_append_himx0294 = " \
 	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
+	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
 "
 
 #	file://tty-imx-disable-dma.patch 
