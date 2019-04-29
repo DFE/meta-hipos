@@ -135,6 +135,15 @@
 		default-brightness-level = <18>;
 	};
 
+	pwmleds {
+		compatible = "pwm-leds";
+		status {
+			label = "status";
+			pwms = <&pwm1 0 50000>;
+			max-brightness = <256>;
+		};
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 
@@ -400,6 +409,14 @@
 		};
 	};
 
+	pwm1 {
+		pinctrl_pwm1_1: pwm1grp-1 {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_9__PWM1_OUT 0x1b0b1
+			>;
+		};
+	};
+
 	pwm3 {
 		pinctrl_pwm3_2: pwm3grp-2 {
 			fsl,pins = <
@@ -497,13 +514,11 @@
 	status = "okay";
 };
 
-#if 0
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm1_1>;
 	status = "okay";
 };
-#endif
 
 &pwm3 {
 	pinctrl-names = "default";
