@@ -1,0 +1,36 @@
+From c7b6f99159d6442dfacbed37ab40be7198074fed Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 14 May 2019 09:14:53 +0200
+Subject: [PATCH] Enable UART0 HYP-20539
+
+Some boards use UART0. Therefore UART0 must be activated.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mfd/intel-lpss.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mfd/intel-lpss.c b/drivers/mfd/intel-lpss.c
+index ba59d16c3e6e..ca9103d69c5d 100644
+--- a/drivers/mfd/intel-lpss.c
++++ b/drivers/mfd/intel-lpss.c
+@@ -244,6 +244,8 @@ static int intel_lpss_assign_devs(struct intel_lpss *lpss)
+ 		return -ENODEV;
+ 	}
+ 
++#if 0
++	Comment out deactivation code. Serial port 0 is required on some boards. MST
+ 	if (type == LPSS_DEV_UART)
+ 	{
+ 		if (PCI_FUNC(pdev->devfn) == 0)
+@@ -252,6 +254,7 @@ static int intel_lpss_assign_devs(struct intel_lpss *lpss)
+ 			return -ENODEV;
+ 		}
+ 	}
++#endif
+ 
+ 	lpss->cell = devm_kmemdup(lpss->dev, cell, sizeof(*cell), GFP_KERNEL);
+ 	if (!lpss->cell)
+-- 
+2.16.4
+

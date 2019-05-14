@@ -9,5 +9,6 @@ SRC_URI_append_hinat = " \
 	file://0004-Update-CPLD-I2C-Bus-maximum-frequency.patch \
 	file://0005-Merge-ptn3460-support-updated-for-linux-4.4.3.patch \
 	file://0006-misc-kt_bootcounter-add-a-boot-counter-driver-for-Ko.patch \
+	file://0001-Enable-UART0.patch \
 "
 
