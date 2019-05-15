@@ -60,7 +60,7 @@ PermitRootLogin yes
 
 # To disable tunneled clear text passwords, change to no here!
 # PasswordAuthentication no
-# PermitEmptyPasswords yes
+PermitEmptyPasswords yes
 
 # Change to no to disable s/key passwords
 ChallengeResponseAuthentication yes
@@ -84,7 +84,7 @@ ChallengeResponseAuthentication yes
 # If you just want the PAM account and session checks to run without
 # PAM authentication, then enable this but set PasswordAuthentication
 # and ChallengeResponseAuthentication to 'no'.
-#UsePAM no
+UsePAM no
 
 #AllowAgentForwarding yes
 #AllowTcpForwarding yes
