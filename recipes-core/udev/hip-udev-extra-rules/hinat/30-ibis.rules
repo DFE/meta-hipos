@@ -1,1 +1,2 @@
-KERNEL=="ttyS3", SUBSYSTEM=="tty", SYMLINK+="ttydribis"
+KERNEL=="ttyS3", SUBSYSTEM=="tty", KERNELS=="kempld-uart",  SUBSYSTEMS=="platform", SYMLINK+="ttydribis"
+KERNEL=="ttyS2", SUBSYSTEM=="tty", KERNELS=="0000:00:18.2", SUBSYSTEMS=="pci",      SYMLINK+="ttydribis"
