@@ -26,8 +26,8 @@ DEVICE_FILE_START="/etc/hipos/hipos-device"
 
 loggerANDstdoutError()
 {
-	echo "E: $@" 2>&1
-	logger -t ${NAME} -p user.err "$@"
+	echo "E: " "$@" 2>&1
+	logger -t "${NAME}" -p user.err "$@"
 }
 
 if [ ! -x "$DRBCC_BIN" ]; then
@@ -48,13 +48,13 @@ fetch_info()
 {
 	local ret=0
 	local resp=""
-	local machine=`hip-machinfo -a`
+	local machine=$(hip-machinfo -a)
 
-	if [ ${machine} == "himx0294-ipcam" ]; then
-		resp=`hip-board devid 2>&1 > ${TMP_DEVID_FILE}`
+	if [ "${machine}" == "himx0294-ipcam" ]; then
+		resp=$(hip-board devid 2>&1 > ${TMP_DEVID_FILE})
 	else
 		# fetch device info file from BCTRL
-		resp=`${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1`
+		resp=$(${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1)
 	fi
 	if [ ! -s ${TMP_DEVID_FILE} ]; then
 		loggerANDstdoutError "No device identity info file available in BCTRL, drbcc resp: \'$resp\'"
@@ -65,11 +65,11 @@ fetch_info()
 		fi
 	else
 		# Fix dublicated entries
-		cat ${TMP_DEVID_FILE} | sort | uniq > ${TMP_DEVID_FILE_SORT}
+		sort ${TMP_DEVID_FILE} | uniq > ${TMP_DEVID_FILE_SORT}
 		if ! diff ${TMP_DEVID_FILE} ${TMP_DEVID_FILE_SORT} > /dev/null; then
 			loggerANDstdoutError "Fix dublicated entries in devid file"
 			mv ${TMP_DEVID_FILE_SORT} ${TMP_DEVID_FILE}
-			if [ ${machine} == "himx0294-ipcam" ]; then
+			if [ "${machine}" == "himx0294-ipcam" ]; then
 				hip-board devid ${TMP_DEVID_FILE} 2>&1
 			else
 				${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="pfiletype 0x50,${TMP_DEVID_FILE}" 2>&1
@@ -132,10 +132,10 @@ update_hostname()
 	local ret=0
 	
 	if serial_valid "${serial}" ; then
-		if [[ ! -f "${HOSTNAME_FILE}" || "`cat ${HOSTNAME_FILE}`" == "hikirk" || "`cat ${HOSTNAME_FILE}`" == "4080-0-00000" ]]; then
+		if [[ ! -f "${HOSTNAME_FILE}" || "$(cat ${HOSTNAME_FILE})" == "hikirk" || "$(cat ${HOSTNAME_FILE})" == "4080-0-00000" ]]; then
 			# update only if hostname file does not exist, contains default "hikirk",
 			# or contains production dummy entry "4080-0-00000"
-			echo ${serial} > ${HOSTNAME_FILE}
+			echo "${serial}" > ${HOSTNAME_FILE}
 		fi
 	else
 		loggerANDstdoutError "No valid serial number found -> cannot update hostname"
