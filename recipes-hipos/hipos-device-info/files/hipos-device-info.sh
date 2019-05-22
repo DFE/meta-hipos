@@ -35,6 +35,17 @@ if [ ! -x "$DRBCC_BIN" ]; then
 	exit 1
 fi
 
+board_init()
+{
+	local machine=$(hip-machinfo -a)
+
+	if [ "${machine}" == "hinat-iprec" ]; then
+		# Set HOST_RUNNING
+		echo 263 > /sys/class/gpio/export
+		echo high > /sys/class/gpio/gpio263/direction
+	fi
+}
+
 serial_valid()
 {
 	case $1 in
@@ -154,6 +165,8 @@ fi
 . ${DEVID_FILE}
 update_device_type
 update_hostname
+
+board_init
 
 # 'real' file is /etc/hydraip-devid. if this isn't the case yet, make it so
 if [ -h ${DEVID_FILE} ]; then mv /etc/hipos/hipos-devid ${DEVID_FILE}; fi
