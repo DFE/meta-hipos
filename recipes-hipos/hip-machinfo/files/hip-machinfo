@@ -12,6 +12,17 @@ GET_SUBMACHINE=false;
 MACHINE="unknown"
 SUBMACHINE="unknown"
 
+module_info()
+{
+	if test -f "/sys/devices/virtual/dmi/id/board_name" && grep -q "SMARC-sXAL" "/sys/devices/virtual/dmi/id/board_name";
+	then
+		echo "SMARC-sXAL"
+	elif test -f "/sys/devices/platform/tqmx86/board_id" && grep -q "TQMxE39S" "/sys/devices/platform/tqmx86/board_id";
+	then
+		echo "TQMxE39S"
+	fi
+}
+
 # Option evaluation
 while [ "$#" -gt 0 ]; do
 	case $1 in
@@ -19,6 +30,7 @@ while [ "$#" -gt 0 ]; do
 		-s|--submachine) GET_SUBMACHINE=true;;
 		-a|--all)        GET_MACHINE=true; GET_SUBMACHINE=true;;
 		--soc)           test -f "/sys/devices/soc0/soc_id" && cat /sys/devices/soc0/soc_id; exit 0 ;;
+		--module)        module_info; exit 0 ;;
 		*) 
 			echo "Use $NAME to obtain information about machine and/or submachine type."
 			echo "    -m|--machine       return machine name"
@@ -26,6 +38,7 @@ while [ "$#" -gt 0 ]; do
 			echo "    -a|--all           return machine-submachine name"
 			echo "    -h|--help          get this little help"
 			echo "    --soc              return SoC identifcation"
+			echo "    --module           return Module identifcation"
 			exit 1
 			;;
 	esac
