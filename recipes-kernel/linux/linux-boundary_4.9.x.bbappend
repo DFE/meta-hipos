@@ -10,7 +10,7 @@ PV_append = "+tw6869gitr${SRCPV}"
 
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="5.4"
 
 SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
