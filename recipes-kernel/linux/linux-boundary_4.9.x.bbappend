@@ -39,7 +39,7 @@ SRC_URI_append_himx0294 = " \
         file://imx6qp-himx0294-dvrec.dts \
         file://imx6qscm-himx0294-ipcam.dtsi \
         file://imx6qscm-himx0294-ipcam.dts \
-        file://imx6ull-himx0432-impec.dts \
+        file://imx6ull-himx0294-impec.dts \
 	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-simulate-phy.patch \
 	file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
@@ -92,7 +92,7 @@ do_configure_prepend_himx0294() {
         cp ${WORKDIR}/imx6qp-himx0294-dvrec.dts ${S}/arch/arm/boot/dts/imx6qp-himx0294-dvrec.dts
         cp ${WORKDIR}/imx6qscm-himx0294-ipcam.dtsi ${S}/arch/arm/boot/dts/imx6qscm-himx0294-ipcam.dtsi
         cp ${WORKDIR}/imx6qscm-himx0294-ipcam.dts ${S}/arch/arm/boot/dts/imx6qscm-himx0294-ipcam.dts
-        cp ${WORKDIR}/imx6ull-himx0432-impec.dts ${S}/arch/arm/boot/dts/imx6ull-himx0432-impec.dts
+        cp ${WORKDIR}/imx6ull-himx0294-impec.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec.dts
 }
 
 do_configure_prepend_nitrogen6x() {
