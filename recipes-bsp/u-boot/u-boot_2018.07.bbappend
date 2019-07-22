@@ -19,6 +19,13 @@ SRC_URI_append_himx0294 = " \
 	file://himx0294_dvmon_defconfig \
 	file://himx0294_ipcam_defconfig \
 	file://himx0294.h \
+	file://0001-himx0432-Add-Kconfig.patch \
+	file://himx0294_impec_defconfig \
+	file://himx0432.c \
+	file://Makefile_himx0432 \
+	file://Kconfig_himx0432 \
+	file://himx0432.h \
+	file://imximage-1GiB.cfg \
 "
 
 do_configure_prepend() {
@@ -41,5 +48,14 @@ do_configure_prepend() {
 	cp ${WORKDIR}/himx0294_dvmon_defconfig ${S}/configs/
 	cp ${WORKDIR}/himx0294_ipcam_defconfig ${S}/configs/
 	cp ${WORKDIR}/himx0294.h ${S}/include/configs/
+
+        cp ${WORKDIR}/himx0294_impec_defconfig ${S}/configs/
+
+        mkdir -p ${S}/board/freescale/himx0432
+        cp ${WORKDIR}/Makefile_himx0432 ${S}/board/freescale/himx0432/Makefile
+        cp ${WORKDIR}/Kconfig_himx0432 ${S}/board/freescale/himx0432/Kconfig
+        cp ${WORKDIR}/himx0432.c ${S}/board/freescale/himx0432/
+        cp ${WORKDIR}/imximage-1GiB.cfg ${S}/board/freescale/himx0432/
+        cp ${WORKDIR}/himx0432.h ${S}/include/configs/
 }
 

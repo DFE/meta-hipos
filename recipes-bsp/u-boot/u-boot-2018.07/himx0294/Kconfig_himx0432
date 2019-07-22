@@ -1,0 +1,12 @@
+if TARGET_HIMXULL
+
+config SYS_BOARD
+	default "himx0432"
+
+config SYS_VENDOR
+	default "freescale"
+
+config SYS_CONFIG_NAME
+	default "himx0432"
+
+endif
