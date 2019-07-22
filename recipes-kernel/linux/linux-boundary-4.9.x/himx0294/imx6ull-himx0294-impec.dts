@@ -15,6 +15,10 @@
 	model = "dfe,himx0294-impec";
 	compatible = "dfe,himx0294-impec", "fsl,imx6ull";
 
+	aliases {
+		ethernet0 = &fec1;
+	};
+
 	chosen {
 		stdout-path = &uart1;
 	};
