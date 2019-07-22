@@ -67,7 +67,7 @@
         "kernel_addr=0x83800000\0" \
         "kernel_file=/boot/zImage\0" \
         "fdt_addr=0x83000000\0" \
-        "fdt_file=/boot/imx6ull-himx0432-impec.dtb\0" \
+        "fdt_file=/boot/imx6ull-himx0294-impec.dtb\0" \
         "fdt_high=0xffffffff\0" \
         "${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
         "do_boot=run load_kernel; run load_fdt; run setbootargs; " \
