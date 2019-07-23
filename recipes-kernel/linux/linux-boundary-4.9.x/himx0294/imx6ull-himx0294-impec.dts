@@ -236,8 +236,8 @@
 	pinctrl_hog_1: hoggrp-1 {
 		fsl,pins = <
 			MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x17059 /* SD1 CD */
-			MX6UL_PAD_GPIO1_IO05__USDHC1_VSELECT	0x17059 /* SD1 VSELECT */
 #if 0
+			MX6UL_PAD_GPIO1_IO05__USDHC1_VSELECT	0x17059 /* SD1 VSELECT */
 			MX6UL_PAD_GPIO1_IO09__GPIO1_IO09        0x17059 /* SD1 RESET */
 #endif
 			MX6UL_PAD_CSI_MCLK__GPIO4_IO17          0x17059 /* SD2 CD */
@@ -767,14 +767,21 @@
 };
 
 &usdhc1 {
+#if 0
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+#endif
+	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc1>;
+#if 0
 	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
 	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
+#endif
 	cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
 	keep-power-in-suspend;
 	enable-sdio-wakeup;
+#if 0
 	vmmc-supply = <&reg_sd1_vmmc>;
+#endif
 	status = "okay";
 };
 
