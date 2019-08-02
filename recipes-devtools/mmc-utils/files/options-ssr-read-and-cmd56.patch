@@ -71,7 +71,7 @@ index 44623fe..910a057 100644
 +				printf("\n%03d: ", count);
 +			}
 +		}
-+		printf("%02x ", block_data[count]);
++		printf("%02x ", (unsigned char)(block_data[count]));
 +		count++;
 +	}
 +	printf("\n");
