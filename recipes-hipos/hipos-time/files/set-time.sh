@@ -13,5 +13,7 @@ if [ "$SUB_TYPE" != "dvmon" -a "$SUB_TYPE" != "ipcam" ]; then
                 done 2>&1 | logger -t $0
                 set -x
         }
+else
+        date -s `cat /lib/systemd/systemd-timesyncd` 2> /dev/null        
 fi
 
