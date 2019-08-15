@@ -83,6 +83,7 @@ IMAGE_INSTALL_append_hinat += " \
   hipos-time                \
   hip-machinfo              \
   gstreamer1.0-plugins-base \
+  gstreamer1.0-plugins-good \
 "
 
 IMAGE_INSTALL_append_imx6qsabrelite += " \
