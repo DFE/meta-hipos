@@ -82,6 +82,7 @@ IMAGE_INSTALL_append_hinat += " \
   hipos-device-info         \
   hipos-time                \
   hip-machinfo              \
+  gstreamer1.0-plugins-base \
 "
 
 IMAGE_INSTALL_append_imx6qsabrelite += " \
