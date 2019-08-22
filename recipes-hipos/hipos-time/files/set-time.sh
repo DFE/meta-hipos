@@ -33,6 +33,7 @@ if [ -n "$date" ]; then
 	if [[ "$date" < "2019" ]]; then
 		log "Warning: RTC time outdated: $date"
 		# signal error with LED
+		mkdir -p /etc/drerrors
 		echo "{\"error\":\"RTC time outdated: $date\"}" > /etc/drerrors/RTC.json
 		if [ -n "$last" ]; then
 			log "no RTC time, using last shutdown: $last"
