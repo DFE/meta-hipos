@@ -7,7 +7,7 @@ log() {
 SUB_TYPE="$(/usr/sbin/hip-machinfo -s)"
 
 # reset error signaling
-rm -f /etc/drerrors/RTC.json 2> /dev/null
+rm -f /etc/drerrors/RTC.json
 
 if [ "$SUB_TYPE" != "dvmon" -a "$SUB_TYPE" != "ipcam" ]; then
 	date=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
