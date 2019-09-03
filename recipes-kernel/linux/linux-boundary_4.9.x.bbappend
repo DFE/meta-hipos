@@ -1,3 +1,4 @@
+inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
