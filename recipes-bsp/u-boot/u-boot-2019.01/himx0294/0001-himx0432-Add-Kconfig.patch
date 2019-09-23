@@ -1,4 +1,4 @@
-From bcda59e2e462647239a5b170b3906830a6e3c847 Mon Sep 17 00:00:00 2001
+From 78913858e65535e203ddb6de142ec85d7783c643 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Wed, 17 Jul 2019 15:08:27 +0200
 Subject: [PATCH] himx0432: Add Kconfig
@@ -6,17 +6,18 @@ Subject: [PATCH] himx0432: Add Kconfig
 Add Kconfig support for himx0432 board.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+
 ---
  arch/arm/mach-imx/mx6/Kconfig | 8 ++++++++
  1 file changed, 8 insertions(+)
 
 diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
-index 521fad74b5..7891ecb0a4 100644
+index 1b0fa72f70..d18359667b 100644
 --- a/arch/arm/mach-imx/mx6/Kconfig
 +++ b/arch/arm/mach-imx/mx6/Kconfig
-@@ -356,6 +356,13 @@ config TARGET_MX6ULL_14X14_EVK
- 	select DM
- 	select DM_THERMAL
+@@ -384,6 +384,13 @@ config TARGET_MX6ULL_14X14_EVK
+ 	select MX6ULL
+ 	imply CMD_DM
  
 +config TARGET_HIMXULL
 +	bool "Support himx0432"
@@ -27,8 +28,8 @@ index 521fad74b5..7891ecb0a4 100644
 +
  config TARGET_NITROGEN6X
  	bool "nitrogen6x"
- 	imply USB_HOST_ETHER
-@@ -513,6 +520,7 @@ source "board/freescale/mx6sxsabresd/Kconfig"
+ 	imply USB_ETHER_ASIX
+@@ -553,6 +560,7 @@ source "board/freescale/mx6sxsabresd/Kconfig"
  source "board/freescale/mx6sxsabreauto/Kconfig"
  source "board/freescale/mx6ul_14x14_evk/Kconfig"
  source "board/freescale/mx6ullevk/Kconfig"
@@ -36,6 +37,3 @@ index 521fad74b5..7891ecb0a4 100644
  source "board/grinn/liteboard/Kconfig"
  source "board/phytec/pcm058/Kconfig"
  source "board/phytec/pfla02/Kconfig"
--- 
-2.16.4
-
