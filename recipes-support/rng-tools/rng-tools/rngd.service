@@ -1,0 +1,16 @@
+[Unit]
+Description=Hardware RNG Entropy Gatherer Daemon
+DefaultDependencies=no
+After=systemd-udev-settle.service
+Before=sysinit.target
+# Workaround shutdown timeout HYP-22032
+Conflicts=systemd-halt.service
+Conflicts=systemd-reboot.service
+Conflicts=systemd-poweroff.service
+
+[Service]
+ExecStart=/usr/sbin/rngd -f -r /dev/hwrng
+SuccessExitStatus=66
+
+[Install]
+WantedBy=multi-user.target
