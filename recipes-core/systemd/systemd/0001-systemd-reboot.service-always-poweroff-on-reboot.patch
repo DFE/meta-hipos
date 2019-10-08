@@ -1,25 +1,26 @@
-From 6590bd26e89c144d0fc5623ee6c4eda64e2de094 Mon Sep 17 00:00:00 2001
-From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Fri, 19 Jul 2013 08:14:00 +0200
+From bdca9e65aca1070635644f7b213aae28c758363e Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Tue, 8 Oct 2019 11:46:55 +0200
 Subject: [PATCH] systemd-reboot.service: always poweroff on reboot
 
 reboot without poweroff makes no sense on our hipos hardware.
 
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- units/systemd-reboot.service.in | 2 +-
+ units/systemd-reboot.service | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/units/systemd-reboot.service.in b/units/systemd-reboot.service.in
-index d99bd3e..547e896 100644
---- a/units/systemd-reboot.service.in
-+++ b/units/systemd-reboot.service.in
-@@ -14,4 +14,4 @@ After=shutdown.target umount.target final.target
- 
- [Service]
- Type=oneshot
--ExecStart=@SYSTEMCTL@ --force reboot
-+ExecStart=@SYSTEMCTL@ --force poweroff
+diff --git a/units/systemd-reboot.service b/units/systemd-reboot.service
+index 505f60aabf..77e0ba0fb1 100644
+--- a/units/systemd-reboot.service
++++ b/units/systemd-reboot.service
+@@ -13,4 +13,4 @@ Documentation=man:systemd-halt.service(8)
+ DefaultDependencies=no
+ Requires=shutdown.target umount.target final.target
+ After=shutdown.target umount.target final.target
+-SuccessAction=reboot-force
++SuccessAction=poweroff-force
 -- 
-1.8.1.4
+2.16.4
 
