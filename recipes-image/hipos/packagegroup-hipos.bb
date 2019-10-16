@@ -41,22 +41,6 @@ RDEPENDS_packagegroup-hipos-qt-examples = "\
 "
 
 RDEPENDS_packagegroup-hipos-gstreamer = "\
-    gstreamer \
-    gstreamer-dev \
-    gst-plugins-base-app \
-    gst-plugins-base-meta \
-    gst-plugins-good-meta \
-    gst-plugins-ugly-meta \
-    gst-meta-audio \
-    gst-meta-video \
-    gst-meta-debug \
-    gst-plugins-base-tcp \
-    gst-plugins-good-meta \
-    gst-plugins-good-udp \
-    gst-plugins-good-rtp \
-    gst-plugins-good-rtpmanager \
-    gst-plugins-good-rtsp \
-    gst-fluendo-mpegdemux \
     gstreamer1.0-plugins-base-meta \
     gstreamer1.0-plugins-good-meta \
     gstreamer1.0-plugins-bad-meta \

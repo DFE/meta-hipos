@@ -17,7 +17,6 @@ DEPENDS = "gstreamer glib-2.0 "
 RDEPENDS_${PN} = "gstreamer \
                   gst-plugins-good-rtp \ 
                   gst-plugins-good-udp \
-                  gst-plugins-good-rtpmanager \
                   gst-plugins-good-video4linux2 \
                   gst-fsl-plugin \
                   glib-2.0 \
