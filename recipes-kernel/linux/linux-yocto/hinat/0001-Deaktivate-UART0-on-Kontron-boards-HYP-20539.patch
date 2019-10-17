@@ -1,0 +1,48 @@
+From a399e6deff3cfd07bf05db5148dcd1906b0b749c Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 17 Oct 2019 12:07:33 +0200
+Subject: [PATCH] Deaktivate UART0 on Kontron boards HYP-20539
+
+Check board vendor and disable UART0 only on Kontron boards.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/mfd/intel-lpss.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mfd/intel-lpss.c b/drivers/mfd/intel-lpss.c
+index ba59d16c3e6e..2da5c21b0510 100644
+--- a/drivers/mfd/intel-lpss.c
++++ b/drivers/mfd/intel-lpss.c
+@@ -28,6 +28,7 @@
+ #include <linux/seq_file.h>
+ #include <linux/io-64-nonatomic-lo-hi.h>
+ #include <linux/pci.h>
++#include <linux/dmi.h>
+ 
+ #include "intel-lpss.h"
+ 
+@@ -244,12 +245,16 @@ static int intel_lpss_assign_devs(struct intel_lpss *lpss)
+ 		return -ENODEV;
+ 	}
+ 
+-	if (type == LPSS_DEV_UART)
+ 	{
+-		if (PCI_FUNC(pdev->devfn) == 0)
++		const char *vendor;
++		vendor = dmi_get_system_info(DMI_BOARD_VENDOR);
++		if (vendor && !strncasecmp(vendor, "Kontron", 7) && type == LPSS_DEV_UART)
+ 		{
+-			pr_info("%s: the HSUART %s is not supported\n", __func__, pci_name(pdev));
+-			return -ENODEV;
++			if (PCI_FUNC(pdev->devfn) == 0)
++			{
++				pr_info("%s: the HSUART %s is not supported\n", __func__, pci_name(pdev));
++				return -ENODEV;
++			}
+ 		}
+ 	}
+ 
+-- 
+2.16.4
+
