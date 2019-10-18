@@ -93,9 +93,16 @@ int board_init(void)
 	i2c_set_bus_num(0);
 	if(0 == i2c_probe(0x8)) {
 		u8 tmp = 0x48;
+		/* Reset KSZ8795CLX */
+		gpio_request(IMX_GPIO_NR(2, 11), "switch_rst");
+		gpio_direction_output(IMX_GPIO_NR(2, 11) , 0);
+
 		i2c_write(0x8, 0x66, 1, &tmp, 1);
 		tmp = 0x1f;
 		i2c_write(0x8, 0x6d, 1, &tmp, 1);
+
+		mdelay(15);
+		gpio_set_value(IMX_GPIO_NR(2, 11), 1);
 	} else {
 		printf("PMIC on i2c1 not found\n");
 	}
