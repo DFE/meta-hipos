@@ -1,2 +1,2 @@
 # create FT232 USB-Serial (UART) fasy linkl
-SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v0403p600?*", NAME="RS485USB0" , SYMLINK+="fasy"
+SUBSYSTEM=="tty", ACTION=="add", ATTRS{modalias}=="usb:v0403p600?*", KERNELS=="1-1.2:1.0", NAME="RS485USB0" , SYMLINK+="fasy"
