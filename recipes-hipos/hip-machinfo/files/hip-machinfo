@@ -17,7 +17,7 @@ module_info()
 	if test -f "/sys/devices/virtual/dmi/id/board_name" && grep -q "SMARC-sXAL" "/sys/devices/virtual/dmi/id/board_name";
 	then
 		echo "SMARC-sXAL"
-	elif test -f "/sys/devices/virtual/dmi/id/board_name" && grep -q "MSC SM2S-AL" "/sys/devices/virtual/dmi/id/board_name";
+	elif test -f "/sys/devices/virtual/dmi/id/board_name" && grep -q "SM2-AL" "/sys/devices/virtual/dmi/id/board_name";
 	then
 		echo "MSC-SM2S-AL"
 	elif test -f "/sys/devices/platform/tqmx86/board_id" && grep -q "TQMxE39S" "/sys/devices/platform/tqmx86/board_id";
