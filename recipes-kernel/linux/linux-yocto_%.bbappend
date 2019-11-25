@@ -10,5 +10,6 @@ SRC_URI_append_hinat = " \
 	file://0005-Merge-ptn3460-support-updated-for-linux-4.4.3.patch \
 	file://0006-misc-kt_bootcounter-add-a-boot-counter-driver-for-Ko.patch \
 	file://0001-Deaktivate-UART0-on-Kontron-boards-HYP-20539.patch \
+	file://0001-Deactivate-HOST_RUNNING-GPO-HYP-20539.patch \
 "
 

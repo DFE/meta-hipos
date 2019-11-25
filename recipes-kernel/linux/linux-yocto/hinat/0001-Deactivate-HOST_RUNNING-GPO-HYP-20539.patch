@@ -1,0 +1,57 @@
+From f26fb30c6df6ee2c1580f3e9c681afe614743ffb Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 25 Nov 2019 11:43:09 +0100
+Subject: [PATCH] Deactivate HOST_RUNNING GPO HYP-20539
+
+The HOST_RUNNING GPO is deactivated as the last action on shutdown. This
+signals to the board controller that the host is shut down.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ kernel/reboot.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/kernel/reboot.c b/kernel/reboot.c
+index e1b79b6a2735..55fde255bcf0 100644
+--- a/kernel/reboot.c
++++ b/kernel/reboot.c
+@@ -16,6 +16,8 @@
+ #include <linux/syscalls.h>
+ #include <linux/syscore_ops.h>
+ #include <linux/uaccess.h>
++#include <linux/gpio.h>
++#include <linux/dmi.h>
+ 
+ /*
+  * this indicates whether you can reboot with ctrl-alt-del: the default is yes
+@@ -231,6 +233,19 @@ void migrate_to_reboot_cpu(void)
+ 	set_cpus_allowed_ptr(current, cpumask_of(cpu));
+ }
+ 
++static void poweroff_host_running(void)
++{
++	unsigned int host_running = 263;
++	const char *vendor;
++	vendor = dmi_get_system_info(DMI_BOARD_VENDOR);
++	if (vendor && !strncasecmp(vendor, "MSC Technologies GmbH", 21))
++	{
++		host_running = 448;
++	}
++	printk("Switch off host running gpio %d vendor '%s'\n", host_running, vendor?vendor:"null");
++	gpio_direction_output(host_running, 0);
++}
++
+ /**
+  *	kernel_restart - reboot the system
+  *	@cmd: pointer to buffer containing command to execute for restart
+@@ -291,6 +306,7 @@ void kernel_power_off(void)
+ 	syscore_shutdown();
+ 	pr_emerg("Power down\n");
+ 	kmsg_dump(KMSG_DUMP_POWEROFF);
++	poweroff_host_running();
+ 	machine_power_off();
+ }
+ EXPORT_SYMBOL_GPL(kernel_power_off);
+-- 
+2.16.4
+
