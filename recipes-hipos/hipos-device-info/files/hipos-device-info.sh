@@ -40,9 +40,15 @@ board_init()
 	local machine=$(hip-machinfo -a)
 
 	if [ "${machine}" == "hinat-iprec" ]; then
+		local host_running=263
+		local machine_module
+		machine_module=$(hip-machinfo --module)
 		# Set HOST_RUNNING
-		echo 263 > /sys/class/gpio/export
-		echo high > /sys/class/gpio/gpio263/direction
+		if [ "${machine_module}" == "MSC-SM2S-AL" ]; then
+			host_running=448
+		fi
+		echo ${host_running} > /sys/class/gpio/export
+		echo high > /sys/class/gpio/gpio${host_running}/direction
 	fi
 }
 
