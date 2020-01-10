@@ -65,6 +65,10 @@ IMAGE_INSTALL_append_himx0294 += "   \
   hipos-net-check           \
 "
 
+IMAGE_INSTALL_append_himx0438 += "   \
+  u-boot-fw-utils           \
+  kernel-devicetree         \
+"
 
 IMAGE_INSTALL_append_himx0294 += " \
   tslib \
