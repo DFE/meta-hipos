@@ -77,7 +77,6 @@ IMAGE_INSTALL_append_himx0294 += " \
   gstreamer1.0-plugins-imx \
   gstreamer1.0-plugins-base \
   gstreamer1.0-plugins-bad-mpegtsmux \
-  eglinfo-fb \
   fsl-alsa-plugins \
 "
 
@@ -99,7 +98,6 @@ IMAGE_INSTALL_append_imx6qsabrelite += " \
   packagegroup-hipos-qt-examples \
   packagegroup-hipos-gstreamer \
   gstreamer1.0-plugins-imx \
-  eglinfo-fb \
   fsl-alsa-plugins \
 "
 
