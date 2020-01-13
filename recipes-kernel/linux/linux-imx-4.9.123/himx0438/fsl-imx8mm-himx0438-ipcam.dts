@@ -829,6 +829,11 @@
 			};
 		};
 	};
+
+	tmp112: lm75@48 {
+		compatible = "lm75";
+		reg = <0x48>;
+	};
 };
 
 &lcdif {
