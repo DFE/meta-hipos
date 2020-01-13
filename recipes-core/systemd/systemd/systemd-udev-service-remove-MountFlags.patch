@@ -27,9 +27,9 @@ index 6a3814e5d9..e3f3ad3293 100644
  WatchdogSec=3min
  TasksMax=infinity
 -PrivateMounts=yes
+ ProtectHostname=yes
  MemoryDenyWriteExecute=yes
  RestrictRealtime=yes
- RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
 -- 
 2.16.4
 
