@@ -1,6 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-PACKAGECONFIG_remove = "networkd resolved"
+PACKAGECONFIG_remove = "networkd"
 
 # Enable kmod package configuration
 # A recipe append from meta-angstrom removes kmod configuration.
