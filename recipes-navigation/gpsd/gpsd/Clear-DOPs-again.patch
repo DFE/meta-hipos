@@ -1,6 +1,6 @@
-From bf73c84e01d52a9c903a4564db48292e3c7e2be6 Mon Sep 17 00:00:00 2001
+From 714ef11ef6f7b2f308888934183b35cde6ba06b2 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 22 May 2017 16:28:18 +0200
+Date: Mon, 23 Dec 2019 10:15:26 +0100
 Subject: [PATCH] Clear DOPs again
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
@@ -9,18 +9,18 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libgpsd_core.c b/libgpsd_core.c
-index 610a113..ddd0c53 100644
+index 3bf420c..9b36165 100644
 --- a/libgpsd_core.c
 +++ b/libgpsd_core.c
-@@ -1646,7 +1646,7 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
- {
-     (void)memset(out->skyview, '\0', sizeof(out->skyview));
-     out->satellites_visible = 0;
+@@ -1722,7 +1722,7 @@ void gpsd_zero_satellites( struct gps_data_t *out)
+         out->skyview[sat].elevation = -91;
+         out->skyview[sat].ss = -1.0;
+     }
 -#if 0
 +#if 1
      /*
       * We used to clear DOPs here, but this causes misbehavior on some
       * combined GPS/GLONASS/QZSS receivers like the Telit SL869; the
 -- 
-2.6.6
+2.16.4
 
