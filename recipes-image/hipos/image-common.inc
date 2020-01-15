@@ -135,9 +135,6 @@ IMAGE_INSTALL += "  \
     init-ifupdown   \
 "
 
-# smb support
-IMAGE_INSTALL += " samba-systemd "
-
 # file system tools
 IMAGE_INSTALL += "      \
     e2fsprogs           \
