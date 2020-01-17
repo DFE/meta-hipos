@@ -22,7 +22,9 @@ IMAGE_FEATURES += " package-management post-install-logging "
 IMAGE_FEATURES_remove = " allow-empty-password debug-tweaks "
 
 # remove connman
-IMAGE_INSTALL_remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client"
+# remove tar to use busybox tar. The 'real'-tar has problems with symlinks to /dev/null with vfat filesystem. HYP-19186
+# tar is installed explicitly in recipe angstrom-image.bb since Yocto zeus. HYP-22728
+IMAGE_INSTALL_remove += "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client tar"
 
 # When wic-image is created, two incorrect entries are generated in /etc/fstab.
 # This causes the boot process to get stuck with:
