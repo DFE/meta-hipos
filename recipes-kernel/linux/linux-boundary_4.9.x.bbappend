@@ -20,6 +20,7 @@ SRC_URI_append = " \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://1byte-serial-trigger.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
+	file://0001-Fix-GCC-9-missing-attributes-warning.patch \
 "
 
 #	file://ENET_REF_CLK.patch 

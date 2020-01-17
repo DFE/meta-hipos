@@ -1,0 +1,35 @@
+From 3ab25c98d23fdf869f4889d2fb73bfceeb2720b1 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 16 Jan 2020 14:07:28 +0100
+Subject: [PATCH] Fix GCC 9 missing-attributes warning
+
+See https://lore.kernel.org/lkml/20190123173707.GA16603@gmail.com/
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ include/linux/module.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/linux/module.h b/include/linux/module.h
+index d2224a09b4b5..f2bafe132c9f 100644
+--- a/include/linux/module.h
++++ b/include/linux/module.h
+@@ -129,13 +129,13 @@ extern void cleanup_module(void);
+ #define module_init(initfn)					\
+ 	static inline initcall_t __inittest(void)		\
+ 	{ return initfn; }					\
+-	int init_module(void) __attribute__((alias(#initfn)));
++	int init_module(void) __cold __attribute__((alias(#initfn)));
+ 
+ /* This is only required if you want to be unloadable. */
+ #define module_exit(exitfn)					\
+ 	static inline exitcall_t __exittest(void)		\
+ 	{ return exitfn; }					\
+-	void cleanup_module(void) __attribute__((alias(#exitfn)));
++	void cleanup_module(void) __cold __attribute__((alias(#exitfn)));
+ 
+ #endif
+ 
+-- 
+2.16.4
+
