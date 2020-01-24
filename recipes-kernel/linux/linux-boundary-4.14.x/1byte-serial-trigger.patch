@@ -1,0 +1,21 @@
+From a722206ffcc359681b66cf5ee986455bb85df922 Mon Sep 17 00:00:00 2001
+From: Eik Binschek <binschek@dresearch-fe.de>
+Date: Fri, 20 Jul 2018 14:56:04 +0200
+
+---
+ drivers/tty/serial/imx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index 0e367ebbfae5..f85beeb03b20 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -1206,7 +1206,7 @@ static int start_rx_dma(struct imx_port *sport)
+ }
+ 
+ #define TXTL_DEFAULT 2 /* reset default */
+-#define RXTL_DEFAULT ((uart_console(&sport->port)) ? 1 : 16) /* reset default */
++#define RXTL_DEFAULT ((uart_console(&sport->port)) ? 1 : 1) /* reset default */
+ #define TXTL_DMA 8 /* DMA burst setting */
+ #define RXTL_DMA 9 /* DMA burst setting */
+ 

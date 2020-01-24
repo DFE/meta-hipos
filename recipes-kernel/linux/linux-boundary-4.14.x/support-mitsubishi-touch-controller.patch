@@ -1,0 +1,59 @@
+From 96b2088ac2af17e743c448f6421975f8035feb97 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 20 Jan 2020 15:40:08 +0100
+Subject: [PATCH] Support Mitsubishi touch controller HYP-16425
+
+Add Mitsubishi touch controller ids to HID driver.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/hid/hid-core.c       | 1 +
+ drivers/hid/hid-ids.h        | 3 +++
+ drivers/hid/hid-multitouch.c | 5 +++++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/drivers/hid/hid-core.c b/drivers/hid/hid-core.c
+index a306493e2e97..8d27722e4481 100644
+--- a/drivers/hid/hid-core.c
++++ b/drivers/hid/hid-core.c
+@@ -2392,6 +2392,7 @@ static const struct hid_device_id hid_have_special_driver[] = {
+ #if IS_ENABLED(CONFIG_HID_ZYDACRON)
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_ZYDACRON, USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL) },
+ #endif
++	{ HID_USB_DEVICE(USB_VENDOR_ID_MITSUBISHI_ELECTRIC, USB_DEVICE_ID_MITSUBISHI_ELECTRIC_USB_TOUCH_6400 ) },
+ 	{ }
+ };
+ 
+diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
+index 28ae3dc57103..b0f82a56a955 100644
+--- a/drivers/hid/hid-ids.h
++++ b/drivers/hid/hid-ids.h
+@@ -783,6 +783,9 @@
+ #define USB_DEVICE_ID_MS_TYPE_COVER_2    0x07a9
+ #define USB_DEVICE_ID_MS_POWER_COVER     0x07da
+ 
++#define USB_VENDOR_ID_MITSUBISHI_ELECTRIC 0x06d3
++#define USB_DEVICE_ID_MITSUBISHI_ELECTRIC_USB_TOUCH_6400 0x6400
++
+ #define USB_VENDOR_ID_MOJO		0x8282
+ #define USB_DEVICE_ID_RETRO_ADAPTER	0x3201
+ 
+diff --git a/drivers/hid/hid-multitouch.c b/drivers/hid/hid-multitouch.c
+index 07d92d4a9f7c..f030e6f28e80 100644
+--- a/drivers/hid/hid-multitouch.c
++++ b/drivers/hid/hid-multitouch.c
+@@ -1614,6 +1614,11 @@ static const struct hid_device_id mt_devices[] = {
+ 		HID_USB_DEVICE(USB_VENDOR_ID_LG,
+ 			USB_DEVICE_ID_LG_MELFAS_MT) },
+ 
++	/* Mitsubishi */
++	{ .driver_data = MT_CLS_DEFAULT,
++		HID_USB_DEVICE(USB_VENDOR_ID_MITSUBISHI_ELECTRIC,
++			USB_DEVICE_ID_MITSUBISHI_ELECTRIC_USB_TOUCH_6400) },
++
+ 	/* MosArt panels */
+ 	{ .driver_data = MT_CLS_CONFIDENCE_MINUS_ONE,
+ 		MT_USB_DEVICE(USB_VENDOR_ID_ASUS,
+-- 
+2.16.4
+

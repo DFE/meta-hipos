@@ -1,0 +1,315 @@
+From b3e4e3fce3cfc30c82101bd1b7af071e3108ce8c Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 29 Nov 2017 13:05:49 +0100
+Subject: [PATCH] ldb: lvds power up/down sequence
+
+This commit implements a lvds power up and down sequence.
+Many lvds displays have a power sequence as follows:
+
+             ______________   _
+VCC        _/              \_/
+                ________
+Data       ____|        |_____
+                 _____
+VLED       _____|     |_______
+                   _
+Backlight ________| |_________
+
+There is a minimum and maximum time requirement between VCC and LVDS data, LVDS
+data and VLED and between VLED and backlight enable. To fullfill the time
+requirements, the ldb driver needs to know VCC, VLED and backlight GPIO and the
+timing before and after data enable. Now this can be configured using following
+"lvds-channel" device tree
+elements:
+
+&ldb {
+        ...
+        lvds-channel@0 {
+                ...
+                vcc-gpios = <&gpio4 7 GPIO_ACTIVE_LOW>;
+                vcc-powerup-delay-ms = <1>;
+                vcc-down-delay-ms = <200>;
+                vled-gpio = <&gpio4 8 GPIO_ACTIVE_HIGH>;
+                vled-powerup-delay-ms = <200>;
+                vled-powerdown-delay-ms = <200>;
+                backlight-gpio = <&gpio4 6 GPIO_ACTIVE_HIGH>;
+                backlight-powerup-delay-ms = <200>;
+                ...
+        };
+};
+
+"vcc-gpios"                  are the VCC GPIOs.
+"vcc-powerup-delay-ms"       is the delay between VCC and data enable during
+                             powerup in milliseconds.
+"vcc-down-delay-ms"          is the delay between VCC down and next VCC up in
+                             milliseconds.
+"vled-gpio"                  is the VLED GPIO.
+"vled-powerup-delay-ms"      is the delay between LVDS data and VLED during
+                             powerup in milliseconds.
+"vled-powerdown-delay-ms"    is the delay between VLED and LVDS data disable
+                             during powerdown in milliseconds.
+"backlight-gpio"             is the backlight GPIO.
+"backlight-powerup-delay-ms" is the delay between VLED and backlight during
+                             powerup in milliseconds.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/video/fbdev/mxc/ldb.c | 191 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 189 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/fbdev/mxc/ldb.c b/drivers/video/fbdev/mxc/ldb.c
+index 78463ef85a6f..bd660778a088 100644
+--- a/drivers/video/fbdev/mxc/ldb.c
++++ b/drivers/video/fbdev/mxc/ldb.c
+@@ -24,6 +24,8 @@
+ #include <video/of_videomode.h>
+ #include <video/of_display_timing.h>
+ #include <video/videomode.h>
++#include <linux/of_gpio.h>
++#include <linux/delay.h>
+ #include "mxc_dispdrv.h"
+ 
+ #define DRIVER_NAME	"ldb"
+@@ -84,6 +86,17 @@ struct ldb_chan {
+ 	bool is_used;
+ 	bool online;
+ 	int parent_choice_index;
++	int vcc_nr_gpios;
++	struct gpio * vcc_gpios;
++	int vcc_powerup_delay_ms;
++	int vcc_down_delay_ms;
++	int vled_gpio;
++	int vled_active_low;
++	int vled_powerup_delay_ms;
++	int vled_powerdown_delay_ms;
++	int backlight_gpio;
++	int backlight_active_low;
++	int backlight_powerup_delay_ms;
+ };
+ 
+ struct ldb_data {
+@@ -546,7 +559,7 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+ 	struct ldb_chan chan;
+ 	struct device *dev = ldb->dev;
+ 	struct bus_mux bus_mux;
+-	int ret = 0, id = 0, chno, other_chno;
++	int ret = 0, id = 0, chno, other_chno, i;
+ 
+ 	ret = find_ldb_chno(ldb, fbi, &chno);
+ 	if (ret < 0)
+@@ -583,7 +596,24 @@ static int ldb_enable(struct mxc_dispdrv_handle *mddh,
+ 					    LDB_CH0_MODE_EN_TO_DI0;
+ 	}
+ 
++	for (i = 0; i < chan.vcc_nr_gpios; i++) {
++		if (gpio_is_valid(chan.vcc_gpios[i].gpio)) {
++			gpio_set_value(chan.vcc_gpios[i].gpio,
++				!(chan.vcc_gpios[i].flags & OF_GPIO_ACTIVE_LOW));
++		}
++	}
++	if (chan.vcc_nr_gpios > 0) { mdelay(chan.vcc_powerup_delay_ms); }
+ 	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
++	if (gpio_is_valid(chan.vled_gpio)) {
++		mdelay(chan.vled_powerup_delay_ms);
++		gpio_set_value(chan.vled_gpio,
++			       !chan.vled_active_low);
++	}
++	if (gpio_is_valid(chan.backlight_gpio)) {
++		mdelay(chan.backlight_powerup_delay_ms);
++		gpio_set_value(chan.backlight_gpio,
++			       !chan.backlight_active_low);
++	}
+ 	return 0;
+ }
+ 
+@@ -591,7 +621,7 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+ 		       struct fb_info *fbi)
+ {
+ 	struct ldb_data *ldb = mxc_dispdrv_getdata(mddh);
+-	int ret, chno, other_chno;
++	int ret, chno, other_chno, i;
+ 
+ 	ret = find_ldb_chno(ldb, fbi, &chno);
+ 	if (ret < 0)
+@@ -606,7 +636,23 @@ static void ldb_disable(struct mxc_dispdrv_handle *mddh,
+ 				      LDB_CH0_MODE_MASK);
+ 	}
+ 
++	if (gpio_is_valid(ldb->chan[chno].backlight_gpio)) {
++		gpio_set_value(ldb->chan[chno].backlight_gpio,
++			       ldb->chan[chno].backlight_active_low);
++	}
++	if (gpio_is_valid(ldb->chan[chno].vled_gpio)) {
++		gpio_set_value(ldb->chan[chno].vled_gpio,
++			       ldb->chan[chno].vled_active_low);
++		mdelay(ldb->chan[chno].vled_powerdown_delay_ms);
++	}
+ 	regmap_write(ldb->regmap, ldb->ctrl_reg, ldb->ctrl);
++	for (i = 0; i < ldb->chan[chno].vcc_nr_gpios; i++) {
++		if (gpio_is_valid(ldb->chan[chno].vcc_gpios[i].gpio)) {
++			gpio_set_value(ldb->chan[chno].vcc_gpios[i].gpio,
++			       ldb->chan[chno].vcc_gpios[i].flags & OF_GPIO_ACTIVE_LOW);
++		}
++	}
++	if (ldb->chan[chno].vcc_nr_gpios > 0) { mdelay(ldb->chan[chno].vcc_down_delay_ms); }
+ 	return;
+ }
+ 
+@@ -724,6 +770,145 @@ static bool is_valid_crtc(struct ldb_data *ldb, enum crtc crtc,
+ 	return false;
+ }
+ 
++static void lvds_power_gpio(struct device *dev, struct device_node *np,
++			    struct ldb_chan *chan)
++{
++	int ret;
++	int i;
++	enum of_gpio_flags flags;
++
++	chan->backlight_gpio = -1;
++
++	chan->vcc_nr_gpios = of_gpio_named_count(np, "vcc-gpios");
++	if (0 >= chan->vcc_nr_gpios) {
++		chan->vcc_nr_gpios = 0;
++		dev_warn(dev, "No vcc-gpios in device tree");
++		return;
++	}
++	chan->vcc_gpios = devm_kzalloc(dev,
++			sizeof(struct gpio) * chan->vcc_nr_gpios,
++			GFP_KERNEL);
++	if (!chan->vcc_gpios) {
++		chan->vcc_nr_gpios = 0;
++		dev_warn(dev, "vcc-gpios no memory");
++		return;
++	}
++	memset(chan->vcc_gpios, -1, sizeof(struct gpio) * chan->vcc_nr_gpios);
++
++	for (i = 0; i < chan->vcc_nr_gpios; i++) {
++		int gpio = of_get_named_gpio_flags(np, "vcc-gpios", i, &flags);
++		if (!gpio_is_valid(gpio))
++			continue;
++
++		dev_info(dev, "lvds vcc gpio: %d\n", gpio);
++		ret = gpio_request(gpio, "lvds-vcc-gpio");
++		if (ret) {
++			dev_err(dev, "Could not get lvds-vcc-gpio %d", gpio);
++			continue;
++		}
++		chan->vcc_gpios[i].gpio = gpio;
++		chan->vcc_gpios[i].flags = flags;
++
++		if (gpio_direction_output(gpio, flags & OF_GPIO_ACTIVE_LOW)) {
++			dev_err(dev, "Could not set direction of vcc gpio");
++			goto err;
++		}
++	}
++
++	ret = of_property_read_u32(np, "vcc-powerup-delay-ms",
++				   &chan->vcc_powerup_delay_ms);
++	if (ret) {
++		dev_info(dev, "Could not get 'vcc-powerup-delay-ms'");
++	}
++
++	ret = of_property_read_u32(np, "vcc-down-delay-ms",
++				   &chan->vcc_down_delay_ms);
++	if (ret) {
++		dev_info(dev, "Could not get 'vcc-down-delay-ms'");
++	}
++
++	chan->vled_gpio = of_get_named_gpio_flags(np, "vled-gpio", 0,
++						       &flags);
++	if (!gpio_is_valid(chan->vled_gpio)) {
++		dev_info(dev, "vled-gpio not valid");
++	} else {
++		dev_info(dev, "lvds VLED gpio: %d\n", chan->vled_gpio);
++		chan->vled_active_low = flags & OF_GPIO_ACTIVE_LOW;
++
++		ret = gpio_request(chan->vled_gpio, "lvds-vled-gpio");
++		if (ret) {
++			dev_err(dev, "Could not get VLED gpio %d",
++				chan->vled_gpio);
++			goto err;
++		}
++
++		if (gpio_direction_output(chan->vled_gpio,
++				  chan->vled_active_low)) {
++			dev_err(dev, "Could not set direction of VLED gpio");
++			goto err_vled;
++		}
++
++		ret = of_property_read_u32(np, "vled-powerup-delay-ms",
++				   &chan->vled_powerup_delay_ms);
++		if (ret) {
++			dev_info(dev, "Could not get 'vled-powerup-delay-ms'");
++		}
++
++		ret = of_property_read_u32(np, "vled-powerdown-delay-ms",
++				   &chan->vled_powerdown_delay_ms);
++		if (ret) {
++			dev_info(dev, "Could not get 'vled-powerdown-delay-ms'");
++		}
++	}
++
++	chan->backlight_gpio = of_get_named_gpio_flags(np, "backlight-gpio", 0,
++						       &flags);
++	if (!gpio_is_valid(chan->backlight_gpio)) {
++		dev_warn(dev, "backlight-gpio not valid");
++		goto err_vled;
++	}
++	dev_info(dev, "lvds backlight gpio: %d\n", chan->backlight_gpio);
++	chan->backlight_active_low = flags & OF_GPIO_ACTIVE_LOW;
++
++	ret = gpio_request(chan->backlight_gpio, "lvds-backlight-gpio");
++	if (ret) {
++		dev_err(dev, "Could not get backlight gpio %d",
++			chan->backlight_gpio);
++		goto err_vled;
++	}
++
++	if (gpio_direction_output(chan->backlight_gpio,
++				  chan->backlight_active_low)) {
++		dev_err(dev, "Could not set direction of backlight gpio");
++		goto err_bl;
++	}
++
++	ret = of_property_read_u32(np, "backlight-powerup-delay-ms",
++				   &chan->backlight_powerup_delay_ms);
++	if (ret) {
++		dev_info(dev, "Could not get 'backlight-powerup-delay-ms'");
++	}
++
++	return;
++err_bl:
++	gpio_free(chan->backlight_gpio);
++	chan->backlight_gpio = -1;
++err_vled:
++	if(gpio_is_valid(chan->vled_gpio)) {
++		gpio_free(chan->vled_gpio);
++		chan->vled_gpio = -1;
++	}
++err:
++	for (i = 0; i < chan->vcc_nr_gpios; i++) {
++		if(-1 != chan->vcc_gpios[i].gpio) {
++			gpio_free(chan->vcc_gpios[i].gpio);
++			chan->vcc_gpios[i].gpio = -1;
++		}
++	}
++	kfree(chan->vcc_gpios);
++	chan->vcc_nr_gpios = 0;
++}
++
+ static int ldb_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+@@ -827,6 +1012,8 @@ static int ldb_probe(struct platform_device *pdev)
+ 		chan->ldb = ldb;
+ 		chan->online = true;
+ 
++		lvds_power_gpio(dev, child, chan);
++
+ 		is_primary = of_property_read_bool(child, "primary");
+ 
+ 		if (ldb->bus_mux_num == 1 || (ldb->primary_chno == -1 &&
+-- 
+2.13.5
+
