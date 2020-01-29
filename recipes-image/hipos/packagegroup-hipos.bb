@@ -26,8 +26,6 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtsystems-tools \
     qtsystems-qmlplugins \
     qtscript \
-    qt3d \
-    qt3d-qmlplugins \
     qtgraphicaleffects-qmlplugins \
     qtconnectivity-qmlplugins \
     qtlocation-plugins \
