@@ -62,7 +62,6 @@ SRC_URI_append_himx0294 = " \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
 	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
-	file://0001-Backport-imx6ull-OCOTP-access-patch.patch \
 "
 
 do_configure_prepend() {
