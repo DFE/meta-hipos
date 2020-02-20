@@ -1075,14 +1075,23 @@
 
 &vpu_g1 {
 	status = "okay";
+	assigned-clocks = <&clk IMX8MM_VPU_PLL_OUT>,<&clk IMX8MM_CLK_VPU_G1_SRC>,<&clk IMX8MM_CLK_VPU_BUS_SRC>;
+	assigned-clock-parents = <0>, <&clk IMX8MM_VPU_PLL_OUT>, <&clk IMX8MM_SYS_PLL1_800M>;
+	assigned-clock-rates = <400000000>, <400000000>, <800000000>;
 };
 
 &vpu_g2 {
 	status = "okay";
+	assigned-clocks = <&clk IMX8MM_VPU_PLL_OUT>,<&clk IMX8MM_CLK_VPU_G2_SRC>,<&clk IMX8MM_CLK_VPU_BUS_SRC>;
+	assigned-clock-parents = <0>, <&clk IMX8MM_VPU_PLL_OUT>, <&clk IMX8MM_SYS_PLL1_800M>;
+	assigned-clock-rates = <400000000>, <400000000>, <800000000>;
 };
 
 &vpu_h1 {
 	status = "okay";
+	assigned-clocks = <&clk IMX8MM_VPU_PLL_OUT>,<&clk IMX8MM_CLK_VPU_H1_SRC>,<&clk IMX8MM_CLK_VPU_BUS_SRC>;
+	assigned-clock-parents = <0>, <&clk IMX8MM_VPU_PLL_OUT>, <&clk IMX8MM_SYS_PLL1_800M>;
+	assigned-clock-rates = <400000000>, <400000000>, <800000000>;
 };
 
 &micfil {
