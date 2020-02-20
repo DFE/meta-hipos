@@ -1,0 +1,27 @@
+From 71b2d32c2a92e37ea7b4588718624a612afcae95 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Thu, 20 Feb 2020 14:43:08 +0100
+Subject: [PATCH] Enable PLL with 400MHz HYP-22201
+
+For the VPU PLL the possibility to configure 400MHz is required.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/clk/imx/clk-imx8mm.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/clk/imx/clk-imx8mm.c b/drivers/clk/imx/clk-imx8mm.c
+index 5709bfce578c..8005446b540f 100644
+--- a/drivers/clk/imx/clk-imx8mm.c
++++ b/drivers/clk/imx/clk-imx8mm.c
+@@ -74,6 +74,7 @@ static const struct imx_int_pll_rate_table imx8mm_intpll_tbl[] = {
+ 	PLL_1416X_RATE(750000000U,  250, 2, 2),
+ 	PLL_1416X_RATE(700000000U,  350, 3, 2),
+ 	PLL_1416X_RATE(600000000U,  300, 3, 2),
++	PLL_1416X_RATE(400000000U,  200, 3, 2),
+ };
+ 
+ static const struct imx_int_pll_rate_table imx8mm_audiopll_tbl[] = {
+-- 
+2.16.4
+
