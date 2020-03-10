@@ -38,8 +38,6 @@ IMAGE_INSTALL += "          \
   linux-firmware-ralink     \
   htop                      \
   bash                      \
-  python-netserver          \
-  python-subprocess         \
   udev-extraconf            \
   hip-udev-extra-rules      \
   iptables		    \
