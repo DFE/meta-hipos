@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """ Himx only:
     Compare mac address and lanspeed parameters in file created from board controller info with the one in the uboot
@@ -21,9 +21,9 @@ ERROR_CODE = 1
 def main():
     devidfile = "/etc/hydraip-devid"
     devidcontent = read_file(devidfile)
-    machine = subprocess.check_output("/usr/sbin/hip-machinfo -a", shell=True).strip()
+    machine = subprocess.check_output("/usr/sbin/hip-machinfo -a", shell=True).decode("utf-8").strip()
     fw_opt = "-c /etc/fw_env-ipcam.config" if (machine == "himx0294-ipcam" or machine == "himx0294-impec") else ""
-    ubootcontent = subprocess.check_output("fw_printenv {}".format(fw_opt), shell=True)
+    ubootcontent = subprocess.check_output("fw_printenv {}".format(fw_opt), shell=True).decode("utf-8")
 
     parameters = [ "ethaddr", "lanspeed" ]
 
@@ -36,7 +36,7 @@ def main():
             if ubootvalue:
                 ubootvalue = ubootvalue.group(1).lower()
             if devidvalue != ubootvalue:
-                print "Update u-boot env: {} {}".format(p, devidvalue)
+                print("Update u-boot env: {} {}".format(p, devidvalue))
                 subprocess.check_output("fw_setenv {} {} {}".format(fw_opt, p, devidvalue), shell=True)
 
 
