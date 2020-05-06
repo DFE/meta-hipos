@@ -26,6 +26,7 @@ fi
 
 # got last shutdown time
 last=$(cat /lib/systemd/systemd-timesyncd 2> /dev/null)
+date_now=$(date --iso-8601=seconds)
 
 # $date and $last may be empty or invalid here
 if [ -n "$date" ]; then
@@ -54,8 +55,12 @@ if [ -n "$date" ]; then
 else
 	# dvmon and ipcam OR bcc read problems
 	if [ -n "$last" ]; then
-		log "no RTC time, using last shutdown: $last"
-		date -u -s "$last" > /dev/null
+		if [[ "$last" > "$date_now" ]]; then
+			log "no RTC time, using last shutdown: $last"
+			date -u -s "$last" > /dev/null
+		else
+			log "no RTC time and last shutdown: $last before now time: $date_now"
+		fi
 	else
 		log "Warning: no RTC time and last shutdown unknown"
 	fi
