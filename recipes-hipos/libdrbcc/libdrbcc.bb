@@ -14,7 +14,7 @@ S = "${WORKDIR}/git"
 
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="5.7"
 
 SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH}"
 SRCREV_default_pn-libdrbcc = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
