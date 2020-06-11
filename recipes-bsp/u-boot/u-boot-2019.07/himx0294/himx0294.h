@@ -27,21 +27,12 @@
 #define CONFIG_USBD_HS
 #define CONFIG_NETCONSOLE
 
-#if 0
-#define CONFIG_CMD_FUSE
-#endif
-#ifdef CONFIG_CMD_FUSE
-#define CONFIG_MXC_OCOTP
-#endif
-
 #define CONFIG_MXC_UART
 #define CONFIG_MXC_UART_BASE	       UART2_BASE
 
 #ifdef CONFIG_CMD_SF
 #define CONFIG_SF_DEFAULT_BUS  0
 #define CONFIG_SF_DEFAULT_CS   0
-#define CONFIG_SF_DEFAULT_SPEED 25000000
-#define CONFIG_SF_DEFAULT_MODE (SPI_MODE_0)
 #endif
 
 /* I2C Configs */
@@ -192,7 +183,6 @@
 #define CONFIG_SYS_LOAD_ADDR	       CONFIG_LOADADDR
 
 /* Physical Memory Map */
-#define CONFIG_NR_DRAM_BANKS	       1
 #define PHYS_SDRAM		       MMDC0_ARB_BASE_ADDR
 
 #define CONFIG_SYS_SDRAM_BASE	       PHYS_SDRAM
