@@ -89,6 +89,7 @@ do_configure_prepend_himx0294() {
         cp ${WORKDIR}/imx6qscm-himx0294-ipcam.dtsi ${S}/arch/arm/boot/dts/imx6qscm-himx0294-ipcam.dtsi
         cp ${WORKDIR}/imx6qscm-himx0294-ipcam.dts ${S}/arch/arm/boot/dts/imx6qscm-himx0294-ipcam.dts
         cp ${WORKDIR}/imx6ull-himx0294-impec.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec.dts
+        cp ${WORKDIR}/imx6ull-himx0294-impec-2.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec-2.dts
 }
 
 do_configure_prepend_nitrogen6x() {
