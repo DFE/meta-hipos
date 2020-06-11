@@ -39,6 +39,7 @@ SRC_URI_append_himx0294 = " \
         file://imx6qscm-himx0294-ipcam.dtsi \
         file://imx6qscm-himx0294-ipcam.dts \
         file://imx6ull-himx0294-impec.dts \
+        file://imx6ull-himx0294-impec-2.dts \
 	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-simulate-phy.patch \
 	file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
