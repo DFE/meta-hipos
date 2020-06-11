@@ -60,6 +60,8 @@
 #define CONFIG_AUTOBOOT_PROMPT \
                         "Press . to abort autoboot in %d seconds\n",bootdelay
 
+#define CONFIG_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
         "boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
                 "setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
@@ -67,7 +69,7 @@
         "kernel_addr=0x83800000\0" \
         "kernel_file=/boot/zImage\0" \
         "fdt_addr=0x83000000\0" \
-        "fdt_file=/boot/imx6ull-himx0294-impec.dtb\0" \
+        "fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
         "fdt_high=0xffffffff\0" \
         "${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
         "do_boot=run load_kernel; run load_fdt; run setbootargs; " \

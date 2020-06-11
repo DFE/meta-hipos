@@ -2,6 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-${PV}:${THISDIR}/u-boot:${THISDIR}
 
 SRC_URI_append_himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
+	file://0001-himx-impec-revision-detection-pin.patch \
 	file://himx0294.c \
 	file://Makefile \
 	file://Kconfig \

@@ -130,7 +130,16 @@ int board_late_init(void)
 	env_set("board_name", "himx0294");
 	env_set("board_rev", "???");
 #endif
-
+	gpio_request(IMX_GPIO_NR(4, 22), "/rev2_detect");
+	gpio_direction_input(IMX_GPIO_NR(4, 22));
+	if (1 == gpio_get_value(IMX_GPIO_NR(4, 22)) &&
+	    !strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
+		char *fdt = CONFIG_DEFAULT_FDT_FILE_IMPEC_1;
+		printf("Detected IMPEC Rev. 1\n");
+		if (env_set("fdt_file", fdt)) {
+			printf("env_set: fdt_file '%s' failed\n", fdt);
+		}
+	}
 	return 0;
 }
 
