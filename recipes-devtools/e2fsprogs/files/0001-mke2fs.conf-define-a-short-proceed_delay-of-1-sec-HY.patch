@@ -1,6 +1,6 @@
-From 2826b9ba22173456a2f0b9cb6c348d0c943afd83 Mon Sep 17 00:00:00 2001
-From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Tue, 21 Jun 2016 11:16:09 +0200
+From 8e381c52125a6f1468313db257aafe5e03cd4753 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 8 Jul 2020 06:49:07 +0200
 Subject: [PATCH] mke2fs.conf: define a short proceed_delay of 1 sec, HYP-14823
 
 Beginning with this version mke2fs asks the user for confirmation if
@@ -11,20 +11,18 @@ automatically.
 
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- misc/mke2fs.conf.in | 3 +++
- 1 file changed, 3 insertions(+)
+ misc/mke2fs.conf.in | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/misc/mke2fs.conf.in b/misc/mke2fs.conf.in
-index 106ee80..d8a18b7 100644
+index 00afd912..c95f55bb 100644
 --- a/misc/mke2fs.conf.in
 +++ b/misc/mke2fs.conf.in
-@@ -1,3 +1,6 @@
-+[options]
+@@ -48,3 +48,4 @@
+ 
+ [options]
+ 	fname_encoding = utf8
 +	proceed_delay = 1
-+
- [defaults]
- 	base_features = sparse_super,large_file,filetype,resize_inode,dir_index,ext_attr
- 	default_mntopts = acl,user_xattr
 -- 
-2.9.0
+2.16.4
 
