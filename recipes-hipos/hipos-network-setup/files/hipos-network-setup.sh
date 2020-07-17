@@ -14,17 +14,7 @@ fi
 
 if [ -z "${lanspeed}" ]
 then
-	if [ "${MACHINE}" == "hikirk" ]
-	then
-		lanspeed=ff
-	else
-		lanspeed=f
-	fi
-fi
-
-if [[ "${MACHINE}" == "hikirk" && "${#lanspeed}" = 1 ]]
-then
-	lanspeed="${lanspeed}f"
+	lanspeed=f
 fi
 
 echo "lanspeed=$lanspeed"
