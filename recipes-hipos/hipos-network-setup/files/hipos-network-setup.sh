@@ -12,6 +12,12 @@ then
 	exit 0
 fi
 
+if [[ "${MACHINE}" == "himx0294-impec" ]]
+then
+	ethtool -A eth0 rx on tx on
+	exit 0
+fi
+
 if [ -z "${lanspeed}" ]
 then
 	lanspeed=f
