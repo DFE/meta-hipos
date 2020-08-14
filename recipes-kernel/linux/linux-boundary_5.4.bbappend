@@ -15,10 +15,8 @@ DRSRCBRANCH="master"
 
 SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
-	file://fix-fb_memcpy_tofb.patch \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
-	file://1byte-serial-trigger.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
 "
 
@@ -40,29 +38,30 @@ SRC_URI_append_himx0294 = " \
         file://imx6qscm-himx0294-ipcam.dts \
         file://imx6ull-himx0294-impec.dts \
         file://imx6ull-himx0294-impec-2.dts \
-	file://iio-tsl2x7x-fix-trigger.patch \
 	file://fec-main-simulate-phy.patch \
 	file://0001-igb-kernel-driver-i210-add-device-id-0x1531-HYP-1131.patch \
 	file://0002-igb-intel-i210-skip-eprom-error-HYP-11312.patch \
-	file://mlb-disable-kconfig.patch \
 	file://bt565-start-pin.patch \
 	file://adv739x-fix-instance.patch \
-	file://imx-poweroff-restart.patch \
 	file://0001-imx6-IPU-remove-dmsg-ipu-warnings-8byte-aligned-HYP-.patch \
 	file://0001-mxc_vpu-fix-kmalloc-HYP-12884.patch \
 	file://ldb-lvds-power-up-down-sequence.patch \
 	file://0001-DCIC-ioctl-improved-to-get-real-checksums-HYP-16117.patch \
-	file://ahci_imx-reset-sata-phy.patch \
 	file://0001-mcs7830-Fixed-MOSCHIP-driver-probe-error-110-HYP-132.patch \ 
 	file://rafi-touchscreen-support.patch \
 	file://rafi-touchscreen-event-report.patch \
-	file://mlb-pll.patch \
         file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
 	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
-	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
 "
+#	file://iio-tsl2x7x-fix-trigger.patch 
+#	file://imx-poweroff-restart.patch 
+#	file://0001-Revert-leds-pwm-add-note-frequency-support.patch 
+
+#	file://mlb-disable-kconfig.patch 
+#	file://mlb-pll.patch 
+#	file://ahci_imx-reset-sata-phy.patch 
 
 do_configure_prepend() {
 	# copy tw6869 driver code into kernel tree
