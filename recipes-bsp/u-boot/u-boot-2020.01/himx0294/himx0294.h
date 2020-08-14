@@ -197,11 +197,7 @@
 /* FLASH and environment organization */
 #define CONFIG_SYS_NO_FLASH
 
-#define CONFIG_ENV_SIZE			(8 * 1024)
-
 #if defined(CONFIG_ENV_IS_IN_MMC)
-#define CONFIG_ENV_OFFSET		(1008 * 1024)
-#define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
 #define CONFIG_SYS_MMC_ENV_DEV		0
 #elif defined(CONFIG_ENV_IS_IN_SPI_FLASH)
 #define CONFIG_ENV_OFFSET		(768 * 1024)

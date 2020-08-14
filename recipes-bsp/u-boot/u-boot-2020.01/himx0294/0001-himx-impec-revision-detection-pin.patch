@@ -1,0 +1,27 @@
+From fb6e4e7e922219b56b63a4ff687de156c87d8959 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 14 Aug 2020 06:42:24 +0200
+Subject: [PATCH] himx-impec revision detection pin
+
+Configure himx-impec revision detection pin.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/dts/imx6ul-14x14-evk.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/imx6ul-14x14-evk.dtsi b/arch/arm/dts/imx6ul-14x14-evk.dtsi
+index d1baf0f081..616579bf01 100644
+--- a/arch/arm/dts/imx6ul-14x14-evk.dtsi
++++ b/arch/arm/dts/imx6ul-14x14-evk.dtsi
+@@ -486,6 +486,7 @@
+ 			MX6UL_PAD_UART1_RTS_B__GPIO1_IO19       0x17059 /* SD1 CD */
+ 			MX6UL_PAD_GPIO1_IO05__USDHC1_VSELECT    0x17059 /* SD1 VSELECT */
+ 			MX6UL_PAD_GPIO1_IO09__GPIO1_IO09        0x17059 /* SD1 RESET */
++			MX6UL_PAD_CSI_DATA01__GPIO4_IO22        0x1b0b0 /* /REV2 DETECT */
+ 		>;
+ 	};
+ 
+-- 
+2.16.4
+
