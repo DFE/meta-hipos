@@ -58,7 +58,7 @@
 #define CONFIG_AUTOBOOT_STOP_STR "."
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 #define CONFIG_AUTOBOOT_PROMPT \
-                        "Press . to abort autoboot in %d seconds\n",bootdelay
+                        "Press . to abort autoboot in %d seconds\n"
 
 #define CONFIG_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
 
@@ -122,7 +122,6 @@
 #define CONFIG_SF_DEFAULT_BUS		0
 #define CONFIG_SF_DEFAULT_CS		0
 #define CONFIG_SF_DEFAULT_SPEED	40000000
-#define CONFIG_SF_DEFAULT_MODE		SPI_MODE_0
 #define FSL_QSPI_FLASH_NUM		1
 #define FSL_QSPI_FLASH_SIZE		SZ_32M
 #endif
