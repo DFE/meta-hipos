@@ -250,7 +250,6 @@ int board_ehci_power(int port, int on)
 
 #endif
 
-#ifdef CONFIG_FSL_ESDHC
 static struct fsl_esdhc_cfg usdhc_cfg[2] = {
 	{USDHC3_BASE_ADDR},
 	{USDHC4_BASE_ADDR},
@@ -313,7 +312,6 @@ int board_mmc_init(bd_t *bis)
 #endif // else defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 	return status;
 }
-#endif
 
 #ifdef CONFIG_MXC_SPI
 int board_spi_cs_gpio(unsigned bus, unsigned cs)
