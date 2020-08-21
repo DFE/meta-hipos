@@ -2,19 +2,24 @@ inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-4.14.x:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-5.4:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
 SRCREV_tw6869 = "${AUTOREV}"
 PV_append = "+tw6869gitr${SRCPV}"
 
+# unset KBUILD_DEFCONFIG. To avoid that the defconfig must be located in kernel
+# source tree.
+KBUILD_DEFCONFIG = ""
+
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="master-next"
 
 SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
+	file://defconfig \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
@@ -54,6 +59,7 @@ SRC_URI_append_himx0294 = " \
 	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
+	file://0001-ahci_imx-fix-module-unload-HYP-23856.patch \
 "
 #	file://iio-tsl2x7x-fix-trigger.patch 
 #	file://imx-poweroff-restart.patch 

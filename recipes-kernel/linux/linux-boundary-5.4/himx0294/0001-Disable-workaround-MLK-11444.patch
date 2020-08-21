@@ -1,6 +1,6 @@
-From 76de44e1b677d8f2e0e6572803bb8b4c0fa9dd88 Mon Sep 17 00:00:00 2001
-From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Tue, 12 Mar 2019 14:39:17 +0000
+From 26188686d846f392818a5396009229e18a2050b3 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 19 Aug 2020 14:51:52 +0200
 Subject: [PATCH] Disable workaround MLK-11444 HYP-20171
 
 The workaround MLK-11444 ata fixes Error ERR009598 documented in errata.
@@ -13,10 +13,10 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 7 insertions(+)
 
 diff --git a/drivers/ata/ahci_imx.c b/drivers/ata/ahci_imx.c
-index da5fe2315bc8..c5720618a983 100644
+index bf53b8784ab7..ebf8cdf24ed6 100644
 --- a/drivers/ata/ahci_imx.c
 +++ b/drivers/ata/ahci_imx.c
-@@ -1395,6 +1400,12 @@ static int imx_ahci_probe(struct platform_device *pdev)
+@@ -1574,6 +1574,12 @@ static int imx_ahci_probe(struct platform_device *pdev)
  		writel(reg_val, hpriv->mmio + IMX_TIMER1MS);
  	}
  
@@ -27,9 +27,9 @@ index da5fe2315bc8..c5720618a983 100644
 +	 */
 +#if 0
  	/*
- 	* Due to IP bug on the Synopsis 3.00 SATA version,
- 	* which is present on mx6q, and not on mx53,
-@@ -1412,6 +1423,7 @@ static int imx_ahci_probe(struct platform_device *pdev)
+ 	 * Due to IP bug on the Synopsis 3.00 SATA version,
+ 	 * which is present on mx6q, and not on mx53,
+@@ -1591,6 +1597,7 @@ static int imx_ahci_probe(struct platform_device *pdev)
  			goto disable_sata;
  		}
  	}
@@ -38,5 +38,5 @@ index da5fe2315bc8..c5720618a983 100644
  	if (imxpriv->type == AHCI_IMX8QM && bist_enable) {
  		dev_info(dev, "AHCI SATA compliance test patterns.\n");
 -- 
-2.20.1
+2.16.4
 

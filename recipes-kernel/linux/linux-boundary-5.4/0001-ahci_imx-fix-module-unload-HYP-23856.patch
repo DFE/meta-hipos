@@ -1,0 +1,44 @@
+From 1193162b0b119418cae420271fb9b812cb39950b Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 19 Aug 2020 19:36:19 +0200
+Subject: [PATCH] ahci_imx: fix module unload HYP-23856
+
+Use old methode to register the module, otherwise unloading the module
+is not possible.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/ata/ahci_imx.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/ata/ahci_imx.c b/drivers/ata/ahci_imx.c
+index ebf8cdf24ed6..a8fe1a04fe9b 100644
+--- a/drivers/ata/ahci_imx.c
++++ b/drivers/ata/ahci_imx.c
+@@ -1685,6 +1685,13 @@ static struct platform_driver imx_ahci_driver = {
+ 	},
+ };
+ 
++
++/* Also unload the module
++ * Use old methode to register the module, otherwise unloading the module
++ * is not possible.
++ * MST
++ */
++#if 0
+ static int __init imx_ahci_init(void)
+ {
+ 	int ret;
+@@ -1699,6 +1706,9 @@ static int __init imx_ahci_init(void)
+ }
+ 
+ device_initcall(imx_ahci_init);
++#else
++module_platform_driver(imx_ahci_driver);
++#endif
+ 
+ MODULE_DESCRIPTION("Freescale i.MX AHCI SATA platform driver");
+ MODULE_AUTHOR("Richard Zhu <Hong-Xing.Zhu@freescale.com>");
+-- 
+2.16.4
+
