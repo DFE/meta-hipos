@@ -13,3 +13,12 @@ SRC_URI_append_hinat = " \
 	file://0001-Deactivate-HOST_RUNNING-GPO-HYP-20539.patch \
 "
 
+# Copy kernel configuration
+# As the linux-yocto_%.bb recipe is extended, the kernel metadata mechanism,
+# which configures the kernel form a git repository, is also applied.
+# This leads to a overwriting of kernel configuration values from defconfig.
+# To avoid these changes, the defconfig, which is a full kernel configuration,
+# is copied after the do_kernel_configme step.
+do_configure_prepend_hinat() {
+        cp ${WORKDIR}/defconfig ${B}/.config
+}
