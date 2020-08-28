@@ -18,7 +18,6 @@ SRC_URI_append_himx0294 = " \
 	file://himx0294_ivap_defconfig \
 	file://himx0294_ivqp_defconfig \
 	file://himx0294_dvmon_defconfig \
-	file://himx0294_ipcam_defconfig \
 	file://himx0294.h \
 	file://0001-himx0432-Add-Kconfig.patch \
 	file://himx0294_impec_defconfig \
@@ -47,7 +46,6 @@ do_configure_prepend() {
 	cp ${WORKDIR}/himx0294_ivap_defconfig ${S}/configs/
 	cp ${WORKDIR}/himx0294_ivqp_defconfig ${S}/configs/
 	cp ${WORKDIR}/himx0294_dvmon_defconfig ${S}/configs/
-	cp ${WORKDIR}/himx0294_ipcam_defconfig ${S}/configs/
 	cp ${WORKDIR}/himx0294.h ${S}/include/configs/
 
         cp ${WORKDIR}/himx0294_impec_defconfig ${S}/configs/
