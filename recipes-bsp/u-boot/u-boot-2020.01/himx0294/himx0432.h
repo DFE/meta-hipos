@@ -51,15 +51,6 @@
 
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
-/*
- * auto boot
- */
-#define CONFIG_AUTOBOOT_KEYED
-#define CONFIG_AUTOBOOT_STOP_STR "."
-#define CONFIG_ZERO_BOOTDELAY_CHECK
-#define CONFIG_AUTOBOOT_PROMPT \
-                        "Press . to abort autoboot in %d seconds\n"
-
 #define CONFIG_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
