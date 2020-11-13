@@ -34,6 +34,13 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define PC MUX_PAD_CTRL(I2C_PAD_CTRL)
 
+#define ENET_PAD_CTRL  (PAD_CTL_PUS_100K_UP | PAD_CTL_PUE |     \
+        PAD_CTL_SPEED_HIGH   |                                  \
+        PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST)
+
+#define ENET_CLK_PAD_CTRL  (PAD_CTL_DSE_40ohm   | PAD_CTL_SRE_FAST)
+
+
 /* I2C1 for PMIC */
 static struct i2c_pads_info i2c_pad_info1 = {
 	.scl = {
@@ -61,6 +68,67 @@ static iomux_v3_cfg_t const uart1_pads[] = {
 	MX6_PAD_UART2_TX_DATA__UART2_DCE_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
 	MX6_PAD_UART2_RX_DATA__UART2_DCE_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
+
+#ifdef CONFIG_FEC_MXC
+static iomux_v3_cfg_t const fec1_pads[] = {
+	MX6_PAD_ENET1_TX_DATA0__ENET1_TDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_TX_DATA1__ENET1_TDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_TX_EN__ENET1_TX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_TX_CLK__ENET1_REF_CLK1 | MUX_PAD_CTRL(ENET_CLK_PAD_CTRL),
+	MX6_PAD_ENET1_RX_DATA0__ENET1_RDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_RX_DATA1__ENET1_RDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_RX_ER__ENET1_RX_ER | MUX_PAD_CTRL(ENET_PAD_CTRL),
+	MX6_PAD_ENET1_RX_EN__ENET1_RX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),
+};
+
+static void setup_iomux_fec(int fec_id)
+{
+	if (fec_id == 0)
+		imx_iomux_v3_setup_multiple_pads(fec1_pads,
+						 ARRAY_SIZE(fec1_pads));
+	else
+		printf("setup_iomux_fec: %d not supported\n", fec_id);
+}
+
+int board_eth_init(bd_t *bis)
+{
+	setup_iomux_fec(CONFIG_FEC_ENET_DEV);
+
+	return fecmxc_initialize_multi(bis, CONFIG_FEC_ENET_DEV,
+				       CONFIG_FEC_MXC_PHYADDR, IMX_FEC_BASE);
+}
+
+static int setup_fec(int fec_id)
+{
+	struct iomuxc *const iomuxc_regs = (struct iomuxc *)IOMUXC_BASE_ADDR;
+	int ret;
+
+	if (fec_id == 0) {
+		/*
+		 * Use 50M anatop loopback REF_CLK1 for ENET1,
+		 * clear gpr1[13], set gpr1[17].
+		 */
+		clrsetbits_le32(&iomuxc_regs->gpr[1], IOMUX_GPR1_FEC1_MASK,
+				IOMUX_GPR1_FEC1_CLOCK_MUX1_SEL_MASK);
+	} else {
+		/*
+		 * Use 50M anatop loopback REF_CLK2 for ENET2,
+		 * clear gpr1[14], set gpr1[18].
+		 */
+		clrsetbits_le32(&iomuxc_regs->gpr[1], IOMUX_GPR1_FEC2_MASK,
+				IOMUX_GPR1_FEC2_CLOCK_MUX1_SEL_MASK);
+	}
+
+	ret = enable_fec_anatop_clock(fec_id, ENET_50MHZ);
+	if (ret)
+		return ret;
+
+	enable_enet_clk(1);
+
+	return 0;
+}
+
+#endif
 
 static void setup_iomux_uart(void)
 {
@@ -107,6 +175,9 @@ int board_init(void)
 		printf("PMIC on i2c1 not found\n");
 	}
 
+#ifdef	CONFIG_FEC_MXC
+	setup_fec(CONFIG_FEC_ENET_DEV);
+#endif
 	return 0;
 }
 
