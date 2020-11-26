@@ -205,14 +205,18 @@
 &can1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
+#if 0
 	xceiver-supply = <&reg_can_3v3>;
+#endif
 	status = "okay";
 };
 
 &can2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan2>;
+#if 0
 	xceiver-supply = <&reg_can_3v3>;
+#endif
 	status = "okay";
 };
 
