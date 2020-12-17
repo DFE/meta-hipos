@@ -64,7 +64,7 @@ do_compile () {
 }
 
 # Having anything auto depending on gcc-cross-sdk is a really bad idea...
-EXCLUDE_FROM_SHLIBS = "1"
+#EXCLUDE_FROM_SHLIBS = "1"
 
 PACKAGES = "${PN}-dbg ${PN} ${PN}-doc"
 
