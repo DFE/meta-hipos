@@ -1,6 +1,6 @@
-From a111f965d46354a502484cc525b740e83093da5d Mon Sep 17 00:00:00 2001
+From 76aae2e40de9d293a503d1a41d32ed72ea0c2f0e Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 14 Aug 2020 18:14:46 +0200
+Date: Wed, 27 Jan 2021 10:28:24 +0100
 Subject: [PATCH] ifupdown: enable udhcpc backgrounding HYP-17009
 
 The former default behaviour was to exit with failure if lease is not
@@ -10,11 +10,11 @@ DHCP server is (accidentally) not available at boot time. :(
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- inet.defn | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ inet.defn | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/inet.defn b/inet.defn
-index 5c16fab..3093396 100644
+index 5c16fab..da5360c 100644
 --- a/inet.defn
 +++ b/inet.defn
 @@ -103,7 +103,7 @@ method dhcp
@@ -26,6 +26,15 @@ index 5c16fab..3093396 100644
          elsif (execable("/sbin/udhcpc"))
      /sbin/dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
+@@ -116,7 +116,7 @@ method dhcp
+         if (execable("/sbin/dhclient"))
+     /sbin/pump -i %iface% -r \
+         elsif (execable("/sbin/pump"))
+-    if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(/bin/cat /run/udhcpc.%iface%.pid); kill -TERM $(/bin/cat /run/udhcpc.%iface%.pid); fi \
++    systemctl --quiet is-active hip-udhcpc_%iface% && systemctl stop hip-udhcpc_%iface% \
+         elsif (execable("/sbin/udhcpc"))
+     /sbin/dhcpcd -k %iface% \
+         elsif (execable("/sbin/dhcpcd"))
 -- 
 2.16.4
 
