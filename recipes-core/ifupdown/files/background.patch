@@ -1,6 +1,6 @@
-From 76aae2e40de9d293a503d1a41d32ed72ea0c2f0e Mon Sep 17 00:00:00 2001
+From 8f6a242b99b91eb2c716f987fbde44329ead9781 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 27 Jan 2021 10:28:24 +0100
+Date: Fri, 29 Jan 2021 19:06:13 +0100
 Subject: [PATCH] ifupdown: enable udhcpc backgrounding HYP-17009
 
 The former default behaviour was to exit with failure if lease is not
@@ -10,11 +10,11 @@ DHCP server is (accidentally) not available at boot time. :(
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- inet.defn | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ inet.defn | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/inet.defn b/inet.defn
-index 5c16fab..da5360c 100644
+index 5c16fab..eaf258d 100644
 --- a/inet.defn
 +++ b/inet.defn
 @@ -103,7 +103,7 @@ method dhcp
@@ -22,19 +22,10 @@ index 5c16fab..da5360c 100644
      /sbin/pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
          elsif (execable("/sbin/pump"))
 -    /sbin/udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
-+    systemd-run --quiet --service-type=forking --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
++    if systemctl --quiet is-active hip-udhcpc_%iface% ; then systemctl stop hip-udhcpc_%iface% ; fi ; systemd-run --quiet --service-type=forking --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
          elsif (execable("/sbin/udhcpc"))
      /sbin/dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
-@@ -116,7 +116,7 @@ method dhcp
-         if (execable("/sbin/dhclient"))
-     /sbin/pump -i %iface% -r \
-         elsif (execable("/sbin/pump"))
--    if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(/bin/cat /run/udhcpc.%iface%.pid); kill -TERM $(/bin/cat /run/udhcpc.%iface%.pid); fi \
-+    systemctl --quiet is-active hip-udhcpc_%iface% && systemctl stop hip-udhcpc_%iface% \
-         elsif (execable("/sbin/udhcpc"))
-     /sbin/dhcpcd -k %iface% \
-         elsif (execable("/sbin/dhcpcd"))
 -- 
 2.16.4
 
