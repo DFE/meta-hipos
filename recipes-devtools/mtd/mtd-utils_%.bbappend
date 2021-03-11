@@ -11,7 +11,7 @@ do_install_append() {
     # install libmtd and its headers
 
     install -d ${D}${includedir}/mtd/
-    install -m 0644 ${S}include/libmtd.h ${D}${includedir}/mtd/
+    install -m 0644 ${S}/include/libmtd.h ${D}${includedir}/mtd/
     install -d ${D}${libdir}/
     install -m 0644 ${B}/libmtd.a ${D}${libdir}/
 }
