@@ -9,4 +9,7 @@ do_install_append() {
     # Otherwise, the following error message occurs:
     # frequency file /var/lib//ntp/drift.TEMP: Permission denied
     chown root:root ${D}${NTP_USER_HOME}
+
+    # Remove sntp
+    rm -f ${D}/etc/default/sntp
 }
