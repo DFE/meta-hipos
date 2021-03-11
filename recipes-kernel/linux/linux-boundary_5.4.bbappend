@@ -59,8 +59,11 @@ SRC_URI_append_himx0294 = " \
 	file://0001-Disable-workaround-MLK-11444.patch \
 	file://0001-ahci_imx-fix-module-unload-HYP-23856.patch \
 	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
-	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 "
+# file://0001-spi-imx-Restore-driver-version-HYP-24810.patch 
+
+
+
 #	file://iio-tsl2x7x-fix-trigger.patch 
 #	file://imx-poweroff-restart.patch 
 
