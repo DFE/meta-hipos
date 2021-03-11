@@ -1,25 +1,25 @@
-From c448e9a3b189acb39c476c0599aafcb717cb2a57 Mon Sep 17 00:00:00 2001
-From: Steffen Sledz <sledz@dresearch-fe.de>
-Date: Wed, 17 Jul 2013 11:49:22 +0200
+From b81f0f7ee339ed4e17690bd7a5cff455424f08eb Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Sun, 7 Mar 2021 08:54:06 +0100
 Subject: [PATCH] systemd-halt.service: always poweroff on halt
 
 halt without poweroff makes no sense on our hipos hardware.
 
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- units/systemd-halt.service.in | 2 +-
+ units/systemd-halt.service | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/units/systemd-halt.service.in b/units/systemd-halt.service.in
-index d55d622..e4e3f8d 100644
---- a/units/systemd-halt.service.in
-+++ b/units/systemd-halt.service.in
-@@ -14,4 +14,4 @@ After=shutdown.target umount.target final.target
+diff --git a/units/systemd-halt.service b/units/systemd-halt.service
+index cd16d1de20..09741375fa 100644
+--- a/units/systemd-halt.service
++++ b/units/systemd-halt.service
+@@ -16,4 +16,4 @@ After=shutdown.target umount.target final.target
  
  [Service]
  Type=oneshot
--ExecStart=@SYSTEMCTL@ --force halt
-+ExecStart=@SYSTEMCTL@ --force poweroff
+-ExecStart=systemctl --force halt
++ExecStart=systemctl --force poweroff
 -- 
-1.8.1.4
+2.26.2
 

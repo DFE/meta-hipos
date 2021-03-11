@@ -1,7 +1,8 @@
-From 8e381c52125a6f1468313db257aafe5e03cd4753 Mon Sep 17 00:00:00 2001
+From cd301edd32c129b23ddcc76a04c281fac8eaaa74 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 8 Jul 2020 06:49:07 +0200
-Subject: [PATCH] mke2fs.conf: define a short proceed_delay of 1 sec, HYP-14823
+Date: Sun, 7 Mar 2021 09:18:41 +0100
+Subject: [PATCH]  mke2fs.conf: define a short proceed_delay of 1 sec,
+ HYP-14823
 
 Beginning with this version mke2fs asks the user for confirmation if
 block device or image file contains an existing file system image.
@@ -11,18 +12,20 @@ automatically.
 
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
- misc/mke2fs.conf.in | 1 +
- 1 file changed, 1 insertion(+)
+ misc/mke2fs.conf.in | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/misc/mke2fs.conf.in b/misc/mke2fs.conf.in
-index 00afd912..c95f55bb 100644
+index 01e35cf8..a72e0cba 100644
 --- a/misc/mke2fs.conf.in
 +++ b/misc/mke2fs.conf.in
-@@ -48,3 +48,4 @@
- 
- [options]
- 	fname_encoding = utf8
+@@ -45,3 +45,6 @@
+ 	     blocksize = 4096
+ 	     inode_size = 128
+ 	}
++
++[options]
 +	proceed_delay = 1
 -- 
-2.16.4
+2.26.2
 

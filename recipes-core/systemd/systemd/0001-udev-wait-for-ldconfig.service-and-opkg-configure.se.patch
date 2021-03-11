@@ -6,13 +6,13 @@ Subject: [PATCH] udev: wait for ldconfig.service and opkg-configure.service
 
 Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
 ---
- units/systemd-udev-trigger.service.in | 2 +-
+ units/systemd-udev-trigger.service | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/units/systemd-udev-trigger.service.in b/units/systemd-udev-trigger.service.in
+diff --git a/units/systemd-udev-trigger.service b/units/systemd-udev-trigger.service
 index 1e04d11..ab6a13b 100644
---- a/units/systemd-udev-trigger.service.in
-+++ b/units/systemd-udev-trigger.service.in
+--- a/units/systemd-udev-trigger.service
++++ b/units/systemd-udev-trigger.service
 @@ -10,7 +10,7 @@ Description=udev Coldplug all Devices
  Documentation=man:udev(7) man:systemd-udevd.service(8)
  DefaultDependencies=no
