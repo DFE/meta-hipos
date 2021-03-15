@@ -1,19 +1,19 @@
-From dff7554c15a5f9ae5d9051490c328539a6608d0f Mon Sep 17 00:00:00 2001
+From 42a86e6a55125bb4f5fb4a1aee5579e236243f1b Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 4 Nov 2020 13:57:05 +0100
+Date: Mon, 15 Mar 2021 11:41:21 +0100
 Subject: [PATCH] spi-imx: Restore driver version HYP-24810
 
-Current spi-imx driver version from kernel 5.4.50 does not work with
+Current spi-imx driver version from kernel 5.4.100 does not work with
 'spi-reg' tool. Therefore the driver version from kernel 4.14.98 is
 restored.
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/spi/spi-imx.c | 480 +++++++++++++++++++-------------------------------
- 1 file changed, 181 insertions(+), 299 deletions(-)
+ drivers/spi/spi-imx.c | 485 ++++++++++++++++--------------------------
+ 1 file changed, 181 insertions(+), 304 deletions(-)
 
 diff --git a/drivers/spi/spi-imx.c b/drivers/spi/spi-imx.c
-index f7e0ed5e6105..84d2441ea25a 100644
+index 7d37fb9096b4..84d2441ea25a 100644
 --- a/drivers/spi/spi-imx.c
 +++ b/drivers/spi/spi-imx.c
 @@ -1,6 +1,22 @@
@@ -290,7 +290,7 @@ index f7e0ed5e6105..84d2441ea25a 100644
 -	 * To workaround ERR009165, SDMA script needs to use XCH instead of SMC
 -	 * just like PIO mode and it is fixed on i.mx6ul
 -	 */
--	if (spi_imx->usedma && (spi_imx->devtype_data->devtype == IMX6UL_ECSPI))
+-	if (spi_imx->usedma && !cspi_quirk(spi_imx, QUIRK_ERR009165))
 -		ctrl |= MX51_ECSPI_CTRL_SMC;
 -
 -	/*
@@ -820,7 +820,7 @@ index f7e0ed5e6105..84d2441ea25a 100644
  	}
  
  	spi_imx->bitbang.chipselect = spi_imx_chipselect;
-@@ -1967,24 +1869,6 @@ static int spi_imx_probe(struct platform_device *pdev)
+@@ -1967,29 +1869,6 @@ static int spi_imx_probe(struct platform_device *pdev)
  		goto out_clk_put;
  	}
  
@@ -829,8 +829,13 @@ index f7e0ed5e6105..84d2441ea25a 100644
 -		if (!spi_imx->idle_state_provided)
 -			num_cs = master->num_chipselect;
 -		for (i = 0; i < num_cs; i++) {
--			if (!gpio_is_valid(master->cs_gpios[i]))
+-			if (!gpio_is_valid(master->cs_gpios[i])) {
+-				if (master->cs_gpios[i] == -EPROBE_DEFER) {
+-					ret = -EPROBE_DEFER;
+-					goto out_spi_bitbang;
+-				}
 -				continue;
+-			}
 -
 -			ret = devm_gpio_request(&pdev->dev,
 -						master->cs_gpios[i],
@@ -845,7 +850,7 @@ index f7e0ed5e6105..84d2441ea25a 100644
  	if (spi_imx->idle_state_provided) {
  		spi_imx->current_state = ~spi_imx->idle_state &
  			((1 << num_cs) - 1);
-@@ -1997,8 +1881,6 @@ static int spi_imx_probe(struct platform_device *pdev)
+@@ -2002,8 +1881,6 @@ static int spi_imx_probe(struct platform_device *pdev)
  	clk_disable_unprepare(spi_imx->clk_per);
  	return ret;
  
@@ -854,7 +859,7 @@ index f7e0ed5e6105..84d2441ea25a 100644
  out_clk_put:
  	clk_disable_unprepare(spi_imx->clk_ipg);
  out_put_per:
-@@ -2067,7 +1949,7 @@ static struct platform_driver spi_imx_driver = {
+@@ -2072,7 +1949,7 @@ static struct platform_driver spi_imx_driver = {
  };
  module_platform_driver(spi_imx_driver);
  
@@ -864,5 +869,5 @@ index f7e0ed5e6105..84d2441ea25a 100644
  MODULE_LICENSE("GPL");
  MODULE_ALIAS("platform:" DRIVER_NAME);
 -- 
-2.16.4
+2.26.2
 
