@@ -1,7 +1,7 @@
 do_compile() {
     mkdir -p ${S}/${sysconfdir}/opkg
 
-    URI="http://package-feed.dresearch-fe.de/hipos/yocto-3.1-dunfell"
+    URI="http://package-feed.dresearch-fe.de/hipos/yocto-3.2-gatesgarth"
 
     echo "src/gz all ${URI}/all" > ${S}/${sysconfdir}/opkg/all-feed.conf
     echo "src/gz ${MACHINE} ${URI}/${MACHINE}" > ${S}/${sysconfdir}/opkg/${MACHINE}-feed.conf
