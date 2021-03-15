@@ -1,5 +1,5 @@
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-imx-5.4.3:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/linux-imx-5.4:"
 
 SRC_URI_append_himx0438 = " \
         file://fsl-imx8mm-himx0438-ipcam.dts \
