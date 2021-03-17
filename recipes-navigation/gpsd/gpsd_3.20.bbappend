@@ -16,6 +16,7 @@ SRC_URI += " \
 # for HydraIP we do not need gpsd.socket unit
 do_install_append() {
     rm -f ${D}${systemd_unitdir}/system/${PN}.socket
+    rm -f ${D}${systemd_unitdir}/system/gpsdctl@.service
 
     install -d ${D}${systemd_unitdir}/system/
     install -m 0644 ${WORKDIR}/${BPN}.service ${D}${systemd_unitdir}/system/${BPN}.service
