@@ -1,0 +1,32 @@
+From ab25cd8f88dc685dab8e7c6108c155d4fad6397d Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Mon, 22 Mar 2021 08:14:00 +0100
+Subject: [PATCH] fec_main: Add dma_rmb() HYP-25259
+
+Avoid fec error:
+kernel: fec 2188000.ethernet eth0: rcv is not +last
+
+The bit test of 'status' variable does not seem to work reliably. Valid
+frames are rejected. If a dma_rmb() is inserted, the error can no longer
+be observed.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/net/ethernet/freescale/fec_main.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/ethernet/freescale/fec_main.c b/drivers/net/ethernet/freescale/fec_main.c
+index 779353caf5dc..dfaa9b009e89 100644
+--- a/drivers/net/ethernet/freescale/fec_main.c
++++ b/drivers/net/ethernet/freescale/fec_main.c
+@@ -1491,6 +1491,7 @@ static int fec_rxq(struct net_device *ndev, struct fec_enet_priv_rx_q *rxq,
+ 	 */
+ 	bdp = rxq->bd.cur;
+ 
++	dma_rmb();
+ 	while (!((status = fec16_to_cpu(bdp->cbd_sc)) & BD_ENET_RX_EMPTY)) {
+ 
+ 		if (pkt_received >= budget)
+-- 
+2.26.2
+
