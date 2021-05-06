@@ -2,6 +2,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/gpsd:"
 
 SRC_URI_append = " \
 	file://Clear-DOPs-again.patch \
+	file://0001-gpsd-dbusexport.c-Fix-broken-d-bus-message-time.patch \
 "
 
 # enable DBus Export
