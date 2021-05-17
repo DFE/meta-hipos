@@ -140,6 +140,7 @@ IMAGE_INSTALL += "      \
     e2fsprogs           \
     e2fsprogs-mke2fs    \
     dosfstools          \
+    exfat-utils         \
     parted              \
     mdadm               \
     hdparm		\
