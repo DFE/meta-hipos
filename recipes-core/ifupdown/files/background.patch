@@ -22,7 +22,7 @@ index 5c16fab..eaf258d 100644
      /sbin/pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
          elsif (execable("/sbin/pump"))
 -    /sbin/udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
-+    if systemctl --quiet is-active hip-udhcpc_%iface% ; then systemctl stop hip-udhcpc_%iface% ; fi ; systemd-run --quiet --service-type=forking --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
++    if systemctl --quiet is-active hip-udhcpc_%iface% ; then systemctl stop hip-udhcpc_%iface% ; fi ; systemd-run --quiet --service-type=forking --collect --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
          elsif (execable("/sbin/udhcpc"))
      /sbin/dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
