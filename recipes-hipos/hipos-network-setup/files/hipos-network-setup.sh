@@ -37,5 +37,17 @@ do
 	fi
 done
 
+if [ "${MACHINE}" == "himx0294-ivap" ] || [ "${MACHINE}" == "himx0294-dvmon" ]
+then
+	# Check PHY identifier 1 and part of PHY identifier 2
+	if mdio 0 2 | grep -q "state 0x22" && mdio 0 3 | grep -q "state 0x162";
+	then
+		# Enable symmetric pause
+		mdio 0x0 0x4 0x5e1
+		# Restart auto-negotiation process
+		mdio 0x0 0x0 0x1340
+	fi
+fi
+
 exit 0
 
