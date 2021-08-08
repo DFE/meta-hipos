@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-2020.07:${THISDIR}/libubootenv:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/u-boot-2021.01:${THISDIR}/libubootenv:"
 
 SRC_URI_append_himx0294 = " \
 	file://fw_env.config \

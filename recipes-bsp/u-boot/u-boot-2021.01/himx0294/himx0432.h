@@ -51,7 +51,7 @@
 
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
-#define CONFIG_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
+#define HIMX_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
         "boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
@@ -105,7 +105,6 @@
 #define CONFIG_SOFT_SPI
 
 #ifdef CONFIG_FSL_QSPI
-#define CONFIG_SYS_FSL_QSPI_AHB
 #define CONFIG_SF_DEFAULT_BUS		0
 #define CONFIG_SF_DEFAULT_CS		0
 #define CONFIG_SF_DEFAULT_SPEED	40000000

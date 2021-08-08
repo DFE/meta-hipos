@@ -91,7 +91,7 @@ static void setup_iomux_fec(int fec_id)
 		printf("setup_iomux_fec: %d not supported\n", fec_id);
 }
 
-int board_eth_init(bd_t *bis)
+int board_eth_init(struct bd_info *bis)
 {
 	setup_iomux_fec(CONFIG_FEC_ENET_DEV);
 
@@ -206,7 +206,7 @@ int board_late_init(void)
 	gpio_direction_input(IMX_GPIO_NR(4, 22));
 	if (1 == gpio_get_value(IMX_GPIO_NR(4, 22)) &&
 	    !strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
-		char *fdt = CONFIG_DEFAULT_FDT_FILE_IMPEC_1;
+		char *fdt = HIMX_DEFAULT_FDT_FILE_IMPEC_1;
 		printf("Detected IMPEC Rev. 1\n");
 		if (env_set("fdt_file", fdt)) {
 			printf("env_set: fdt_file '%s' failed\n", fdt);

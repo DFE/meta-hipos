@@ -271,7 +271,7 @@ int board_mmc_getcd(struct mmc *mmc)
 	return !gpio_get_value(gp_cd);
 }
 
-int board_mmc_init(bd_t *bis)
+int board_mmc_init(struct bd_info *bis)
 {
 	s32 status = 0;
 	u32 index = 0;
@@ -469,7 +469,7 @@ int board_phy_config(struct phy_device *phydev)
 }
 #endif
 
-int board_eth_init(bd_t *bis)
+int board_eth_init(struct bd_info *bis)
 {
 #if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 	return 0;
@@ -713,10 +713,10 @@ int board_late_init(void)
 	gpio_direction_input(ENET_RX_ER_GP);
 	if (0 == gpio_get_value(ENET_RX_ER_GP) &&
 	    !strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
-		char *fdt = CONFIG_DEFAULT_FDT_FILE_DVREC;
+		char *fdt = HIMX_DEFAULT_FDT_FILE_DVREC;
 		printf("Detected DVREC\n");
 		if (is_cpu_type(MXC_CPU_MX6QP)) {
-			fdt = CONFIG_DEFAULT_FDT_FILE_DVREC_P;
+			fdt = HIMX_DEFAULT_FDT_FILE_DVREC_P;
 		}
 		if (env_set("fdt_file", fdt)) {
 			printf("env_set: fdt_file '%s' failed\n", fdt);
@@ -728,7 +728,7 @@ int board_late_init(void)
 	i2c_set_bus_num(0);
 	if(0 == i2c_probe(0x5c)) {
 		if(!strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
-			char *fdt = CONFIG_DEFAULT_FDT_FILE_DVMON_2;
+			char *fdt = HIMX_DEFAULT_FDT_FILE_DVMON_2;
 			printf("dvmon: detected touch use alternative fdt\n");
 			if (env_set("fdt_file", fdt)) {
 				printf("env_set: fdt_file '%s' failed\n", fdt);

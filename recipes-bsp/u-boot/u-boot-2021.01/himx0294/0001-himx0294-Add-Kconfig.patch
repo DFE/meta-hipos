@@ -1,32 +1,33 @@
-From 77e62d40932db5764d6e96c15a32a6e06defc97f Mon Sep 17 00:00:00 2001
+From d95082b86ea9e43d9689189686e87826dcc7191a Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 14 Aug 2020 09:14:50 +0200
+Date: Sat, 7 Aug 2021 17:48:03 +0200
 Subject: [PATCH] himx0294: Add Kconfig
 
 Add Kconfig support for himx0294 board.
 
-Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
  arch/arm/mach-imx/mx6/Kconfig | 5 +++++
- 1 file changed, 5 insertions(+)
+ scripts/config_whitelist.txt  | 4 ++++
+ 2 files changed, 9 insertions(+)
 
 diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
-index 1e5df9ae44..81099265e9 100644
+index 575c410ef9..f410927c68 100644
 --- a/arch/arm/mach-imx/mx6/Kconfig
 +++ b/arch/arm/mach-imx/mx6/Kconfig
-@@ -426,6 +426,10 @@ config TARGET_NITROGEN6X
+@@ -478,6 +478,10 @@ config TARGET_NITROGEN6X
+ 	imply USB_ETHER_SMSC95XX
  	imply USB_HOST_ETHER
- 	select MX6QDL
  
 +config TARGET_HIMX0294
-+       bool "Support himx0294"
-+       select SUPPORT_SPL
++	bool "Support himx0294"
++	select SUPPORT_SPL
 +
  config TARGET_OPOS6ULDEV
  	bool "Armadeus OPOS6ULDev board"
- 	select MX6UL_OPOS6UL
-@@ -629,6 +633,7 @@ source "board/bachmann/ot1200/Kconfig"
+ 	depends on MX6UL
+@@ -714,6 +718,7 @@ source "board/bachmann/ot1200/Kconfig"
  source "board/barco/platinum/Kconfig"
  source "board/barco/titanium/Kconfig"
  source "board/boundary/nitrogen6x/Kconfig"
@@ -34,6 +35,21 @@ index 1e5df9ae44..81099265e9 100644
  source "board/bticino/mamoj/Kconfig"
  source "board/ccv/xpress/Kconfig"
  source "board/compulab/cm_fx6/Kconfig"
+diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
+index 55acc38d06..36ecc8882a 100644
+--- a/scripts/config_whitelist.txt
++++ b/scripts/config_whitelist.txt
+@@ -106,6 +106,10 @@ CONFIG_BOARDNAME
+ CONFIG_BOARDNAME_LOCAL
+ CONFIG_BOARD_COMMON
+ CONFIG_BOARD_ECC_SUPPORT
++CONFIG_BOARD_IS_HIMX_DVMON
++CONFIG_BOARD_IS_HIMX_IMOC
++CONFIG_BOARD_IS_HIMX_IPCAM
++CONFIG_BOARD_IS_HIMX_IVAP
+ CONFIG_BOARD_IS_OPENRD_BASE
+ CONFIG_BOARD_IS_OPENRD_CLIENT
+ CONFIG_BOARD_IS_OPENRD_ULTIMATE
 -- 
-2.16.4
+2.26.2
 

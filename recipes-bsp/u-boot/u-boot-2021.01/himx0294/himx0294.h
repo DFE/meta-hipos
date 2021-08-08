@@ -48,7 +48,6 @@
 #define CONFIG_SYS_FSL_ESDHC_ADDR      0
 #define CONFIG_SYS_FSL_USDHC_NUM       2
 
-#define CONFIG_GENERIC_MMC
 #define CONFIG_BOUNCE_BUFFER
 
 /*
@@ -69,10 +68,6 @@
 #define CONFIG_FEC_MXC_PHYADDR		6
 
 /* USB Configs */
-#define CONFIG_USB_EHCI
-#if 0
-#define CONFIG_USB_EHCI_MX6
-#endif
 #define CONFIG_USB_HOST_ETHER
 #define CONFIG_USB_ETHER_ASIX
 #define CONFIG_USB_ETHER_MCS7830
@@ -92,7 +87,6 @@
 #define CONFIG_VIDEO_BMP_RLE8
 #define CONFIG_SPLASH_SCREEN
 #define CONFIG_BMP_16BPP
-#define CONFIG_IPUV3_CLK 260000000
 #define CONFIG_IMX_HDMI
 #define CONFIG_IMX_VIDEO_SKIP
 
@@ -113,23 +107,23 @@
 #define CONFIG_BOOTCOMMAND	"setenv bootcmd run x_bootA; saveenv; boot"
 
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
-#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
-#define CONFIG_DEFAULT_LINUX_DEV "2"
+#define HIMX_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define HIMX_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IVAP)
-#define CONFIG_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
-#define CONFIG_DEFAULT_FDT_FILE_DVREC_P "/boot/imx6qp-himx0294-dvrec.dtb"
-#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
-#define CONFIG_DEFAULT_LINUX_DEV "2"
+#define HIMX_DEFAULT_FDT_FILE_DVREC "/boot/imx6q-himx0294-dvrec.dtb"
+#define HIMX_DEFAULT_FDT_FILE_DVREC_P "/boot/imx6qp-himx0294-dvrec.dtb"
+#define HIMX_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define HIMX_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
-#define CONFIG_DEFAULT_FDT_FILE_DVMON_2 "/boot/imx6q-himx0294-dvmon-2.dtb"
-#define CONFIG_DEFAULT_FDT_HIGH ""
-#define CONFIG_DEFAULT_LINUX_DEV "2"
+#define HIMX_DEFAULT_FDT_FILE_DVMON_2 "/boot/imx6q-himx0294-dvmon-2.dtb"
+#define HIMX_DEFAULT_FDT_HIGH ""
+#define HIMX_DEFAULT_LINUX_DEV "2"
 #elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
-#define CONFIG_DEFAULT_FDT_HIGH ""
-#define CONFIG_DEFAULT_LINUX_DEV "0"
+#define HIMX_DEFAULT_FDT_HIGH ""
+#define HIMX_DEFAULT_LINUX_DEV "0"
 #else
-#define CONFIG_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
-#define CONFIG_DEFAULT_LINUX_DEV "2"
+#define HIMX_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
+#define HIMX_DEFAULT_LINUX_DEV "2"
 #endif
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
@@ -140,7 +134,7 @@
 	"kernel_file=/boot/uImage\0" \
 	"fdt_addr=0x22000000\0" \
 	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
-	CONFIG_DEFAULT_FDT_HIGH \
+	HIMX_DEFAULT_FDT_HIGH \
 	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
 	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm ${kernel_addr} - ${fdt_addr}\0" \
@@ -150,9 +144,9 @@
 		"root=${bootroot} rootwait " \
 		"mxc_hdmi.only_cea=0\0" \
 	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
-		"setenv bootroot /dev/mmcblk" CONFIG_DEFAULT_LINUX_DEV "p1; run do_boot\0" \
+		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p1; run do_boot\0" \
 	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
-		"setenv bootroot /dev/mmcblk" CONFIG_DEFAULT_LINUX_DEV "p2; run do_boot\0"
+		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p2; run do_boot\0"
 
 /* Miscellaneous configurable options */
 #undef CONFIG_SYS_PROMPT
@@ -165,8 +159,6 @@
 #undef CONFIG_SYS_MAXARGS
 #define CONFIG_SYS_MAXARGS	       48
 #define CONFIG_SYS_BARGSIZE CONFIG_SYS_CBSIZE
-
-#define CONFIG_SYS_MEMTEST_SCRATCH     0x10800000
 
 #define CONFIG_SYS_LOAD_ADDR	       CONFIG_LOADADDR
 
@@ -183,8 +175,6 @@
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
 /* FLASH and environment organization */
-#define CONFIG_SYS_NO_FLASH
-
 #if defined(CONFIG_ENV_IS_IN_MMC)
 #define CONFIG_SYS_MMC_ENV_DEV		0
 #elif defined(CONFIG_ENV_IS_IN_SPI_FLASH)
@@ -205,10 +195,5 @@
 #define CONFIG_PCI_SCAN_SHOW
 #define CONFIG_PCIE_IMX
 #endif
-
-/* Netchip IDs */
-#define CONFIG_G_DNL_VENDOR_NUM 0x0525
-#define CONFIG_G_DNL_PRODUCT_NUM 0xa4a5
-#define CONFIG_G_DNL_MANUFACTURER "Boundary"
 
 #endif	       /* __CONFIG_H */
