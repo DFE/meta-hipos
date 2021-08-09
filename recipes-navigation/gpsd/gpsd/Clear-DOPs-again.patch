@@ -1,18 +1,18 @@
-From da1c1fed52367432cb8041c246d43a230309cec3 Mon Sep 17 00:00:00 2001
+From e136db9a9643f15338c3d30915089c92c15af9fa Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 24 Jun 2021 10:34:18 +0200
+Date: Mon, 9 Aug 2021 07:40:58 +0200
 Subject: [PATCH] Clear DOPs again
 
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- libgpsd_core.c | 2 +-
+ gpsd/libgpsd_core.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/libgpsd_core.c b/libgpsd_core.c
-index 52bf8e5..e5a1339 100644
---- a/libgpsd_core.c
-+++ b/libgpsd_core.c
-@@ -1887,7 +1887,7 @@ void gpsd_zero_satellites( struct gps_data_t *out)
+diff --git a/gpsd/libgpsd_core.c b/gpsd/libgpsd_core.c
+index ea72993..7775377 100644
+--- a/gpsd/libgpsd_core.c
++++ b/gpsd/libgpsd_core.c
+@@ -1967,7 +1967,7 @@ void gpsd_zero_satellites( struct gps_data_t *out)
          out->skyview[sat].ss = NAN;
          out->skyview[sat].freqid = -1;
      }
