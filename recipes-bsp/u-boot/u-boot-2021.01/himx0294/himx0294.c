@@ -698,6 +698,7 @@ int board_init(void)
 	// Enable Touchscreen
 	gpio_direction_output(IMX_GPIO_NR(1, 0), 0);
 #else
+	gpio_request(IMX_GPIO_NR(4, 4), "???");
 	gpio_direction_output(IMX_GPIO_NR(4, 4), 1);
 	gpio_set_value(IMX_GPIO_NR(4, 4), 0);
 	udelay(1000);
@@ -766,6 +767,15 @@ static const struct boot_mode board_boot_modes[] = {
 
 int misc_init_r(void)
 {
+#if defined(CONFIG_BOARD_IS_HIMX_IVAP)
+	gpio_request(ENET_RX_ER_GP, "Detect DVREC");
+	gpio_request(IMX_GPIO_NR(4, 15), "Enable USB OTG PWR");
+	gpio_request(IMX_GPIO_NR(1, 4), "Reset USB");
+#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
+	gpio_request(IMX_GPIO_NR(3, 31), "Enable USB");
+	gpio_request(IMX_GPIO_NR(1, 0), "Enable touchscreen");
+#endif
+
 #ifdef CONFIG_CMD_BMODE
 	add_board_boot_modes(board_boot_modes);
 #endif
