@@ -694,8 +694,10 @@ int board_init(void)
 
 #if defined(CONFIG_BOARD_IS_HIMX_DVMON)
 	// Enable USB
+	gpio_request(IMX_GPIO_NR(3, 31), "Enable USB");
 	gpio_direction_output(IMX_GPIO_NR(3, 31), 1);
 	// Enable Touchscreen
+	gpio_request(IMX_GPIO_NR(1, 0), "Enable touchscreen");
 	gpio_direction_output(IMX_GPIO_NR(1, 0), 0);
 #else
 	gpio_request(IMX_GPIO_NR(4, 4), "???");
@@ -771,9 +773,6 @@ int misc_init_r(void)
 	gpio_request(ENET_RX_ER_GP, "Detect DVREC");
 	gpio_request(IMX_GPIO_NR(4, 15), "Enable USB OTG PWR");
 	gpio_request(IMX_GPIO_NR(1, 4), "Reset USB");
-#elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
-	gpio_request(IMX_GPIO_NR(3, 31), "Enable USB");
-	gpio_request(IMX_GPIO_NR(1, 0), "Enable touchscreen");
 #endif
 
 #ifdef CONFIG_CMD_BMODE
