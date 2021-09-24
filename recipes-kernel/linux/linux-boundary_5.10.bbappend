@@ -2,7 +2,7 @@ inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-5.4:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-5.10:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
@@ -24,6 +24,7 @@ SRC_URI_append = " \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
 "
+
 
 SRC_URI_append_himx0294 = " \
 	file://imx6qdl-himx0294-imoc.dtsi \
@@ -54,16 +55,17 @@ SRC_URI_append_himx0294 = " \
 	file://rafi-touchscreen-support.patch \
 	file://rafi-touchscreen-event-report.patch \
         file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
-	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
 	file://0001-ahci_imx-fix-module-unload-HYP-23856.patch \
 	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
 	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \
-	file://0001-Backport-exfat-from-kernel-5.7.patch \
 "
 
+#	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch
+#	file://0001-Backport-exfat-from-kernel-5.7.patch 
+ 
 #	file://iio-tsl2x7x-fix-trigger.patch 
 #	file://imx-poweroff-restart.patch 
 

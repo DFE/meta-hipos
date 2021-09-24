@@ -130,9 +130,18 @@
 
 	backlight_lvds {
 		compatible = "pwm-backlight";
-		pwms = <&pwm4 0 5000000>;
+		pwms = <&pwm4 0 5000000 0>;
 		brightness-levels = <0 4 8 16 32 48 64 80 96 112 128 144 160 176 192 208 224 240 255>;
 		default-brightness-level = <18>;
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+		status {
+			label = "status";
+			pwms = <&pwm1 0 50000 0>;
+			max-brightness = <256>;
+		};
 	};
 
 	gpio-keys {
@@ -206,8 +215,10 @@
 };
 
 &fec {
+#define GPIRQ_ENET_PHY		<&gpio1 28 IRQ_TYPE_LEVEL_LOW>
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
+	phy-handle = <&ethphy>;
 	phy-mode = "rgmii";
 #if 0
 #define GP_ENET_PHY_RESET	<&gpio1 25 GPIO_ACTIVE_LOW>
@@ -215,12 +226,26 @@
 #endif
 	status = "okay";
 
-	#address-cells = <0>;
-	#size-cells = <1>;
-	phy_int {
-		reg = <0x6>;
-#define GPIRQ_ENET_PHY		<&gpio1 28 IRQ_TYPE_LEVEL_LOW>
-		interrupts-extended = GPIRQ_ENET_PHY;
+	mdio {
+		#address-cells = <0>;
+		#size-cells = <1>;
+
+		ethphy: ethernet-phy {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			interrupts-extended = GPIRQ_ENET_PHY;
+			rxc-skew-ps = <3000>;
+			rxd0-skew-ps = <0>;
+			rxd1-skew-ps = <0>;
+			rxd2-skew-ps = <0>;
+			rxd3-skew-ps = <0>;
+			rxdv-skew-ps = <0>;
+			txc-skew-ps = <3000>;
+			txd0-skew-ps = <0>;
+			txd1-skew-ps = <0>;
+			txd2-skew-ps = <0>;
+			txd3-skew-ps = <0>;
+			txen-skew-ps = <0>;
+		};
 	};
 };
 
@@ -249,6 +274,18 @@
 	hdmi_edid: edid@50 {
 		compatible = "fsl,imx6-hdmi-i2c";
 		reg = <0x50>;
+	};
+
+	pixcir_ts@5c {
+		compatible = "pixcir,pixcir_ts";
+		reg = <0x5c>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <7 0>;
+
+		attb-gpio = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+
+		touchscreen-size-x = <1280>;
+		touchscreen-size-y = <800>;
 	};
 };
 
@@ -388,6 +425,14 @@
 		};
 	};
 
+	pwm1 {
+		pinctrl_pwm1_1: pwm1grp-1 {
+			fsl,pins = <
+				MX6QDL_PAD_GPIO_9__PWM1_OUT 0x1b0b1
+			>;
+		};
+	};
+
 	pwm3 {
 		pinctrl_pwm3_2: pwm3grp-2 {
 			fsl,pins = <
@@ -444,13 +489,16 @@
 
 	lvds-channel@0 {
 		crtc = "ipu1-di1";
-		fsl,data-mapping = "jeida";
+		fsl,data-mapping = "spwg";
 		fsl,data-width = <24>;
 		primary;
 		status = "okay";
-		vcc-gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>, <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		vcc-gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
 		vcc-powerup-delay-ms = <35>;
 		vcc-down-delay-ms = <500>;
+		vled-gpio = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		vled-powerup-delay-ms = <200>;
+		vled-powerdown-delay-ms = <200>;
 		backlight-gpio = <&gpio2 0 GPIO_ACTIVE_HIGH>;
 		backlight-powerup-delay-ms = <10>;
 
@@ -459,14 +507,14 @@
 			timing0: 1280p60 {
 				clock-frequency = <71107200>;
 				hactive = <1280>;
-				vactive = <800>;
-				hback-porch = <48>;
-				hfront-porch = <80>;
-				vback-porch = <15>;
-				vfront-porch = <2>;
-				hsync-len = <32>;
-				vsync-len = <6>;
-			};
+		 		vactive = <800>;
+		 		hback-porch = <50>;
+		 		hfront-porch = <50>;
+		 		vback-porch = <4>;
+		 		vfront-porch = <14>;
+		 		hsync-len = <60>;
+		 		vsync-len = <5>;
+	 		};
 		};
 	};
 };
@@ -482,13 +530,11 @@
 	status = "okay";
 };
 
-#if 0
 &pwm1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm1_1>;
 	status = "okay";
 };
-#endif
 
 &pwm3 {
 	pinctrl-names = "default";

@@ -1,6 +1,6 @@
-From 9719a85b0db981efcd664345240fe1b38918943b Mon Sep 17 00:00:00 2001
+From ed7e9f7132f60b19f27a1789600ee20cbce2c6c1 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 13 Aug 2020 15:08:11 +0200
+Date: Wed, 22 Sep 2021 18:49:46 +0200
 Subject: [PATCH] Support Mitsubishi touch controller HYP-16425
 
 Add Mitsubishi touch controller ids to HID driver.
@@ -13,12 +13,12 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  3 files changed, 9 insertions(+)
 
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index c552a6bc627e..d2c220fa095a 100644
+index 136b58a91c04..6f67c641c7b1 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -842,6 +842,9 @@
- #define USB_DEVICE_ID_MS_XBOX_ONE_S_CONTROLLER	0x02fd
+@@ -869,6 +869,9 @@
  #define USB_DEVICE_ID_MS_PIXART_MOUSE    0x00cb
+ #define USB_DEVICE_ID_8BITDO_SN30_PRO_PLUS      0x02e0
  
 +#define USB_VENDOR_ID_MITSUBISHI_ELECTRIC 0x06d3
 +#define USB_DEVICE_ID_MITSUBISHI_ELECTRIC_USB_TOUCH_6400 0x6400
@@ -27,12 +27,12 @@ index c552a6bc627e..d2c220fa095a 100644
  #define USB_DEVICE_ID_RETRO_ADAPTER	0x3201
  
 diff --git a/drivers/hid/hid-multitouch.c b/drivers/hid/hid-multitouch.c
-index 39e4da7468e1..adc01f723373 100644
+index e5a3704b9fe8..1588f96385a9 100644
 --- a/drivers/hid/hid-multitouch.c
 +++ b/drivers/hid/hid-multitouch.c
-@@ -2013,6 +2013,11 @@ static const struct hid_device_id mt_devices[] = {
- 		HID_DEVICE(BUS_I2C, HID_GROUP_GENERIC,
- 			USB_VENDOR_ID_LG, I2C_DEVICE_ID_LG_7010) },
+@@ -1990,6 +1990,11 @@ static const struct hid_device_id mt_devices[] = {
+ 			   USB_VENDOR_ID_LENOVO,
+ 			   USB_DEVICE_ID_LENOVO_X1_TAB3) },
  
 +	/* Mitsubishi */
 +	{ .driver_data = MT_CLS_DEFAULT,
@@ -43,10 +43,10 @@ index 39e4da7468e1..adc01f723373 100644
  	{ .driver_data = MT_CLS_CONFIDENCE_MINUS_ONE,
  		MT_USB_DEVICE(USB_VENDOR_ID_ASUS,
 diff --git a/drivers/hid/hid-quirks.c b/drivers/hid/hid-quirks.c
-index 168fdaa1999f..590d23af54b7 100644
+index be53c723c729..d17f4350b4e7 100644
 --- a/drivers/hid/hid-quirks.c
 +++ b/drivers/hid/hid-quirks.c
-@@ -686,6 +686,7 @@ static const struct hid_device_id hid_have_special_driver[] = {
+@@ -693,6 +693,7 @@ static const struct hid_device_id hid_have_special_driver[] = {
  #if IS_ENABLED(CONFIG_HID_ZYDACRON)
  	{ HID_USB_DEVICE(USB_VENDOR_ID_ZYDACRON, USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL) },
  #endif
@@ -55,5 +55,5 @@ index 168fdaa1999f..590d23af54b7 100644
  };
  
 -- 
-2.16.4
+2.26.2
 

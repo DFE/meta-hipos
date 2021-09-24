@@ -1,17 +1,18 @@
-From 07ad698c69d62766693ca47332ee73cfdfa386f8 Mon Sep 17 00:00:00 2001
+From 611e77f876cc3636460560499b5a6e0fb88371c2 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Tue, 25 Aug 2020 10:09:59 +0200
-Subject: [PATCH] Revert "leds-pwm: add note/frequency support"
+Date: Wed, 22 Sep 2021 18:37:03 +0200
+Subject: [PATCH] Revert: leds-pwm: add note/frequency support
 
-This reverts commit e1a16997460d0ea1cf4dba4b4d69c33c4c147558.
 The reverted commit causes a crash when loading the driver. The commit
 is not in the mainline kernel.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/leds/leds-pwm.c | 248 +-----------------------------------------------
+ drivers/leds/leds-pwm.c | 248 +---------------------------------------
  1 file changed, 1 insertion(+), 247 deletions(-)
 
 diff --git a/drivers/leds/leds-pwm.c b/drivers/leds/leds-pwm.c
-index 4ff8a3c198f2..8b6965a563e9 100644
+index 65c57640bbe6..f53f9309ca6c 100644
 --- a/drivers/leds/leds-pwm.c
 +++ b/drivers/leds/leds-pwm.c
 @@ -9,8 +9,6 @@
@@ -23,9 +24,9 @@ index 4ff8a3c198f2..8b6965a563e9 100644
  #include <linux/module.h>
  #include <linux/kernel.h>
  #include <linux/platform_device.h>
-@@ -20,38 +18,6 @@
+@@ -19,38 +17,6 @@
+ #include <linux/err.h>
  #include <linux/pwm.h>
- #include <linux/leds_pwm.h>
  #include <linux/slab.h>
 -#include "leds.h"
 -
@@ -60,12 +61,12 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	43243895,	/* "_G"	23.12 hz, 1490 cm */
 -};
  
- struct led_pwm_data {
- 	struct led_classdev	cdev;
-@@ -59,11 +25,6 @@ struct led_pwm_data {
+ struct led_pwm {
+ 	const char	*name;
+@@ -63,11 +29,6 @@ struct led_pwm_data {
+ 	struct pwm_device	*pwm;
+ 	struct pwm_state	pwmstate;
  	unsigned int		active_low;
- 	unsigned int		period;
- 	int			duty;
 -	unsigned char		octave;
 -#define NM_NORMAL 0
 -#define NM_SHARP 1
@@ -74,8 +75,8 @@ index 4ff8a3c198f2..8b6965a563e9 100644
  };
  
  struct led_pwm_priv {
-@@ -71,177 +32,6 @@ struct led_pwm_priv {
- 	struct led_pwm_data leds[0];
+@@ -75,177 +36,6 @@ struct led_pwm_priv {
+ 	struct led_pwm_data leds[];
  };
  
 -static ssize_t led_frequency_show(struct device *dev,
@@ -84,7 +85,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 -	struct led_pwm_data *led_dat =
 -		container_of(led_cdev, struct led_pwm_data, cdev);
--	unsigned int period =  led_dat->period;
+-	unsigned int period = led_dat->pwmstate.period;
 -	unsigned int freq = period ? 1000000000 / period : 0;
 -
 -	return sprintf(buf, "%u\n", freq);
@@ -107,7 +108,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	if (count == size) {
 -		ret = count;
 -
--		led_dat->period = freq ? 1000000000 / freq : 0;
+-		led_dat->pwmstate.period = freq ? 1000000000 / freq : 0;
 -		if (!led_cdev->brightness)
 -			led_cdev->brightness = led_cdev->max_brightness >> 1;
 -		led_set_brightness(led_cdev, led_cdev->brightness);
@@ -121,7 +122,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 -	struct led_pwm_data *led_dat =
 -		container_of(led_cdev, struct led_pwm_data, cdev);
--	unsigned int period =  led_dat->period;
+-	unsigned int period = led_dat->pwmstate.period;
 -
 -	return sprintf(buf, "%u\n", period);
 -}
@@ -142,7 +143,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -
 -	if (count == size) {
 -		ret = count;
--		led_dat->period = period;
+-		led_dat->pwmstate.period = period;
 -		led_set_brightness(led_cdev, led_cdev->brightness);
 -	}
 -
@@ -155,7 +156,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 -	struct led_pwm_data *led_dat =
 -		container_of(led_cdev, struct led_pwm_data, cdev);
--	unsigned int period =  led_dat->period;
+-	unsigned int period = led_dat->pwmstate.period;
 -	unsigned i;
 -	int octave = 0;
 -	unsigned best = 0;
@@ -232,7 +233,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -		led_dat->note_mode = note_mode;
 -		if (period >= 0) {
 -			period >>= octave;
--			led_dat->period = period;
+-			led_dat->pwmstate.period = period;
 -			if (!led_cdev->brightness)
 -				led_cdev->brightness = led_cdev->max_brightness
 -							>> 1;
@@ -249,11 +250,11 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -static DEVICE_ATTR(frequency, 0644, led_frequency_show, led_frequency_store);
 -static DEVICE_ATTR(period, 0644, led_period_show, led_period_store);
 -
- static void __led_pwm_set(struct led_pwm_data *led_dat)
+ static int led_pwm_set(struct led_classdev *led_cdev,
+ 		       enum led_brightness brightness)
  {
- 	int new_duty = led_dat->duty;
-@@ -275,17 +65,6 @@ static int led_pwm_set(struct led_classdev *led_cdev,
- 	return 0;
+@@ -265,17 +55,6 @@ static int led_pwm_set(struct led_classdev *led_cdev,
+ 	return pwm_apply_state(led_dat->pwm, &led_dat->pwmstate);
  }
  
 -static void led_pwm_cleanup(struct led_pwm_priv *priv)
@@ -267,39 +268,39 @@ index 4ff8a3c198f2..8b6965a563e9 100644
 -	}
 -}
 -
+ __attribute__((nonnull))
  static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
  		       struct led_pwm *led, struct fwnode_handle *fwnode)
- {
-@@ -299,8 +78,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
+@@ -289,8 +68,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
  	led_data->cdev.brightness = LED_OFF;
  	led_data->cdev.max_brightness = led->max_brightness;
  	led_data->cdev.flags = LED_CORE_SUSPENDRESUME;
 -	led_data->octave = 4;
--	led_data->period = led_data->pwm->state.period;
+-	led_data->pwmstate.period = led_data->pwm->state.period;
  
- 	if (fwnode)
- 		led_data->pwm = devm_fwnode_pwm_get(dev, fwnode, NULL);
-@@ -330,17 +107,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
- 
- 	ret = devm_led_classdev_register(dev, &led_data->cdev);
- 	if (ret == 0) {
--		/* register the attributes */
--		ret = device_create_file(led_data->cdev.dev,
--					 &dev_attr_frequency);
--		if (ret)
--			return ret;
--		ret = device_create_file(led_data->cdev.dev, &dev_attr_period);
--		if (ret)
--			return ret;
--		ret = device_create_file(led_data->cdev.dev, &dev_attr_note);
--		if (ret)
--			return ret;
- 		priv->num_leds++;
- 		led_pwm_set(&led_data->cdev, led_data->cdev.brightness);
- 	} else {
-@@ -418,25 +184,14 @@ static int led_pwm_probe(struct platform_device *pdev)
- 		ret = led_pwm_create_fwnode(&pdev->dev, priv);
+ 	led_data->pwm = devm_fwnode_pwm_get(dev, fwnode, NULL);
+ 	if (IS_ERR(led_data->pwm))
+@@ -308,17 +85,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
+ 			led->name, ret);
+ 		return ret;
  	}
+-	/* register the attributes */
+-	ret = device_create_file(led_data->cdev.dev,
+-				 &dev_attr_frequency);
+-	if (ret)
+-		return ret;
+-	ret = device_create_file(led_data->cdev.dev, &dev_attr_period);
+-	if (ret)
+-		return ret;
+-	ret = device_create_file(led_data->cdev.dev, &dev_attr_note);
+-	if (ret)
+-		return ret;
+ 
+ 	ret = led_pwm_set(&led_data->cdev, led_data->cdev.brightness);
+ 	if (ret) {
+@@ -382,25 +148,14 @@ static int led_pwm_probe(struct platform_device *pdev)
+ 
+ 	ret = led_pwm_create_fwnode(&pdev->dev, priv);
  
 -	if (ret) {
 -		led_pwm_cleanup(priv);
@@ -324,7 +325,7 @@ index 4ff8a3c198f2..8b6965a563e9 100644
  static const struct of_device_id of_pwm_leds_match[] = {
  	{ .compatible = "pwm-leds", },
  	{},
-@@ -445,7 +200,6 @@ MODULE_DEVICE_TABLE(of, of_pwm_leds_match);
+@@ -409,7 +164,6 @@ MODULE_DEVICE_TABLE(of, of_pwm_leds_match);
  
  static struct platform_driver led_pwm_driver = {
  	.probe		= led_pwm_probe,
@@ -333,5 +334,5 @@ index 4ff8a3c198f2..8b6965a563e9 100644
  		.name	= "leds_pwm",
  		.of_match_table = of_pwm_leds_match,
 -- 
-2.16.4
+2.26.2
 
