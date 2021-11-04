@@ -728,8 +728,16 @@ int board_late_init(void)
 #elif defined(CONFIG_BOARD_IS_HIMX_DVMON)
 	/* If a touch controller is detected, then the touch display is
 	   connected and the alternative device tree is used. */
+	int found_5c = 0;
 	i2c_set_bus_num(0);
-	if(0 == i2c_probe(0x5c)) {
+	for(int i=0; i<5; ++i) {
+		if(0 == i2c_probe(0x5c)) {
+			found_5c = 1;
+			break;
+		}
+		udelay(200*1000);
+	}
+	if(found_5c) {
 		if(!strcmp(env_get("fdt_file"), CONFIG_DEFAULT_FDT_FILE)) {
 			char *fdt = HIMX_DEFAULT_FDT_FILE_DVMON_2;
 			printf("dvmon: detected touch use alternative fdt\n");
