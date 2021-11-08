@@ -16,7 +16,7 @@ S = "${WORKDIR}/git"
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
 DRSRCBRANCH="master"
 
-SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH}"
+SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH};protocol=https"
 SRCREV_default_pn-libdrbcc = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
 
 PACKAGES += " drbcc "

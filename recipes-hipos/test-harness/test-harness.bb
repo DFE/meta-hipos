@@ -9,6 +9,6 @@ PV = "1.0"
 inherit autotools
 
 SRCREV="${AUTOREV}"
-SRC_URI=" git://github.com/t-lo/test_harness.git"
+SRC_URI=" git://github.com/t-lo/test_harness.git;protocol=https"
 S = "${WORKDIR}/git"
 

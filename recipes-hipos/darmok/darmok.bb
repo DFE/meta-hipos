@@ -12,7 +12,7 @@ PR = "r002"
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
 DRSRCBRANCH="master"
 
-SRC_URI = "git://github.com/DFE/darmok.git;branch=${DRSRCBRANCH}"
+SRC_URI = "git://github.com/DFE/darmok.git;branch=${DRSRCBRANCH};protocol=https"
 SRCREV = "4f15c0427308d224cef134c9ac5c445ed4c99e25" 
 
 S = "${WORKDIR}/git"

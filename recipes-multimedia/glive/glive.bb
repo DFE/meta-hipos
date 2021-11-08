@@ -5,7 +5,7 @@ DESCRIPTION = "Gstreamer Live Example (GLIVE) Server and Client Application"
 LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-SRC_URI = "git://github.com/johnweber/glive.git;branch=master"
+SRC_URI = "git://github.com/johnweber/glive.git;branch=master;protocol=https"
 SRCREV = "d7263f6dc685efb06cbd0f70b12c12193cec480a"
 
 inherit autotools pkgconfig
