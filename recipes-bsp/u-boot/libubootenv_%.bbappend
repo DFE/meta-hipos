@@ -3,7 +3,6 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-2021.07:${THISDIR}/libubootenv:"
 SRC_URI:append:himx0294 = " \
 	file://fw_env.config \
 	file://fw_env-ipcam.config \
-	file://0001-Add-libz-as-libuboot-dependency.patch \
 "
 
 do_install:append:himx0294 () {
