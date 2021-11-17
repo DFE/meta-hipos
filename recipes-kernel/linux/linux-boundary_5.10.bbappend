@@ -2,12 +2,12 @@ inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/linux-boundary-5.10:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-5.10:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
 SRCREV_tw6869 = "${AUTOREV}"
-PV_append = "+tw6869gitr${SRCPV}"
+PV:append = "+tw6869gitr${SRCPV}"
 
 # unset KBUILD_DEFCONFIG. To avoid that the defconfig must be located in kernel
 # source tree.
@@ -17,7 +17,7 @@ KBUILD_DEFCONFIG = ""
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
 DRSRCBRANCH="master"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://defconfig \
 	file://support-mitsubishi-touch-controller.patch \
@@ -26,7 +26,7 @@ SRC_URI_append = " \
 "
 
 
-SRC_URI_append_himx0294 = " \
+SRC_URI:append:himx0294 = " \
 	file://imx6qdl-himx0294-imoc.dtsi \
 	file://imx6q-himx0294-imoc.dts \
 	file://imx6qdl-himx0294-imoc-2.dtsi \
@@ -69,14 +69,14 @@ SRC_URI_append_himx0294 = " \
 #	file://iio-tsl2x7x-fix-trigger.patch 
 #	file://imx-poweroff-restart.patch 
 
-do_configure_prepend() {
+do_configure:prepend() {
 	# copy tw6869 driver code into kernel tree
 	mkdir -p ${S}/drivers/media/pci/drtw6869
 	cd ${S}/drivers/media/pci/drtw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
 	sed -i -e's/VIDEO_TW6869/VIDEO_DRTW6869/g' ${S}/drivers/media/pci/drtw6869/*
 }
 
-do_configure_prepend_himx0294() {
+do_configure:prepend:himx0294() {
         cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/himx0294_defconfig
 	cp ${WORKDIR}/imx6qdl-himx0294-imoc.dtsi ${S}/arch/arm/boot/dts/imx6qdl-himx0294-imoc.dtsi
 	cp ${WORKDIR}/imx6q-himx0294-imoc.dts ${S}/arch/arm/boot/dts/imx6q-himx0294-imoc.dts
@@ -95,7 +95,7 @@ do_configure_prepend_himx0294() {
         cp ${WORKDIR}/imx6ull-himx0294-impec-2.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec-2.dts
 }
 
-do_configure_prepend_nitrogen6x() {
+do_configure:prepend:nitrogen6x() {
         cp ${WORKDIR}/defconfig ${S}/arch/arm/configs/nitrogen6x_defconfig
 }
 

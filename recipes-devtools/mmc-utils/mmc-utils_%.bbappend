@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI_append = " file://options-ssr-read-and-cmd56.patch "
+SRC_URI:append = " file://options-ssr-read-and-cmd56.patch "
 

@@ -2,11 +2,11 @@
 # MTD dev package
 #
 
-FILES_${PN}-staticdev += "          \
+FILES:${PN}-staticdev += "          \
     ${includedir}/mtd/libmtd.h      \
 "
 
-do_install_append() {
+do_install:append() {
     # MTD dev package:
     # install libmtd and its headers
 

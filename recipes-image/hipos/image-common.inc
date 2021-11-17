@@ -1,7 +1,5 @@
 # common stuff for all images
-
-require recipes-images/angstrom/systemd-image.bb
-
+LICENSE = "CLOSED"
 # Image feature debug-tweaks makes an image suitable for development. It adds 'allow-empty-password',
 # 'empty-root-password', and 'post-install-logging' to IMAGE_FEATURES.
 # meta-angstrom/recipes-images/angstrom/angstrom-image.bb adds also allow-empty-password to IMAGE_FEATURES.
@@ -19,19 +17,19 @@ require recipes-images/angstrom/systemd-image.bb
 # append since the rootfs postprocess command is executed after ipk installation.
 # So we remove 'allow-empty-password' and 'debug-tweaks' from IMAGE_FEATURES here.
 IMAGE_FEATURES += " package-management post-install-logging "
-IMAGE_FEATURES_remove = " allow-empty-password debug-tweaks "
+IMAGE_FEATURES:remove = " allow-empty-password debug-tweaks "
 
 # remove connman
 # remove tar to use busybox tar. The 'real'-tar has problems with symlinks to /dev/null with vfat filesystem. HYP-19186
 # tar is installed explicitly in recipe angstrom-image.bb since Yocto zeus. HYP-22728
-IMAGE_INSTALL_remove += "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client tar"
+IMAGE_INSTALL:remove += "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client tar"
 
 # When wic-image is created, two incorrect entries are generated in /etc/fstab.
 # This causes the boot process to get stuck with:
 # A start job is running for dev-disk-by...
 # Occured at machine congatec-tca5-64 and Yocto rocko
 # Use following wic option to not change /etc/fstab.
-WIC_CREATE_EXTRA_ARGS_append = " --no-fstab-update"
+WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
 
 IMAGE_INSTALL += "          \
   kernel-modules            \
@@ -52,7 +50,7 @@ IMAGE_INSTALL += "          \
   wireless-regdb-static     \
 "
 
-IMAGE_INSTALL_append_himx0294 += "   \
+IMAGE_INSTALL:append:himx0294 += "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
   libdrbcc                  \
@@ -65,12 +63,12 @@ IMAGE_INSTALL_append_himx0294 += "   \
   hipos-net-check           \
 "
 
-IMAGE_INSTALL_append_himx0438 += "   \
+IMAGE_INSTALL:append:himx0438 += "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
 "
 
-IMAGE_INSTALL_append_himx0294 += " \
+IMAGE_INSTALL:append:himx0294 += " \
   tslib \
   tslib-calibrate \
   tslib-tests \
@@ -80,7 +78,7 @@ IMAGE_INSTALL_append_himx0294 += " \
   fsl-alsa-plugins \
 "
 
-IMAGE_INSTALL_append_hinat += " \
+IMAGE_INSTALL:append:hinat += " \
   libdrbcc                  \
   drbcc                     \
   hipos-device-info         \
@@ -90,7 +88,7 @@ IMAGE_INSTALL_append_hinat += " \
   gstreamer1.0-plugins-good \
 "
 
-IMAGE_INSTALL_append_imx6qsabrelite += " \
+IMAGE_INSTALL:append:imx6qsabrelite += " \
   tslib \
   tslib-calibrate \
   tslib-tests \
@@ -101,7 +99,7 @@ IMAGE_INSTALL_append_imx6qsabrelite += " \
   fsl-alsa-plugins \
 "
 
-IMAGE_INSTALL_append_imx6dqscm-1gb-qwks += " \
+IMAGE_INSTALL:append:imx6dqscm-1gb-qwks += " \
   gstreamer1.0-plugins-imx \
   gstreamer1.0-plugins-base \
 "

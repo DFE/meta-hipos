@@ -1,7 +1,7 @@
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI_append_hinat = " \
+SRC_URI:append:hinat = " \
 	file://defconfig \
 	file://0001-UART-driver-Add-device-driver-for-Altera-MAX10-CPLD-.patch \
 	file://0002-SMBus-driver-handle-SMBus-transactions-with-polling-.patch \
@@ -19,6 +19,6 @@ SRC_URI_append_hinat = " \
 # This leads to a overwriting of kernel configuration values from defconfig.
 # To avoid these changes, the defconfig, which is a full kernel configuration,
 # is copied after the do_kernel_configme step.
-do_configure_prepend_hinat() {
+do_configure:prepend:hinat() {
         cp ${WORKDIR}/defconfig ${B}/.config
 }

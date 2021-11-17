@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = "libdrbcc bash hip-machinfo hip-board"
+RDEPENDS:${PN} = "libdrbcc bash hip-machinfo hip-board"
 
 PR = "r23"
 
@@ -13,11 +13,11 @@ SRC_URI = " file://hipos-device-info.service  \
             file://hipos-device-info.sh \
 	    file://COPYING "
 
-FILES_${PN} = "${base_libdir}/systemd \
+FILES:${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/hipos/hipos-device-info.sh \
 		"
 
-SYSTEMD_SERVICE_${PN} = "hipos-device-info.service"
+SYSTEMD_SERVICE:${PN} = "hipos-device-info.service"
 
 do_install () {
   install -d ${D}${base_libdir}/systemd/system

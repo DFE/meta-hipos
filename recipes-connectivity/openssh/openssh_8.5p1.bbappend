@@ -12,5 +12,5 @@
 # ------------------------------------------------------------------------------------------
 # As workaround this sshd_config disables PermitEmptyPasswords
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/openssh:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/openssh:"
 

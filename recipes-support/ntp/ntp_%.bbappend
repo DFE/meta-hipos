@@ -1,8 +1,8 @@
-PACKAGECONFIG_remove = "sntp"
-PACKAGES_remove = "sntp"
-SYSTEMD_PACKAGES_remove = "sntp"
+PACKAGECONFIG:remove = "sntp"
+PACKAGES:remove = "sntp"
+SYSTEMD_PACKAGES:remove = "sntp"
 
-do_install_append() {
+do_install:append() {
     # Fix ntpd Permission denied HYP-25241
     # As long as the ntpd daemon is running with root privileges,
     # the drift file directory must have root ownership.

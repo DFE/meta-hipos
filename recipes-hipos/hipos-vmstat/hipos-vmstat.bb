@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = " bash "
+RDEPENDS:${PN} = " bash "
 
 PR = "r1"
 
@@ -13,11 +13,11 @@ SRC_URI = " file://hipos-vmstat.service  \
             file://hipos-vmstat.sh \
 	    file://COPYING "
 
-FILES_${PN} = "${base_libdir}/systemd \
+FILES:${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/hipos/hipos-vmstat.sh \
 		"
 
-SYSTEMD_SERVICE_${PN} = "hipos-vmstat.service"
+SYSTEMD_SERVICE:${PN} = "hipos-vmstat.service"
 
 do_install () {
   install -d ${D}${base_libdir}/systemd/system

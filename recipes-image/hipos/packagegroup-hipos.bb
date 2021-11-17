@@ -9,7 +9,7 @@ PACKAGES = "\
     packagegroup-hipos-gstreamer \
 "
 
-RDEPENDS_packagegroup-hipos-qt = "\
+RDEPENDS:packagegroup-hipos-qt = "\
     qtbase-plugins \
     qtbase-tools \
     qtdeclarative \
@@ -32,13 +32,13 @@ RDEPENDS_packagegroup-hipos-qt = "\
     qtlocation-qmlplugins \
 "
 
-RDEPENDS_packagegroup-hipos-qt-examples = "\
+RDEPENDS:packagegroup-hipos-qt-examples = "\
     cinematicexperience \
     qtsmarthome \
     qt5everywheredemo \
 "
 
-RDEPENDS_packagegroup-hipos-gstreamer = "\
+RDEPENDS:packagegroup-hipos-gstreamer = "\
     gstreamer1.0-plugins-base-meta \
     gstreamer1.0-plugins-good-meta \
     gstreamer1.0-plugins-bad-meta \

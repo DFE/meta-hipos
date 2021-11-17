@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = " drbcc bash "
+RDEPENDS:${PN} = " drbcc bash "
 
 PR = "r14"
 
@@ -15,11 +15,11 @@ SRC_URI = " \
         file://hipos-watchdog.sh \
 	    file://COPYING "
 
-FILES_${PN} = "${base_libdir}/systemd \
+FILES:${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/hipos/hipos-watchdog.sh \
                ${sysconfdir}/systemd "
 
-SYSTEMD_SERVICE_${PN} = "hipos-watchdog.service hipos-watchdog.timer"
+SYSTEMD_SERVICE:${PN} = "hipos-watchdog.service hipos-watchdog.timer"
 
 do_install () {
   install -d ${D}${sysconfdir}/hipos

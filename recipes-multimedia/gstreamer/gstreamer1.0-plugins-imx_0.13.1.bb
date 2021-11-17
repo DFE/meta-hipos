@@ -10,9 +10,9 @@ DEPENDS = "gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
 # for the uniaudio decoder, videoparsersbad for the VPU video decoder
 # the gstreamer1.0-plugins-imx RDEPENDS is necessary to ensure the -good recipe is
 # build (it is not a compile-time dependency however, hence RDEPENDS and not DEPENDS)
-RDEPENDS_gstreamer1.0-plugins-imx = "gstreamer1.0-plugins-good"
-RDEPENDS_gstreamer1.0-plugins-imx-imxaudio = "gstreamer1.0-plugins-good-audioparsers"
-RDEPENDS_gstreamer1.0-plugins-imx-imxvpu = "gstreamer1.0-plugins-bad-videoparsersbad"
+RDEPENDS:gstreamer1.0-plugins-imx = "gstreamer1.0-plugins-good"
+RDEPENDS:gstreamer1.0-plugins-imx-imxaudio = "gstreamer1.0-plugins-good-audioparsers"
+RDEPENDS:gstreamer1.0-plugins-imx-imxvpu = "gstreamer1.0-plugins-bad-videoparsersbad"
 
 PV .= "+git${SRCPV}"
 
@@ -44,11 +44,11 @@ EGLVIVSINK_DEPENDS = " \
 "
 
 PACKAGECONFIG ?= "uniaudiodec mp3encoder v4l2src v4l2sink"
-PACKAGECONFIG_append_imxgpu3d = " eglvivsink"
-PACKAGECONFIG_append_imxgpu2d = " g2d g2dpango"
-PACKAGECONFIG_append_imxipu   = " ipu"
-PACKAGECONFIG_append_imxvpu   = " vpu"
-PACKAGECONFIG_append_imxpxp   = " pxp"
+PACKAGECONFIG:append:imxgpu3d = " eglvivsink"
+PACKAGECONFIG:append:imxgpu2d = " g2d g2dpango"
+PACKAGECONFIG:append:imxipu   = " ipu"
+PACKAGECONFIG:append:imxvpu   = " vpu"
+PACKAGECONFIG:append:imxpxp   = " pxp"
 
 PACKAGECONFIG[g2d] = ",--disable-g2d,imx-gpu-g2d"
 PACKAGECONFIG[g2dpango] = ",--disable-g2dpango,imx-gpu-g2d pango"

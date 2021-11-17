@@ -14,7 +14,7 @@ S = "${WORKDIR}/git"
 
 # Depends on Gstreamer
 DEPENDS = "gstreamer glib-2.0 "
-RDEPENDS_${PN} = "gstreamer \
+RDEPENDS:${PN} = "gstreamer \
                   gst-plugins-good-rtp \ 
                   gst-plugins-good-udp \
                   gst-plugins-good-video4linux2 \

@@ -1,1 +1,1 @@
-SYSTEMD_DISABLED_SYSV_SERVICES_remove = "networking"
+SYSTEMD_DISABLED_SYSV_SERVICES:remove = "networking"

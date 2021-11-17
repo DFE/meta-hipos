@@ -1,8 +1,8 @@
 DESCRIPTION = "HIPOS Boardcontroller communication tool"
 SECTION = "libs"
 DEPENDS = "readline lockdev"
-RDEPENDS_${PN} = "hip-udev-extra-rules"
-RDEPENDS_drbcc = "hip-udev-extra-rules"
+RDEPENDS:${PN} = "hip-udev-extra-rules"
+RDEPENDS:drbcc = "hip-udev-extra-rules"
 
 LICENSE = "GPLv3 & LGPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
@@ -17,12 +17,12 @@ S = "${WORKDIR}/git"
 DRSRCBRANCH="master"
 
 SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH};protocol=https"
-SRCREV_default_pn-libdrbcc = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
+SRCREV:default:pn-libdrbcc = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
 
 PACKAGES += " drbcc "
 
-FILES_${PN} = "${libdir}/*.so.*"
-FILES_drbcc = "${bindir}/*"
+FILES:${PN} = "${libdir}/*.so.*"
+FILES:drbcc = "${bindir}/*"
 
 inherit autotools
 

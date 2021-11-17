@@ -7,11 +7,11 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 # do not generate rc-links
 inherit systemd allarch
 
-RDEPENDS_${PN} = " bootconfig "
+RDEPENDS:${PN} = " bootconfig "
 
 PR = "r6"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI = " file://healthy.service \
 	    file://COPYING "
@@ -19,7 +19,7 @@ SRC_URI = " file://healthy.service \
 # systemd
 PACKAGES = " ${PN} "
 
-FILES_${PN} = "${base_libdir}/systemd"
+FILES:${PN} = "${base_libdir}/systemd"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE = "healthy.service"

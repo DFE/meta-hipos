@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = "drbcc gawk bash"
+RDEPENDS:${PN} = "drbcc gawk bash"
 
 PR = "r16"
 
@@ -13,11 +13,11 @@ SRC_URI = " file://hipos-time.service \
             file://set-time.sh \
             file://COPYING "
 
-FILES_${PN} = "${base_libdir}/systemd \
+FILES:${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/systemd \
                ${sysconfdir}/hipos/set-time.sh "
 
-SYSTEMD_SERVICE_${PN} = "hipos-time.service"
+SYSTEMD_SERVICE:${PN} = "hipos-time.service"
 
 do_install () {
   install -d ${D}${base_libdir}/systemd/system

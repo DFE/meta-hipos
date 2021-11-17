@@ -2,7 +2,7 @@ require hipos-image.inc
 
 export IMAGE_BASENAME = "hipos-devimage"
 
-IMAGE_FSTYPES_himx0294 = "tar.bz2"
+IMAGE_FSTYPES:himx0294 = "tar.bz2"
 
 # SDK
 IMAGE_INSTALL += " \
@@ -31,7 +31,7 @@ IMAGE_INSTALL += " \
 "
 
 # machine specific
-IMAGE_INSTALL_append_himx0294 += " \
+IMAGE_INSTALL:append:himx0294 += " \
   packagegroup-hipos-qt-examples \
   packagegroup-hipos-qt     \
   packagegroup-hipos-gstreamer \

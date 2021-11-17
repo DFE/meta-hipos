@@ -22,9 +22,9 @@ S = "${WORKDIR}/git"
 
 PACKAGES += " ${PN}-tst ${PN}-demo "
 
-FILES_${PN} = "${libdir}/*.so.*"
-FILES_${PN}-tst = "${bindir}/drtp_tst"
-FILES_${PN}-demo = "${bindir}/drtp-gst-demo"
+FILES:${PN} = "${libdir}/*.so.*"
+FILES:${PN}-tst = "${bindir}/drtp_tst"
+FILES:${PN}-demo = "${bindir}/drtp-gst-demo"
 
 EXTRA_OECONF = ""
 

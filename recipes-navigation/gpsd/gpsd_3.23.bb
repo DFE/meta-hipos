@@ -42,7 +42,7 @@ EXTRA_OESCONS = " \
 # this cannot be used, because then chrpath is not found and only static lib is built
 # target=${HOST_SYS}
 
-do_compile_prepend() {
+do_compile:prepend() {
     export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}"
     export PKG_CONFIG="PKG_CONFIG_SYSROOT_DIR=\"${PKG_CONFIG_SYSROOT_DIR}\" pkg-config"
     export STAGING_PREFIX="${STAGING_DIR_HOST}/${prefix}"
@@ -63,7 +63,7 @@ do_install() {
       bbfatal "scons install execution failed."
 }
 
-do_install_append() {
+do_install:append() {
     install -d ${D}/${sysconfdir}/init.d
     install -m 0755 ${WORKDIR}/gpsd.init ${D}/${sysconfdir}/init.d/gpsd
     install -d ${D}/${sysconfdir}/default
@@ -92,37 +92,37 @@ PACKAGES =+ "libgps libgpsd python3-pygps gpsd-udev gpsd-conf gpsd-gpsctl gps-ut
 
 RPROVIDES_${PN}-dbg += "python-pygps-dbg"
 
-FILES_${PN}-dev += "${libdir}/pkgconfdir/libgpsd.pc ${libdir}/pkgconfdir/libgps.pc \
+FILES:${PN}-dev += "${libdir}/pkgconfdir/libgpsd.pc ${libdir}/pkgconfdir/libgps.pc \
                     ${libdir}/libQgpsmm.prl"
 
-RDEPENDS_${PN} = "gpsd-gpsctl"
+RDEPENDS:${PN} = "gpsd-gpsctl"
 RRECOMMENDS_${PN} = "gpsd-conf gpsd-udev gpsd-machine-conf"
 
 SUMMARY_gpsd-udev = "udev relevant files to use gpsd hotplugging"
-FILES_gpsd-udev = "${base_libdir}/udev ${sysconfdir}/udev/*"
-RDEPENDS_gpsd-udev += "udev gpsd-conf"
+FILES:gpsd-udev = "${base_libdir}/udev ${sysconfdir}/udev/*"
+RDEPENDS:gpsd-udev += "udev gpsd-conf"
 
 SUMMARY_libgpsd = "C service library used for communicating with gpsd"
-FILES_libgpsd = "${libdir}/libgpsd.so.*"
+FILES:libgpsd = "${libdir}/libgpsd.so.*"
 
 SUMMARY_libgps = "C service library used for communicating with gpsd"
-FILES_libgps = "${libdir}/libgps.so.*"
+FILES:libgps = "${libdir}/libgps.so.*"
 
 SUMMARY_gpsd-conf = "gpsd configuration files and init scripts"
-FILES_gpsd-conf = "${sysconfdir}"
+FILES:gpsd-conf = "${sysconfdir}"
 CONFFILES_gpsd-conf = "${sysconfdir}/default/gpsd.default"
 
 SUMMARY_gpsd-gpsctl = "Tool for tweaking GPS modes"
-FILES_gpsd-gpsctl = "${bindir}/gpsctl"
+FILES:gpsd-gpsctl = "${bindir}/gpsctl"
 
 SUMMARY_gps-utils = "Utils used for simulating, monitoring,... a GPS"
 # Python files are required for gps/fake, required for gpsfake.
-FILES_gps-utils = "${bindir}/* ${libdir}/gps/*.py ${libdir}/gps/*.so"
-RDEPENDS_gps-utils = "python3-pygps"
+FILES:gps-utils = "${bindir}/* ${libdir}/gps/*.py ${libdir}/gps/*.so"
+RDEPENDS:gps-utils = "python3-pygps"
 
 SUMMARY_python3-pygps = "Python bindings to gpsd"
-FILES_python3-pygps = "${PYTHON_SITEPACKAGES_DIR}/* ${libdir}/gps/*.py ${libdir}/*.egg-info"
-RDEPENDS_python3-pygps = " \
+FILES:python3-pygps = "${PYTHON_SITEPACKAGES_DIR}/* ${libdir}/gps/*.py ${libdir}/*.egg-info"
+RDEPENDS:python3-pygps = " \
     python3-core \
     python3-io \
     python3-threading \
@@ -133,9 +133,9 @@ RDEPENDS_python3-pygps = " \
 RPROVIDES_${PN} += "${PN}-systemd"
 RREPLACES_${PN} += "${PN}-systemd"
 RCONFLICTS_${PN} += "${PN}-systemd"
-SYSTEMD_SERVICE_${PN} = "${BPN}.socket ${BPN}ctl@.service"
+SYSTEMD_SERVICE:${PN} = "${BPN}.socket ${BPN}ctl@.service"
 
 
-ALTERNATIVE_${PN} = "gpsd-defaults"
+ALTERNATIVE:${PN} = "gpsd-defaults"
 ALTERNATIVE_LINK_NAME[gpsd-defaults] = "${sysconfdir}/default/gpsd"
 ALTERNATIVE_TARGET[gpsd-defaults] = "${sysconfdir}/default/gpsd.default"

@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS_${PN} = " bash gpsd "
+RDEPENDS:${PN} = " bash gpsd "
 
 PR = "r13"
 
@@ -18,13 +18,13 @@ SRC_URI = " \
         file://hipos-gps-on.sh \
 	    file://COPYING "
 
-FILES_${PN} = "${base_libdir}/systemd \
+FILES:${PN} = "${base_libdir}/systemd \
                ${sysconfdir}/hipos/hipos-lte-gps.sh \
                ${sysconfdir}/hipos/hipos-gps-on.sh \
 	       ${sysconfdir}/udev/rules.d/99-modem.rules \
 	       ${sysconfdir}/udev/rules.d/99-gps.rules "
 
-SYSTEMD_SERVICE_${PN} = "hipos-lte-gps.service modem-at.service"
+SYSTEMD_SERVICE:${PN} = "hipos-lte-gps.service modem-at.service"
 
 do_install () {
   install -d ${D}${base_libdir}/systemd/system
