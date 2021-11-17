@@ -1,5 +1,6 @@
 # common stuff for all images
-LICENSE = "CLOSED"
+inherit core-image
+
 # Image feature debug-tweaks makes an image suitable for development. It adds 'allow-empty-password',
 # 'empty-root-password', and 'post-install-logging' to IMAGE_FEATURES.
 # meta-angstrom/recipes-images/angstrom/angstrom-image.bb adds also allow-empty-password to IMAGE_FEATURES.
