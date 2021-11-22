@@ -33,6 +33,7 @@ IMAGE_INSTALL:remove += "connman connman-angstrom-settings connman-plugin-loopba
 WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
 
 IMAGE_INSTALL += "          \
+  distro-feed-configs       \
   kernel-modules            \
   linux-firmware-ralink     \
   htop                      \
