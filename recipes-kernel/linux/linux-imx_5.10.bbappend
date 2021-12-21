@@ -1,6 +1,26 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-5.10:"
 
+SRC_URI:append:himx8 = " \
+        file://imx8mp-tqma8mpql-mba8mpxl.dts \
+        file://imx8mp-tqma8mpql.dtsi \
+        file://mba8mpxl.dtsi \
+        file://imx8mp-tqma8mpql-mba8mpxl-hdmi.dts \
+        file://imx8mp-tqma8mpql-mba8mpxl-hdmi-imx327.dts \
+        file://imx8mp-mba8mpxl-imx327.dtsi \
+        file://imx8mp-tqma8mpql-mba8mpxl-lvds-tm070jvhg33.dts \
+"
+
+do_configure:prepend:himx8() {
+	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl.dts ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-tqma8mpql.dtsi ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/mba8mpxl.dtsi ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-hdmi.dts ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-hdmi-imx327.dts ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-mba8mpxl-imx327.dtsi ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-lvds-tm070jvhg33.dts ${S}/arch/arm64/boot/dts/freescale/
+}
+
 SRC_URI:append:himx0438 = " \
         file://fsl-imx8mm-himx0438-ipcam.dts \
         file://0001-Enable-PLL-with-400MHz-HYP-22201.patch \

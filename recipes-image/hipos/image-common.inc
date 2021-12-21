@@ -65,6 +65,11 @@ IMAGE_INSTALL:append:himx0294 += "   \
   hipos-net-check           \
 "
 
+IMAGE_INSTALL:append:himx8 += "   \
+  u-boot-fw-utils           \
+  kernel-devicetree         \
+"
+
 IMAGE_INSTALL:append:himx0438 += "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
