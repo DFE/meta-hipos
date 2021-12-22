@@ -68,6 +68,14 @@ IMAGE_INSTALL:append:himx0294 += "   \
 IMAGE_INSTALL:append:himx8 += "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
+  libdrbcc                  \
+  libdrtp                   \
+  drbcc                     \
+  hipos-device-info         \
+  hipos-time                \
+  hip-machinfo              \
+  hipos-network-setup       \
+  hipos-net-check           \
 "
 
 IMAGE_INSTALL:append:himx0438 += "   \
