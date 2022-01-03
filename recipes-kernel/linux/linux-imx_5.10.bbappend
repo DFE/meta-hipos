@@ -8,7 +8,7 @@ SRC_URI:append:himx8 = " \
         file://imx8mp-tqma8mpql-mba8mpxl-hdmi.dts \
         file://imx8mp-tqma8mpql-mba8mpxl-hdmi-imx327.dts \
         file://imx8mp-mba8mpxl-imx327.dtsi \
-        file://imx8mp-tqma8mpql-mba8mpxl-lvds-tm070jvhg33.dts \
+        file://imx8mp-tqma8mpql-mba8mpxl-lvds-g101evn010.dts \
 "
 
 do_configure:prepend:himx8() {
@@ -18,7 +18,7 @@ do_configure:prepend:himx8() {
 	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-hdmi.dts ${S}/arch/arm64/boot/dts/freescale/
 	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-hdmi-imx327.dts ${S}/arch/arm64/boot/dts/freescale/
 	cp ${WORKDIR}/imx8mp-mba8mpxl-imx327.dtsi ${S}/arch/arm64/boot/dts/freescale/
-	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-lvds-tm070jvhg33.dts ${S}/arch/arm64/boot/dts/freescale/
+	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl-lvds-g101evn010.dts ${S}/arch/arm64/boot/dts/freescale/
 }
 
 SRC_URI:append:himx0438 = " \
