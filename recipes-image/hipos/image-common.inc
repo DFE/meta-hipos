@@ -93,6 +93,13 @@ IMAGE_INSTALL:append:himx0294 += " \
   fsl-alsa-plugins \
 "
 
+IMAGE_INSTALL:append:himx8 += " \
+  weston \
+  gstreamer1.0-plugins-base \
+  gstreamer1.0-plugins-bad-mpegtsmux \
+  fsl-alsa-plugins \
+"
+
 IMAGE_INSTALL:append:hinat += " \
   libdrbcc                  \
   drbcc                     \
