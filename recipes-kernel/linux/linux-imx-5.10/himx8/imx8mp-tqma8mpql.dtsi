@@ -239,6 +239,10 @@
 };
 /* HACK end */
 
+&ml_vipsi {
+        status = "okay";
+};
+
 &mix_gpu_ml {
 	status = "okay";
 };
