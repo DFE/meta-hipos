@@ -101,32 +101,6 @@ IMAGE_INSTALL:append:himx8 += " \
   fsl-alsa-plugins \
 "
 
-IMAGE_INSTALL:append:hinat += " \
-  libdrbcc                  \
-  drbcc                     \
-  hipos-device-info         \
-  hipos-time                \
-  hip-machinfo              \
-  gstreamer1.0-plugins-base \
-  gstreamer1.0-plugins-good \
-"
-
-IMAGE_INSTALL:append:imx6qsabrelite += " \
-  tslib \
-  tslib-calibrate \
-  tslib-tests \
-  packagegroup-hipos-qt \
-  packagegroup-hipos-qt-examples \
-  packagegroup-hipos-gstreamer \
-  gstreamer1.0-plugins-imx \
-  fsl-alsa-plugins \
-"
-
-IMAGE_INSTALL:append:imx6dqscm-1gb-qwks += " \
-  gstreamer1.0-plugins-imx \
-  gstreamer1.0-plugins-base \
-"
-
 # profiling
 IMAGE_INSTALL += "  \
   systemd-analyze   \
