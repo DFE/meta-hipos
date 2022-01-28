@@ -73,6 +73,8 @@ then
 		dfe,himx0294-ipcam)  MACHINE="himx0294"; SUBMACHINE="ipcam";;
 		dfe,himx0294-impec)  MACHINE="himx0294"; SUBMACHINE="impec";;
 		dfe,hikirk)          MACHINE="hikirk";   SUBMACHINE=""; GET_SUBMACHINE=false;;
+		TQ-Systems\ i.MX8MPlus*) MACHINE="himx8"; SUBMACHINE="hybdmon";;
+		NXP\ i.MX8MPlus*)        MACHINE="himx8"; SUBMACHINE="hybdmon";;
 		# add checks for other submachines here
 	esac
 fi
