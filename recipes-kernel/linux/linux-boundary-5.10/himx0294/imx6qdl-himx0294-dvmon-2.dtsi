@@ -215,38 +215,10 @@
 };
 
 &fec {
-#define GPIRQ_ENET_PHY		<&gpio1 28 IRQ_TYPE_LEVEL_LOW>
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_enet>;
-	phy-handle = <&ethphy>;
 	phy-mode = "rgmii";
-#if 0
-#define GP_ENET_PHY_RESET	<&gpio1 25 GPIO_ACTIVE_LOW>
-	phy-reset-gpios = GP_ENET_PHY_RESET;
-#endif
 	status = "okay";
-
-	mdio {
-		#address-cells = <0>;
-		#size-cells = <1>;
-
-		ethphy: ethernet-phy {
-			compatible = "ethernet-phy-ieee802.3-c22";
-			interrupts-extended = GPIRQ_ENET_PHY;
-			rxc-skew-ps = <3000>;
-			rxd0-skew-ps = <0>;
-			rxd1-skew-ps = <0>;
-			rxd2-skew-ps = <0>;
-			rxd3-skew-ps = <0>;
-			rxdv-skew-ps = <0>;
-			txc-skew-ps = <3000>;
-			txd0-skew-ps = <0>;
-			txd1-skew-ps = <0>;
-			txd2-skew-ps = <0>;
-			txd3-skew-ps = <0>;
-			txen-skew-ps = <0>;
-		};
-	};
 };
 
 &hdmi_audio {
