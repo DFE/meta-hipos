@@ -659,6 +659,13 @@
 		>;
 	};
 
+        pinctrl_reg12v0: reg12v0grp {
+                fsl,pins = <
+                        /* VCC12V enable */
+                        MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06      0x140
+                >;
+        };
+
 	pinctrl_regotgvbus: reggotgvbusgrp {
 		fsl,pins = <
 			/* USB1 OTG PWR as GPIO */
