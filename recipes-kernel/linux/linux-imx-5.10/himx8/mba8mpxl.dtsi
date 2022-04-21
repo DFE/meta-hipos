@@ -115,6 +115,8 @@
 
 	reg_vcc_12v0: regulator-12v0 {
 		compatible = "regulator-fixed";
+                pinctrl-names = "default";
+                pinctrl-0 = <&pinctrl_reg12v0>;
 		regulator-name = "VCC_12V0";
 		regulator-min-microvolt = <12000000>;
 		regulator-max-microvolt = <12000000>;
