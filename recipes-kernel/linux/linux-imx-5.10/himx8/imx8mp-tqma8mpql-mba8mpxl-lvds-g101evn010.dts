@@ -48,3 +48,50 @@
 &pwm2 {
 	status = "okay";
 };
+
+&mipi_csi_0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	port@0 {
+		reg = <0>;
+		mipi0_sensor_ep: endpoint {
+			remote-endpoint = <&adv7180_to_ipu2_csi1_mux>;
+			data-lanes = <1>;
+			csis-hs-settle = <13>;
+			csis-clk-settle = <2>;
+			csis-wclk;
+		};
+	};
+};
+
+&cameradev {
+	status = "okay";
+};
+
+&isi_0 {
+	status = "okay";
+	cap_device {
+		status = "okay";
+	};
+};
+
+&i2c4 {
+	adv7180: camera@21 {
+		compatible = "adi,adv7280-m";
+		reg = <0x21>;
+#if 0
+		powerdown-gpios = <&gpio3 31 GPIO_ACTIVE_LOW>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <30 IRQ_TYPE_LEVEL_LOW>;
+#endif
+
+		port {
+			adv7180_to_ipu2_csi1_mux: endpoint {
+				remote-endpoint = <&mipi0_sensor_ep>;
+				data-lanes = <1>;
+				clock-lanes = <0>;
+			};
+		};
+	};
+};
