@@ -1,0 +1,308 @@
+From 4095ce605909426e09eae7515726c350c11d5eb3 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 11 May 2022 14:36:22 +0200
+Subject: [PATCH] imx8-isi-cap: Fix interaction with adv7280-m HYP-27448
+
+Set default field format V4L2_FIELD_NONE. This configures adv7280-m in
+progressive mode.
+Enable MIPI CSI channel first and the die subdevice. Otherwise the setup
+with adv7280-m as subdevice does not work.
+Add g_std, s_std, querystd and s_input api functions. This allows to
+select the input.
+Set tvnorms to adv7280-m norms. This is needed for the api functions.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/staging/media/imx/imx8-isi-cap.c | 228 ++++++++++++++++++++++-
+ 1 file changed, 227 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/staging/media/imx/imx8-isi-cap.c b/drivers/staging/media/imx/imx8-isi-cap.c
+index 57ec7b4354b1..d19dac6c72e4 100644
+--- a/drivers/staging/media/imx/imx8-isi-cap.c
++++ b/drivers/staging/media/imx/imx8-isi-cap.c
+@@ -756,6 +756,7 @@ static int mxc_isi_capture_open(struct file *file)
+ 		mutex_unlock(&isi_cap->lock);
+ 		return 0;
+ 	}
++
+ 	mutex_unlock(&isi_cap->lock);
+ 
+ 	if (mxc_isi->m2m_enabled || isi_cap->is_streaming[isi_cap->id]) {
+@@ -985,6 +986,8 @@ static int mxc_isi_source_fmt_init(struct mxc_isi_cap_dev *isi_cap)
+ 	src_fmt.format.code = MEDIA_BUS_FMT_UYVY8_2X8;
+ 	src_fmt.format.width = dst_f->width;
+ 	src_fmt.format.height = dst_f->height;
++	/* Initialize default value. V4L2_FIELD_NONE is for adv7280-m progressive mode. */
++	src_fmt.format.field = V4L2_FIELD_NONE;
+ 	ret = v4l2_subdev_call(src_sd, pad, set_fmt, NULL, &src_fmt);
+ 	if (ret < 0 && ret != -ENOIOCTLCMD) {
+ 		v4l2_err(&isi_cap->sd, "set remote fmt fail!\n");
+@@ -1158,13 +1161,16 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 		return -EBUSY;
+ 	}
+ 
++	/* Enable the MIPI CSI channel first and then the subdevice. The other
++	 * way round the setup with the adv7280-m as subdevice does not work. */
++#if 0
+ 	src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
+ 	ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
+ 	if (ret) {
+ 		v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
+ 		return ret;
+ 	}
+-
++#endif
+ 	ret = mxc_isi_config_parm(isi_cap);
+ 	if (ret < 0)
+ 		goto power;
+@@ -1175,6 +1181,15 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 	if (ret < 0 && ret != -ENOIOCTLCMD)
+ 		goto disable;
+ 
++#if 1
++	src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
++	ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
++	if (ret) {
++		v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
++		return ret;
++	}
++#endif
++
+ 	isi_cap->is_streaming[isi_cap->id] = 1;
+ 	mxc_isi->is_streaming = 1;
+ 
+@@ -1395,6 +1410,210 @@ static int mxc_isi_cap_enum_frameintervals(struct file *file, void *fh,
+ 	return 0;
+ }
+ 
++static int mxc_isi_vidioc_g_std(struct file *file, void *priv, v4l2_std_id *a)
++{
++	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
++	struct device *dev = &isi_cap->pdev->dev;
++	struct media_entity *entity = &isi_cap->vdev.entity;
++	struct media_device *mdev = entity->graph_obj.mdev;
++	struct media_graph graph;
++	struct v4l2_subdev *subdev;
++	int ret = 0;
++
++	mutex_lock(&mdev->graph_mutex);
++
++	ret = media_graph_walk_init(&graph, entity->graph_obj.mdev);
++	if (ret) {
++		mutex_unlock(&mdev->graph_mutex);
++		return ret;
++	}
++	media_graph_walk_start(&graph, entity);
++
++	while ((entity = media_graph_walk_next(&graph))) {
++		if (!entity) {
++			dev_dbg(dev, "entity is NULL\n");
++			continue;
++		}
++
++		if (!is_media_entity_v4l2_subdev(entity)) {
++			dev_dbg(dev, "%s is no v4l2 subdev\n", entity->name);
++			continue;
++		}
++
++		subdev = media_entity_to_v4l2_subdev(entity);
++		if (!subdev) {
++			dev_dbg(dev, "%s subdev is NULL\n", entity->name);
++			continue;
++		}
++
++		ret = v4l2_subdev_call(subdev, video, g_std, a);
++		if (ret < 0 && ret != -ENOIOCTLCMD) {
++			dev_err(dev, "subdev %s g_std failed\n", subdev->name);
++			break;
++		}
++		if(ret == 0) {
++			break;
++		}
++	}
++	mutex_unlock(&mdev->graph_mutex);
++	media_graph_walk_cleanup(&graph);
++
++	return ret;
++}
++
++static int mxc_isi_vidioc_s_std(struct file *file, void *priv, v4l2_std_id a)
++{
++	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
++	struct device *dev = &isi_cap->pdev->dev;
++	struct media_entity *entity = &isi_cap->vdev.entity;
++	struct media_device *mdev = entity->graph_obj.mdev;
++	struct media_graph graph;
++	struct v4l2_subdev *subdev;
++	int ret = 0;
++
++	mutex_lock(&mdev->graph_mutex);
++
++	ret = media_graph_walk_init(&graph, entity->graph_obj.mdev);
++	if (ret) {
++		mutex_unlock(&mdev->graph_mutex);
++		return ret;
++	}
++	media_graph_walk_start(&graph, entity);
++
++	while ((entity = media_graph_walk_next(&graph))) {
++		if (!entity) {
++			dev_dbg(dev, "entity is NULL\n");
++			continue;
++		}
++
++		if (!is_media_entity_v4l2_subdev(entity)) {
++			dev_dbg(dev, "%s is no v4l2 subdev\n", entity->name);
++			continue;
++		}
++
++		subdev = media_entity_to_v4l2_subdev(entity);
++		if (!subdev) {
++			dev_dbg(dev, "%s subdev is NULL\n", entity->name);
++			continue;
++		}
++
++		ret = v4l2_subdev_call(subdev, video, s_std, a);
++		if (ret < 0 && ret != -ENOIOCTLCMD) {
++			dev_err(dev, "subdev %s s_std failed\n", subdev->name);
++			break;
++		}
++		if(ret == 0) {
++			break;
++		}
++	}
++	mutex_unlock(&mdev->graph_mutex);
++	media_graph_walk_cleanup(&graph);
++
++	return ret;
++}
++
++static int mxc_isi_vidioc_querystd(struct file *file, void *priv, v4l2_std_id *a)
++{
++	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
++	struct device *dev = &isi_cap->pdev->dev;
++	struct media_entity *entity = &isi_cap->vdev.entity;
++	struct media_device *mdev = entity->graph_obj.mdev;
++	struct media_graph graph;
++	struct v4l2_subdev *subdev;
++	int ret = 0;
++
++	mutex_lock(&mdev->graph_mutex);
++
++	ret = media_graph_walk_init(&graph, entity->graph_obj.mdev);
++	if (ret) {
++		mutex_unlock(&mdev->graph_mutex);
++		return ret;
++	}
++	media_graph_walk_start(&graph, entity);
++
++	while ((entity = media_graph_walk_next(&graph))) {
++		if (!entity) {
++			dev_dbg(dev, "entity is NULL\n");
++			continue;
++		}
++
++		if (!is_media_entity_v4l2_subdev(entity)) {
++			dev_dbg(dev, "%s is no v4l2 subdev\n", entity->name);
++			continue;
++		}
++
++		subdev = media_entity_to_v4l2_subdev(entity);
++		if (!subdev) {
++			dev_dbg(dev, "%s subdev is NULL\n", entity->name);
++			continue;
++		}
++
++		ret = v4l2_subdev_call(subdev, video, querystd, a);
++		if (ret < 0 && ret != -ENOIOCTLCMD) {
++			dev_err(dev, "subdev %s querystd failed\n", subdev->name);
++			break;
++		}
++		if(ret == 0) {
++			break;
++		}
++	}
++	mutex_unlock(&mdev->graph_mutex);
++	media_graph_walk_cleanup(&graph);
++
++	return ret;
++}
++
++static int mxc_isi_vidioc_s_input(struct file *file, void *priv, unsigned int input)
++{
++	struct mxc_isi_cap_dev *isi_cap = video_drvdata(file);
++	struct device *dev = &isi_cap->pdev->dev;
++	struct media_entity *entity = &isi_cap->vdev.entity;
++	struct media_device *mdev = entity->graph_obj.mdev;
++	struct media_graph graph;
++	struct v4l2_subdev *subdev;
++	int ret = 0;
++
++	mutex_lock(&mdev->graph_mutex);
++
++	ret = media_graph_walk_init(&graph, entity->graph_obj.mdev);
++	if (ret) {
++		mutex_unlock(&mdev->graph_mutex);
++		return ret;
++	}
++	media_graph_walk_start(&graph, entity);
++
++	while ((entity = media_graph_walk_next(&graph))) {
++		if (!entity) {
++			dev_dbg(dev, "entity is NULL\n");
++			continue;
++		}
++
++		if (!is_media_entity_v4l2_subdev(entity)) {
++			dev_dbg(dev, "%s is no v4l2 subdev\n", entity->name);
++			continue;
++		}
++
++		subdev = media_entity_to_v4l2_subdev(entity);
++		if (!subdev) {
++			dev_dbg(dev, "%s subdev is NULL\n", entity->name);
++			continue;
++		}
++
++		ret = v4l2_subdev_call(subdev, video, s_routing, input, 0, 0);
++		if (ret < 0 && ret != -ENOIOCTLCMD) {
++			dev_err(dev, "subdev %s s_input failed\n", subdev->name);
++			break;
++		}
++		if(ret == 0) {
++			break;
++		}
++	}
++	mutex_unlock(&mdev->graph_mutex);
++	media_graph_walk_cleanup(&graph);
++
++	return ret;
++}
++
+ static const struct v4l2_ioctl_ops mxc_isi_capture_ioctl_ops = {
+ 	.vidioc_querycap		= mxc_isi_cap_querycap,
+ 
+@@ -1411,6 +1630,11 @@ static const struct v4l2_ioctl_ops mxc_isi_capture_ioctl_ops = {
+ 	.vidioc_prepare_buf		= vb2_ioctl_prepare_buf,
+ 	.vidioc_create_bufs		= vb2_ioctl_create_bufs,
+ 
++	.vidioc_g_std			= mxc_isi_vidioc_g_std,
++	.vidioc_s_std			= mxc_isi_vidioc_s_std,
++	.vidioc_querystd		= mxc_isi_vidioc_querystd,
++	.vidioc_s_input			= mxc_isi_vidioc_s_input,
++
+ 	.vidioc_g_parm			= mxc_isi_cap_g_parm,
+ 	.vidioc_s_parm			= mxc_isi_cap_s_parm,
+ 
+@@ -1707,6 +1931,8 @@ static int mxc_isi_register_cap_device(struct mxc_isi_cap_dev *isi_cap,
+ 	vdev->release	= video_device_release_empty;
+ 	vdev->queue	= q;
+ 	vdev->lock	= &isi_cap->lock;
++	/* Initialize with adv7280-m standards. */
++	vdev->tvnorms	= V4L2_STD_NTSC_M | V4L2_STD_PAL;
+ 
+ 	vdev->device_caps = V4L2_CAP_STREAMING | V4L2_CAP_VIDEO_CAPTURE_MPLANE;
+ 	video_set_drvdata(vdev, isi_cap);
+-- 
+2.31.1
+
