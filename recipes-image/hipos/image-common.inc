@@ -23,7 +23,7 @@ IMAGE_FEATURES:remove = " allow-empty-password debug-tweaks "
 # remove connman
 # remove tar to use busybox tar. The 'real'-tar has problems with symlinks to /dev/null with vfat filesystem. HYP-19186
 # tar is installed explicitly in recipe angstrom-image.bb since Yocto zeus. HYP-22728
-IMAGE_INSTALL:remove += "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client tar"
+IMAGE_INSTALL:remove = "connman connman-angstrom-settings connman-plugin-loopback connman-plugin-ethernet connman-plugin-wifi connman-tools connman-client tar"
 
 # When wic-image is created, two incorrect entries are generated in /etc/fstab.
 # This causes the boot process to get stuck with:
@@ -52,7 +52,7 @@ IMAGE_INSTALL += "          \
   wireless-regdb-static     \
 "
 
-IMAGE_INSTALL:append:himx0294 += "   \
+IMAGE_INSTALL:append:himx0294 = "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
   libdrbcc                  \
@@ -65,7 +65,7 @@ IMAGE_INSTALL:append:himx0294 += "   \
   hipos-net-check           \
 "
 
-IMAGE_INSTALL:append:himx8 += "   \
+IMAGE_INSTALL:append:himx8 = "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
   libdrbcc                  \
@@ -78,12 +78,12 @@ IMAGE_INSTALL:append:himx8 += "   \
   hipos-net-check           \
 "
 
-IMAGE_INSTALL:append:himx0438 += "   \
+IMAGE_INSTALL:append:himx0438 = "   \
   u-boot-fw-utils           \
   kernel-devicetree         \
 "
 
-IMAGE_INSTALL:append:himx0294 += " \
+IMAGE_INSTALL:append:himx0294 = " \
   tslib \
   tslib-calibrate \
   tslib-tests \
@@ -93,7 +93,7 @@ IMAGE_INSTALL:append:himx0294 += " \
   fsl-alsa-plugins \
 "
 
-IMAGE_INSTALL:append:himx8 += " \
+IMAGE_INSTALL:append:himx8 = " \
   weston \
   imx-gst1.0-plugin \
   gstreamer1.0-plugins-base \

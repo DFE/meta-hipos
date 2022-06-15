@@ -31,7 +31,7 @@ IMAGE_INSTALL += " \
 "
 
 # machine specific
-IMAGE_INSTALL:append:himx0294 += " \
+IMAGE_INSTALL:append:himx0294 = " \
   packagegroup-hipos-qt-examples \
   packagegroup-hipos-qt     \
   packagegroup-hipos-gstreamer \
