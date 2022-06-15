@@ -1,5 +1,5 @@
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-5.10:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-5.15:"
 
 SRC_URI:append:himx8 = " \
         file://imx8mp-tqma8mpql-mba8mpxl.dts \

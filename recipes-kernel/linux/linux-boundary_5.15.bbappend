@@ -2,7 +2,7 @@ inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-5.10:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-5.15:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
