@@ -2,7 +2,7 @@
 # Copyright (C) 2013 Avnet Electronics Marketing
 
 DESCRIPTION = "Gstreamer Live Example (GLIVE) Server and Client Application"
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 SRC_URI = "git://github.com/johnweber/glive.git;branch=master;protocol=https"
