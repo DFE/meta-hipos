@@ -68,4 +68,4 @@ require recipes-multimedia/gstreamer/gstreamer1.0-plugins-packaging.inc
 # the following line is required to produce one package for each plugin
 PACKAGES_DYNAMIC = "^${PN}-.*"
 
-COMPATIBLE_MACHINE = "(mx6dl|mx6q|mx6sl|mx6sx|mx6ul|mx6ull|mx7d)"
+COMPATIBLE_MACHINE = "(mx6dl-nxp-bsp|mx6q-nxp-bsp|mx6sl-nxp-bsp|mx6sx-nxp-bsp|mx6ul-nxp-bsp|mx6ull-nxp-bsp|mx7d-nxp-bsp)"

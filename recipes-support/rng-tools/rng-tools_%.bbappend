@@ -2,4 +2,4 @@
 # Up to Yocto honister this dependency did not exist. For i.mx6
 # machines, the dependency is removed again to speed up the boot
 # process.
-FILESEXTRAPATHS:prepend:mx6 := "${THISDIR}/imx6:"
+FILESEXTRAPATHS:prepend:mx6-nxp-bsp := "${THISDIR}/imx6:"

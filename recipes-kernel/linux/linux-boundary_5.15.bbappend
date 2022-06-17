@@ -1,6 +1,6 @@
 inherit kernel_wireless_regdb
 
-COMPATIBLE_MACHINE = "(himx0294|himx|nitrogen6x|nitrogen6x-lite|mx6)"
+COMPATIBLE_MACHINE = "(himx0294|himx-nxp-bsp|nitrogen6x|nitrogen6x-lite|mx6-nxp-bsp)"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-5.15:"
 

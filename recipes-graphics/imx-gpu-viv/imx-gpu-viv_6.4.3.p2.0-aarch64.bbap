@@ -1,2 +1,2 @@
 
-REQUIRED_DISTRO_FEATURES:remove:mx8 = "wayland"
+REQUIRED_DISTRO_FEATURES:remove:mx8-nxp-bsp = "wayland"
