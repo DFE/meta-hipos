@@ -1,6 +1,6 @@
-From 7c6e656ced94723661d47bb1402384084a0693da Mon Sep 17 00:00:00 2001
+From d284b8f100229976c6979642d62a322b5b58bc4a Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 17 Nov 2021 14:28:56 +0100
+Date: Thu, 16 Jun 2022 14:36:18 +0200
 Subject: [PATCH] New options ssr read and cmd56
 
 Option ssr read:
@@ -18,11 +18,11 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  4 files changed, 132 insertions(+)
 
 diff --git a/mmc.c b/mmc.c
-index eb2638b..c85f2cd 100644
+index 6c56387..dc24cba 100644
 --- a/mmc.c
 +++ b/mmc.c
-@@ -237,6 +237,17 @@ static struct Command commands[] = {
- 		"secure-trim1 | secure-trim2 | trim \n",
+@@ -245,6 +245,17 @@ static struct Command commands[] = {
+ 		"be 1.",
  	NULL
  	},
 +	{ do_read_ssr, -1,
@@ -40,10 +40,10 @@ index eb2638b..c85f2cd 100644
  };
  
 diff --git a/mmc.h b/mmc.h
-index e9766d7..30fc8b9 100644
+index daff62c..9f34c6e 100644
 --- a/mmc.h
 +++ b/mmc.h
-@@ -221,3 +221,6 @@
+@@ -243,3 +243,6 @@
  
  #define MMC_RSP_R1	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
  #define MMC_RSP_R1B	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE|MMC_RSP_BUSY)
@@ -51,12 +51,12 @@ index e9766d7..30fc8b9 100644
 +#define SD_APP_SD_STATUS 13   /* adtc, R1 */
 +#define SD_GEN_CMD 56 /* adtc, R1 */
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index afa85b7..12e2b60 100644
+index bb0f022..83bbb08 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -2888,3 +2888,119 @@ out:
+@@ -3038,3 +3038,119 @@ out:
+ 	close(dev_fd);
  	return ret;
- #endif
  }
 +
 +static void dump_data_block(char *block_data, int len)
@@ -175,15 +175,15 @@ index afa85b7..12e2b60 100644
 +	return ret;
 +}
 diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 8331ab2..a5a3e87 100644
+index 0f7c004..39e0fea 100644
 --- a/mmc_cmds.h
 +++ b/mmc_cmds.h
-@@ -46,3 +46,5 @@ int do_read_scr(int argc, char **argv);
- int do_read_cid(int argc, char **argv);
+@@ -47,3 +47,5 @@ int do_read_cid(int argc, char **argv);
  int do_read_csd(int argc, char **argv);
  int do_erase(int nargs, char **argv);
+ int do_general_cmd_read(int nargs, char **argv);
 +int do_read_ssr(int argc, char **argv);
 +int do_cmd56(int argc, char **argv);
 -- 
-2.17.1
+2.35.3
 
