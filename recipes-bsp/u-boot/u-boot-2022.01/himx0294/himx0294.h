@@ -36,12 +36,6 @@
 #endif
 
 /* I2C Configs */
-#define CONFIG_SYS_I2C
-#define CONFIG_SYS_I2C_MXC
-#define CONFIG_SYS_I2C_MXC_I2C1		/* enable I2C bus 1 */
-#define CONFIG_SYS_I2C_MXC_I2C2		/* enable I2C bus 2 */
-#define CONFIG_SYS_I2C_MXC_I2C3		/* enable I2C bus 3 */
-#define CONFIG_SYS_I2C_SPEED		100000
 #define CONFIG_I2C_EDID
 
 /* MMC Configs */
@@ -99,8 +93,6 @@
 #undef CONFIG_CMD_IMLS
 
 #define CONFIG_PREBOOT                 ""
-
-#define CONFIG_LOADADDR			       0x12000000
 
 /* This boot command stores the environment persistently. This ensures that the "fdt_file"
    variable is set and u-boot and kernel use the same variable. HYP-12761 */
@@ -160,7 +152,7 @@
 #define CONFIG_SYS_MAXARGS	       48
 #define CONFIG_SYS_BARGSIZE CONFIG_SYS_CBSIZE
 
-#define CONFIG_SYS_LOAD_ADDR	       CONFIG_LOADADDR
+#define CONFIG_SYS_LOAD_ADDR	       0x12000000
 
 /* Physical Memory Map */
 #define PHYS_SDRAM		       MMDC0_ARB_BASE_ADDR

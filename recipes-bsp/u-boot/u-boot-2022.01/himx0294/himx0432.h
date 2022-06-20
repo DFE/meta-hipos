@@ -40,15 +40,6 @@
 #endif
 #endif
 
-/* I2C configs */
-#define CONFIG_SYS_I2C
-#ifdef CONFIG_CMD_I2C
-#define CONFIG_SYS_I2C_MXC
-#define CONFIG_SYS_I2C_MXC_I2C1		/* enable I2C bus 1 */
-#define CONFIG_SYS_I2C_MXC_I2C2		/* enable I2C bus 2 */
-#define CONFIG_SYS_I2C_SPEED		100000
-#endif
-
 #define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #define HIMX_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
@@ -78,7 +69,6 @@
    variable is set and u-boot and kernel use the same variable. HYP-12761 */
 #define CONFIG_BOOTCOMMAND      "setenv bootcmd run x_bootA; saveenv; boot"
 
-#define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
 #define CONFIG_SYS_HZ			1000
 
 /* Physical Memory Map */
