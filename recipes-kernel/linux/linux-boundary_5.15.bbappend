@@ -52,8 +52,6 @@ SRC_URI:append:himx0294 = " \
 	file://ldb-lvds-power-up-down-sequence.patch \
 	file://0001-DCIC-ioctl-improved-to-get-real-checksums-HYP-16117.patch \
 	file://0001-mcs7830-Fixed-MOSCHIP-driver-probe-error-110-HYP-132.patch \ 
-	file://rafi-touchscreen-support.patch \
-	file://rafi-touchscreen-event-report.patch \
         file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
@@ -63,11 +61,8 @@ SRC_URI:append:himx0294 = " \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \
 "
 
-#	file://additional-ratelimit-for-PFNs-busy-warn-HYP-19220.patch
-#	file://0001-Backport-exfat-from-kernel-5.7.patch 
- 
-#	file://iio-tsl2x7x-fix-trigger.patch 
-#	file://imx-poweroff-restart.patch 
+#	file://rafi-touchscreen-support.patch 
+#	file://rafi-touchscreen-event-report.patch 
 
 do_configure:prepend() {
 	# copy tw6869 driver code into kernel tree
