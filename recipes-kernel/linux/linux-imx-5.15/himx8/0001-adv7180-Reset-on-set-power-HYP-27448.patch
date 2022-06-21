@@ -1,6 +1,6 @@
-From 0dd2c89527f1d01a8ce224ebaf17243b746f1bf9 Mon Sep 17 00:00:00 2001
+From e51b4f83c9c6a01f344ef78eb995293ea3af2a4f Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 12 May 2022 16:15:54 +0200
+Date: Fri, 17 Jun 2022 14:23:28 +0200
 Subject: [PATCH] adv7180: Reset on set power HYP-27448
 
 Extra reset to improve the interaction with MIPI CSI2 interface.
@@ -11,7 +11,7 @@ Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
  1 file changed, 19 insertions(+)
 
 diff --git a/drivers/media/i2c/adv7180.c b/drivers/media/i2c/adv7180.c
-index 065ce295d62d..b3ace275e3ac 100644
+index 5a2263d99b72..e9dd5d05f9d8 100644
 --- a/drivers/media/i2c/adv7180.c
 +++ b/drivers/media/i2c/adv7180.c
 @@ -66,6 +66,8 @@
@@ -23,7 +23,7 @@ index 065ce295d62d..b3ace275e3ac 100644
  #define ADV7180_REG_CTRL		0x000e
  #define ADV7180_CTRL_IRQ_SPACE		0x20
  
-@@ -190,6 +192,8 @@ struct adv7180_state;
+@@ -191,6 +193,8 @@ struct adv7180_state;
  #define ADV7180_FLAG_MIPI_CSI2		BIT(2)
  #define ADV7180_FLAG_I2P		BIT(3)
  
@@ -32,7 +32,7 @@ index 065ce295d62d..b3ace275e3ac 100644
  struct adv7180_chip_info {
  	unsigned int flags;
  	unsigned int valid_input_mask;
-@@ -500,6 +504,21 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
+@@ -516,6 +520,21 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
  
  	if (state->chip_info->flags & ADV7180_FLAG_MIPI_CSI2) {
  		if (on) {
@@ -55,5 +55,5 @@ index 065ce295d62d..b3ace275e3ac 100644
  			adv7180_csi_write(state, 0xD2, 0xF7);
  			adv7180_csi_write(state, 0xD8, 0x65);
 -- 
-2.31.1
+2.35.3
 

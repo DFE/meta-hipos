@@ -1,6 +1,6 @@
-From f0dabb60845071620c21478b09af464d9d9c7ef4 Mon Sep 17 00:00:00 2001
+From caa57cfbcc3843fb761757c366f8365700b76d36 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 4 May 2022 08:54:32 +0200
+Date: Fri, 17 Jun 2022 14:17:58 +0200
 Subject: [PATCH] adv7180: Add link_setup function HYP-27448
 
 Add link_setup media_entity_operations interface function to meet the
@@ -8,22 +8,14 @@ requiremets of the imx8-isi-cap driver.
 
 Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/media/i2c/adv7180.c | 14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
+ drivers/media/i2c/adv7180.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/drivers/media/i2c/adv7180.c b/drivers/media/i2c/adv7180.c
-index 4498d14d3429..065ce295d62d 100644
+index d9a99fcfacb1..5a2263d99b72 100644
 --- a/drivers/media/i2c/adv7180.c
 +++ b/drivers/media/i2c/adv7180.c
-@@ -530,6 +530,7 @@ static int adv7180_s_power(struct v4l2_subdev *sd, int on)
- 		state->powered = on;
- 
- 	mutex_unlock(&state->mutex);
-+
- 	return ret;
- }
- 
-@@ -598,6 +599,17 @@ static const struct v4l2_ctrl_config adv7180_ctrl_fast_switch = {
+@@ -614,6 +614,17 @@ static const struct v4l2_ctrl_config adv7180_ctrl_fast_switch = {
  	.step = 1,
  };
  
@@ -41,15 +33,7 @@ index 4498d14d3429..065ce295d62d 100644
  static int adv7180_init_controls(struct adv7180_state *state)
  {
  	v4l2_ctrl_handler_init(&state->ctrl_hdl, 4);
-@@ -756,7 +768,6 @@ static int adv7180_init_cfg(struct v4l2_subdev *sd,
- 		.which = cfg ? V4L2_SUBDEV_FORMAT_TRY
- 			: V4L2_SUBDEV_FORMAT_ACTIVE,
- 	};
--
- 	return adv7180_set_pad_format(sd, cfg, &fmt);
- }
- 
-@@ -1371,6 +1382,7 @@ static int adv7180_probe(struct i2c_client *client,
+@@ -1416,6 +1427,7 @@ static int adv7180_probe(struct i2c_client *client,
  		goto err_unregister_vpp_client;
  
  	state->pad.flags = MEDIA_PAD_FL_SOURCE;
@@ -58,5 +42,5 @@ index 4498d14d3429..065ce295d62d 100644
  	ret = media_entity_pads_init(&sd->entity, 1, &state->pad);
  	if (ret)
 -- 
-2.31.1
+2.35.3
 
