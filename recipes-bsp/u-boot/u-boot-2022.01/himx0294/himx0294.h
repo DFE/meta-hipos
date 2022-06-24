@@ -19,9 +19,6 @@
 #define CONFIG_INITRD_TAG
 #define CONFIG_REVISION_TAG
 
-/* Size of malloc() pool */
-#define CONFIG_SYS_MALLOC_LEN		(10 * 1024 * 1024)
-
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_MISC_INIT_R
 #define CONFIG_USBD_HS

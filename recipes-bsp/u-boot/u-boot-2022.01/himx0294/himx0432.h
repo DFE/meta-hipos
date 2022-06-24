@@ -22,9 +22,6 @@
 
 #define PHYS_SDRAM_SIZE	SZ_512M
 
-/* Size of malloc() pool */
-#define CONFIG_SYS_MALLOC_LEN		(16 * SZ_1M)
-
 #define CONFIG_MXC_UART
 #define CONFIG_MXC_UART_BASE		UART2_BASE
 
