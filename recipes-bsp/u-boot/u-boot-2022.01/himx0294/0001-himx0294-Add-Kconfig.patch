@@ -1,6 +1,6 @@
-From c756aa346958d7c59e54ccd65a19d5827a42e4d7 Mon Sep 17 00:00:00 2001
+From 908a43aa50b7c7a002cc34439ee8c127fb7826af Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 17 Nov 2021 14:19:15 +0100
+Date: Fri, 24 Jun 2022 13:46:26 +0200
 Subject: [PATCH] himx0294: Add Kconfig
 
 Add Kconfig support for himx0294 board.
@@ -13,10 +13,10 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  2 files changed, 10 insertions(+)
 
 diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
-index 23cab3932b..2aa97705b2 100644
+index 98df4d4e42..40c067de50 100644
 --- a/arch/arm/mach-imx/mx6/Kconfig
 +++ b/arch/arm/mach-imx/mx6/Kconfig
-@@ -464,6 +464,11 @@ config TARGET_NPI_IMX6ULL
+@@ -471,6 +471,11 @@ config TARGET_NPI_IMX6ULL
  	select DM_THERMAL
  	select SUPPORT_SPL
  
@@ -28,7 +28,7 @@ index 23cab3932b..2aa97705b2 100644
  config TARGET_OPOS6ULDEV
  	bool "Armadeus OPOS6ULDev board"
  	depends on MX6UL
-@@ -652,6 +657,7 @@ source "board/ge/b1x5v2/Kconfig"
+@@ -659,6 +664,7 @@ source "board/ge/b1x5v2/Kconfig"
  source "board/aristainetos/Kconfig"
  source "board/armadeus/opos6uldev/Kconfig"
  source "board/boundary/nitrogen6x/Kconfig"
@@ -37,11 +37,11 @@ index 23cab3932b..2aa97705b2 100644
  source "board/compulab/cm_fx6/Kconfig"
  source "board/dhelectronics/dh_imx6/Kconfig"
 diff --git a/scripts/config_whitelist.txt b/scripts/config_whitelist.txt
-index 3dbcc042a8..821d2264d2 100644
+index b9c1c61e13..5d9ee07d83 100644
 --- a/scripts/config_whitelist.txt
 +++ b/scripts/config_whitelist.txt
-@@ -102,6 +102,10 @@ CONFIG_BOARDNAME
- CONFIG_BOARDNAME_LOCAL
+@@ -64,6 +64,10 @@ CONFIG_BOARDDIR
+ CONFIG_BOARDNAME
  CONFIG_BOARD_COMMON
  CONFIG_BOARD_ECC_SUPPORT
 +CONFIG_BOARD_IS_HIMX_DVMON
@@ -52,5 +52,5 @@ index 3dbcc042a8..821d2264d2 100644
  CONFIG_BOARD_IS_OPENRD_CLIENT
  CONFIG_BOARD_IS_OPENRD_ULTIMATE
 -- 
-2.26.2
+2.35.3
 
