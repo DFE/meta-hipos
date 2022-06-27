@@ -27,7 +27,7 @@ IMAGE_INSTALL += " \
 # multimedia
 IMAGE_INSTALL += " \
   v4l-utils \
-  live555 \
+  live555-examples \
 "
 
 # machine specific
