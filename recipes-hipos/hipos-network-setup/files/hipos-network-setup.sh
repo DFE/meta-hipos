@@ -2,6 +2,17 @@
 
 MACHINE="$(hip-machinfo -a)"
 
+mmd_write_reg() {
+	DEVICE=$1
+	REG=$2
+	VAL=$3
+
+	mdio 0 0xd 0x${DEVICE}
+	mdio 0 0xe 0x${REG}
+	mdio 0 0xd 0x40${DEVICE}
+	mdio 0 0xe ${VAL}
+}
+
 if [ -a /etc/hydraip-devid ]
 then
 	. /etc/hydraip-devid
@@ -42,6 +53,12 @@ then
 	# Check PHY identifier 1 and part of PHY identifier 2
 	if mdio 0 2 | grep -q "state 0x22" && mdio 0 3 | grep -q "state 0x162";
 	then
+		# Control signal, rx data and clock delay.
+		# Up to kernel 5.10 the fix was in the kernel.
+		mmd_write_reg 02 4 0x0
+		mmd_write_reg 02 5 0x0
+		mmd_write_reg 02 8 0x3ff
+
 		# Enable symmetric pause
 		mdio 0x0 0x4 0x5e1
 		# Restart auto-negotiation process
