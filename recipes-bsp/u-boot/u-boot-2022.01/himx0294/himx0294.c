@@ -455,8 +455,17 @@ int board_phy_config(struct phy_device *phydev)
 
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
 		/* Same for port 6 with real external PHY. */
+		unsigned short phycontrol = 0xC0C0;
+		unsigned short deviceid = marvell_phy_read(0x6, 0x3);
+		if ((deviceid & 0xFFF0) == 0x1640) {
+			printf("KSZ9131RNX on port 6 detected\n");
+			/* No RX delay HYP-28912 */
+			phycontrol = 0x40C0;
+		} else {
+			printf("KSZ9031RNX on port 6\n");
+		}
 		miiphy_read(devname, 0x16, 0x1, &val);
-		val |= 0xC0C0;
+		val |= phycontrol;
 		miiphy_write(devname, 0x16, 0x1, val);
 #endif
 	}
