@@ -51,10 +51,11 @@ done
 if [ "${MACHINE}" == "himx0294-ivap" ] || [ "${MACHINE}" == "himx0294-dvmon" ]
 then
 	# Check PHY identifier 1 and part of PHY identifier 2
-	if mdio 0 2 | grep -q "state 0x22" && mdio 0 3 | grep -q "state 0x162";
+	if mdio 0 2 | grep -q "state 0x22" && mdio 0 3 | grep -q "state 0x16";
 	then
 		# Control signal, rx data and clock delay.
 		# Up to kernel 5.10 the fix was in the kernel.
+		# Fix is needed by KSZ9031RNX and KSZ9131RNX
 		mmd_write_reg 02 4 0x0
 		mmd_write_reg 02 5 0x0
 		mmd_write_reg 02 8 0x3ff
