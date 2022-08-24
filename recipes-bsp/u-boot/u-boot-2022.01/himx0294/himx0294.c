@@ -696,7 +696,8 @@ int board_init(void)
 #if defined(CONFIG_BOARD_IS_HIMX_IPCAM)
 	return 0;
 #else
-
+	SETUP_IOMUX_PADS(usdhc3_pads);
+	SETUP_IOMUX_PADS(usdhc4_pads);
 #ifdef CONFIG_SATA
 	setup_sata();
 #endif
