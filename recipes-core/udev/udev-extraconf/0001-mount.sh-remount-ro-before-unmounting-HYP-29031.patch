@@ -1,0 +1,29 @@
+From aa6a2e75e353c173ed04f511e869ff3d22c72ca9 Mon Sep 17 00:00:00 2001
+From: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+Date: Mon, 29 Aug 2022 13:51:09 +0200
+Subject: [PATCH] mount.sh: remount ro before unmounting, HYP-29031
+
+Since honister systemd crashes when the target is busy upon unmounting.
+Hence, remount read-only beforehands to prevent the crash.
+
+Signed-off-by: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+---
+ meta/recipes-core/udev/udev-extraconf/mount.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/meta/recipes-core/udev/udev-extraconf/mount.sh b/meta/recipes-core/udev/udev-extraconf/mount.sh
+index b23731870e..c39fc0404d 100644
+--- a/mount.sh
++++ b/mount.sh
+@@ -152,6 +152,8 @@ fi
+ if [ "$ACTION" = "remove" ] || [ "$ACTION" = "change" ] && [ -x "$UMOUNT" ] && [ -n "$DEVNAME" ]; then
+     for mnt in `cat /proc/mounts | grep "$DEVNAME" | cut -f 2 -d " " `
+     do
++        # Remount read-only first to circumvent crash of systemd if mount is busy
++        /bin/mount -o remount,ro $mnt
+         $UMOUNT $mnt
+     done
+ 
+-- 
+2.35.3
+
