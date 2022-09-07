@@ -1,0 +1,143 @@
+From bd6eee6217b9466cc933c92a9964e2e3859bfd24 Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
+Date: Wed, 7 Sep 2022 11:41:40 +0200
+Subject: [PATCH] adv7180: Reset and interrupt HYP-27448
+
+Extra reset to improve the interaction with MIPI CSI2 interface.
+Enable field has changed interrupt to determine which is current field.
+
+Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
+---
+ drivers/media/i2c/adv7180.c | 67 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 65 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/i2c/adv7180.c b/drivers/media/i2c/adv7180.c
+index 5a2263d99b72..ea2be3ab30b7 100644
+--- a/drivers/media/i2c/adv7180.c
++++ b/drivers/media/i2c/adv7180.c
+@@ -66,6 +66,8 @@
+ #define ADV7180_HUE_DEF		0
+ #define ADV7180_HUE_MAX		128
+ 
++#define ADV7180_REG_DEFAULT_VALUE_Y	0x000c
++#define ADV7180_REG_DEFAULT_VALUE_C	0x000d
+ #define ADV7180_REG_CTRL		0x000e
+ #define ADV7180_CTRL_IRQ_SPACE		0x20
+ 
+@@ -120,6 +122,9 @@
+ #define ADV7180_REG_ISR1	0x2042
+ #define ADV7180_REG_ICR1	0x2043
+ #define ADV7180_REG_IMR1	0x2044
++#define ADV7180_REG_IRSR2	0x2045
++#define ADV7180_REG_ISR2	0x2046
++#define ADV7180_REG_ICR2	0x2047
+ #define ADV7180_REG_IMR2	0x2048
+ #define ADV7180_IRQ3_AD_CHANGE	0x08
+ #define ADV7180_REG_ISR3	0x204A
+@@ -191,6 +196,8 @@ struct adv7180_state;
+ #define ADV7180_FLAG_MIPI_CSI2		BIT(2)
+ #define ADV7180_FLAG_I2P		BIT(3)
+ 
++static int adv7180_set_field_mode(struct adv7180_state *state);
++
+ struct adv7180_chip_info {
+ 	unsigned int flags;
+ 	unsigned int valid_input_mask;
+@@ -516,6 +523,46 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
+ 
+ 	if (state->chip_info->flags & ADV7180_FLAG_MIPI_CSI2) {
+ 		if (on) {
++			/* Extra reset to improve the interaction with MIPI CSI2 interface */
++			int insel = adv7180_read(state, ADV7180_REG_INPUT_CONTROL);
++			adv7180_write(state, 0x0F, 0x80);
++			/*  Reset ADV7280A-M */
++			msleep(10);
++			adv7180_write(state, 0x0F, 0x0);
++			/* Restore input */
++			adv7180_write(state, ADV7180_REG_INPUT_CONTROL, insel);
++			/* Default to black output */
++			adv7180_write(state, ADV7180_REG_DEFAULT_VALUE_Y, 0x02);
++			adv7180_write(state, ADV7180_REG_DEFAULT_VALUE_C, 0x88);
++			/* Reinitialize */
++			state->chip_info->init(state);
++			adv7180_set_field_mode(state);
++			/* register for interrupts */
++			if (state->irq > 0) {
++				/* config the Interrupt pin to be active low */
++				ret = adv7180_write(state, ADV7180_REG_ICONF1,
++						ADV7180_ICONF1_ACTIVE_LOW |
++						ADV7180_ICONF1_PSYNC_ONLY);
++				if (ret < 0)
++					printk("ret: %d irq conf\n", ret);
++
++				ret = adv7180_write(state, ADV7180_REG_IMR1, 0x0);
++				if (ret < 0)
++					printk("ret: %d irq IMR1\n", ret);
++
++				ret = adv7180_write(state, ADV7180_REG_IMR2, 0x10);
++				if (ret < 0)
++					printk("ret: %d irq IMR2\n", ret);
++
++				ret = adv7180_write(state, ADV7180_REG_IMR3, 0x0);
++				if (ret < 0)
++					printk("ret: %d irq IMR3\n", ret);
++
++				ret = adv7180_write(state, ADV7180_REG_IMR4, 0);
++				if (ret < 0)
++					printk("ret: %d irq IMR4\n", ret);
++			}
++
+ 			adv7180_csi_write(state, 0xDE, 0x02);
+ 			adv7180_csi_write(state, 0xD2, 0xF7);
+ 			adv7180_csi_write(state, 0xD8, 0x65);
+@@ -681,9 +728,10 @@ static int adv7180_mbus_fmt(struct v4l2_subdev *sd,
+ 	fmt->width = 720;
+ 	fmt->height = state->curr_norm & V4L2_STD_525_60 ? 480 : 576;
+ 
++#if 0
+ 	if (state->field == V4L2_FIELD_ALTERNATE)
+ 		fmt->height /= 2;
+-
++#endif
+ 	return 0;
+ }
+ 
+@@ -910,12 +958,18 @@ static const struct v4l2_subdev_ops adv7180_ops = {
+ 	.sensor = &adv7180_sensor_ops,
+ };
+ 
++void imx8_isi_cap_set_even_field(int even_field);
++
+ static irqreturn_t adv7180_irq(int irq, void *devid)
+ {
+ 	struct adv7180_state *state = devid;
++	u8 isr2;
++	u8 irsr2;
++#if 0
+ 	u8 isr3;
+-
++#endif
+ 	mutex_lock(&state->mutex);
++#if 0
+ 	isr3 = adv7180_read(state, ADV7180_REG_ISR3);
+ 	/* clear */
+ 	adv7180_write(state, ADV7180_REG_ICR3, isr3);
+@@ -928,6 +982,15 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
+ 
+ 		v4l2_subdev_notify_event(&state->sd, &src_ch);
+ 	}
++#endif
++	isr2 = adv7180_read(state, ADV7180_REG_ISR2);
++	/* clear */
++	adv7180_write(state, ADV7180_REG_ICR2, isr2);
++
++	if (isr2 & 0x10) {
++		irsr2 = adv7180_read(state, ADV7180_REG_IRSR2);
++		imx8_isi_cap_set_even_field(irsr2);
++	}
+ 	mutex_unlock(&state->mutex);
+ 
+ 	return IRQ_HANDLED;
+-- 
+2.35.3
+

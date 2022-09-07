@@ -76,15 +76,24 @@
 	};
 };
 
+&iomuxc {
+	pinctrl_i2c4_adv7280_int: dsi_ts_int {
+		fsl,pins = <
+			MX8MP_IOMUXC_ECSPI1_MOSI__GPIO5_IO07		0x1C0
+		>;
+	};
+
+};
 &i2c4 {
 	adv7180: camera@21 {
 		compatible = "adi,adv7280-m";
 		reg = <0x21>;
 #if 0
 		powerdown-gpios = <&gpio3 31 GPIO_ACTIVE_LOW>;
-		interrupt-parent = <&gpio3>;
-		interrupts = <30 IRQ_TYPE_LEVEL_LOW>;
 #endif
+		pinctrl-0 = <&pinctrl_i2c4_adv7280_int>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <7 IRQ_TYPE_EDGE_FALLING>;
 
 		port {
 			adv7180_to_ipu2_csi1_mux: endpoint {
