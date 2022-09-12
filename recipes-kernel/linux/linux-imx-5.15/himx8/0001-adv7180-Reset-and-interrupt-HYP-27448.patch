@@ -1,18 +1,19 @@
-From bd6eee6217b9466cc933c92a9964e2e3859bfd24 Mon Sep 17 00:00:00 2001
+From 1ce9b89957017e70808a48b3b12efdcc963fe382 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 7 Sep 2022 11:41:40 +0200
+Date: Mon, 12 Sep 2022 10:24:35 +0200
 Subject: [PATCH] adv7180: Reset and interrupt HYP-27448
 
 Extra reset to improve the interaction with MIPI CSI2 interface.
 Enable field has changed interrupt to determine which is current field.
+Read status in interrupt service routine.
 
 Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/media/i2c/adv7180.c | 67 +++++++++++++++++++++++++++++++++++--
- 1 file changed, 65 insertions(+), 2 deletions(-)
+ drivers/media/i2c/adv7180.c | 79 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 76 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/i2c/adv7180.c b/drivers/media/i2c/adv7180.c
-index 5a2263d99b72..ea2be3ab30b7 100644
+index 5a2263d99b72..fb1bc01a060a 100644
 --- a/drivers/media/i2c/adv7180.c
 +++ b/drivers/media/i2c/adv7180.c
 @@ -66,6 +66,8 @@
@@ -34,16 +35,28 @@ index 5a2263d99b72..ea2be3ab30b7 100644
  #define ADV7180_REG_IMR2	0x2048
  #define ADV7180_IRQ3_AD_CHANGE	0x08
  #define ADV7180_REG_ISR3	0x204A
-@@ -191,6 +196,8 @@ struct adv7180_state;
+@@ -191,6 +196,9 @@ struct adv7180_state;
  #define ADV7180_FLAG_MIPI_CSI2		BIT(2)
  #define ADV7180_FLAG_I2P		BIT(3)
  
++static v4l2_std_id s_irq_std = 0;
 +static int adv7180_set_field_mode(struct adv7180_state *state);
 +
  struct adv7180_chip_info {
  	unsigned int flags;
  	unsigned int valid_input_mask;
-@@ -516,6 +523,46 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
+@@ -356,7 +364,9 @@ static int adv7180_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
+ 		return err;
+ 
+ 	if (state->streaming) {
+-		err = -EBUSY;
++		//err = -EBUSY;
++		// The video standard is determined in the interrupt service routine.
++		if (std) { *std = s_irq_std; }
+ 		goto unlock;
+ 	}
+ 
+@@ -516,6 +526,46 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
  
  	if (state->chip_info->flags & ADV7180_FLAG_MIPI_CSI2) {
  		if (on) {
@@ -90,7 +103,7 @@ index 5a2263d99b72..ea2be3ab30b7 100644
  			adv7180_csi_write(state, 0xDE, 0x02);
  			adv7180_csi_write(state, 0xD2, 0xF7);
  			adv7180_csi_write(state, 0xD8, 0x65);
-@@ -681,9 +728,10 @@ static int adv7180_mbus_fmt(struct v4l2_subdev *sd,
+@@ -681,9 +731,10 @@ static int adv7180_mbus_fmt(struct v4l2_subdev *sd,
  	fmt->width = 720;
  	fmt->height = state->curr_norm & V4L2_STD_525_60 ? 480 : 576;
  
@@ -102,7 +115,7 @@ index 5a2263d99b72..ea2be3ab30b7 100644
  	return 0;
  }
  
-@@ -910,12 +958,18 @@ static const struct v4l2_subdev_ops adv7180_ops = {
+@@ -910,12 +961,21 @@ static const struct v4l2_subdev_ops adv7180_ops = {
  	.sensor = &adv7180_sensor_ops,
  };
  
@@ -113,6 +126,9 @@ index 5a2263d99b72..ea2be3ab30b7 100644
  	struct adv7180_state *state = devid;
 +	u8 isr2;
 +	u8 irsr2;
++	static ktime_t last_time = 0;
++	ktime_t now = ktime_get();
++	ktime_t diff = ktime_to_ms(ktime_sub(now, last_time));
 +#if 0
  	u8 isr3;
 -
@@ -122,7 +138,7 @@ index 5a2263d99b72..ea2be3ab30b7 100644
  	isr3 = adv7180_read(state, ADV7180_REG_ISR3);
  	/* clear */
  	adv7180_write(state, ADV7180_REG_ICR3, isr3);
-@@ -928,6 +982,15 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
+@@ -928,6 +988,19 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
  
  		v4l2_subdev_notify_event(&state->sd, &src_ch);
  	}
@@ -134,6 +150,10 @@ index 5a2263d99b72..ea2be3ab30b7 100644
 +	if (isr2 & 0x10) {
 +		irsr2 = adv7180_read(state, ADV7180_REG_IRSR2);
 +		imx8_isi_cap_set_even_field(irsr2);
++	}
++	if (diff >= 500) {
++		__adv7180_status(state, NULL, &s_irq_std);
++		last_time = now;
 +	}
  	mutex_unlock(&state->mutex);
  
