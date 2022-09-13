@@ -1,6 +1,8 @@
 DESCRIPTION = "hipos Package Groups"
 LICENSE = "MIT"
 
+# Packages get dynamically renamed
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
 PACKAGES = "\
