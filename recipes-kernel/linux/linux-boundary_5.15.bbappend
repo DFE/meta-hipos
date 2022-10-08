@@ -64,7 +64,7 @@ SRC_URI:append:himx0294 = " \
 #	file://rafi-touchscreen-support.patch 
 #	file://rafi-touchscreen-event-report.patch 
 
-do_configure:prepend() {
+do_kernel_configme:prepend() {
 	# copy tw6869 driver code into kernel tree
 	mkdir -p ${S}/drivers/media/pci/drtw6869
 	cd ${S}/drivers/media/pci/drtw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
