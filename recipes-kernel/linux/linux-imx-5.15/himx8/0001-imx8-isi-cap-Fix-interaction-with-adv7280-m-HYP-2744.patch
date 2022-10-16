@@ -1,6 +1,6 @@
-From fdae024b5e21b3ff1efff56a5b201a1617bf6e25 Mon Sep 17 00:00:00 2001
+From 093fdea6ac781c05115cc99113ad9d2b24af5ea4 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 7 Oct 2022 18:50:04 +0200
+Date: Wed, 7 Sep 2022 13:03:36 +0200
 Subject: [PATCH] imx8-isi-cap: Fix interaction with adv7280-m HYP-27448
 
 Enable MIPI CSI channel first and the die subdevice. Otherwise the setup
@@ -12,14 +12,14 @@ Set tvnorms to adv7280-m norms. This is needed for the api functions.
 
 Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/staging/media/imx/imx8-isi-cap.c | 235 +++++++++++++++++++++++
- 1 file changed, 235 insertions(+)
+ drivers/staging/media/imx/imx8-isi-cap.c | 237 ++++++++++++++++++++++-
+ 1 file changed, 236 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/staging/media/imx/imx8-isi-cap.c b/drivers/staging/media/imx/imx8-isi-cap.c
-index 880f0023f202..8caea3f9f3e9 100644
+index 4a919cc8d52f..4fcb50b38c93 100644
 --- a/drivers/staging/media/imx/imx8-isi-cap.c
 +++ b/drivers/staging/media/imx/imx8-isi-cap.c
-@@ -184,6 +184,13 @@ static int mxc_isi_update_buf_paddr(struct mxc_isi_buffer *buf, int memplanes)
+@@ -182,6 +182,13 @@ static int mxc_isi_update_buf_paddr(struct mxc_isi_buffer *buf, int memplanes)
  	return 0;
  }
  
@@ -33,7 +33,7 @@ index 880f0023f202..8caea3f9f3e9 100644
  void mxc_isi_cap_frame_write_done(struct mxc_isi_dev *mxc_isi)
  {
  	struct mxc_isi_cap_dev *isi_cap = mxc_isi->isi_cap;
-@@ -214,6 +221,11 @@ void mxc_isi_cap_frame_write_done(struct mxc_isi_dev *mxc_isi)
+@@ -212,6 +219,11 @@ void mxc_isi_cap_frame_write_done(struct mxc_isi_dev *mxc_isi)
  		vb2 = &buf->v4l2_buf.vb2_buf;
  		list_del_init(&buf->list);
  		buf->v4l2_buf.vb2_buf.timestamp = ktime_get_ns();
@@ -45,39 +45,41 @@ index 880f0023f202..8caea3f9f3e9 100644
  		vb2_buffer_done(&buf->v4l2_buf.vb2_buf, VB2_BUF_STATE_DONE);
  	}
  
-@@ -1105,12 +1117,16 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
- 	dev_dbg(dev, "%s\n", __func__);
+@@ -1083,13 +1095,16 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 		return -EBUSY;
+ 	}
  
- 	if (!isi_cap->is_streaming[isi_cap->id]) {
++	/* Enable the MIPI CSI channel first and then the subdevice. The other
++	 * way round the setup with the adv7280-m as subdevice does not work. */
 +#if 0
-+		/* Enable the MIPI CSI channel first and then the subdevice. The other
-+		 * way round the setup with the adv7280-m as subdevice does not work. */
- 		src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
- 		ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
- 		if (ret) {
- 			v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
- 			return ret;
- 		}
+ 	src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
+ 	ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
+ 	if (ret) {
+ 		v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
+ 		return ret;
+ 	}
+-
 +#endif
- 
- 		ret = mxc_isi_config_parm(isi_cap);
- 		if (ret < 0)
-@@ -1132,6 +1148,14 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
- 		if (ret < 0 && ret != -ENOIOCTLCMD)
- 			goto disable;
+ 	ret = mxc_isi_config_parm(isi_cap);
+ 	if (ret < 0)
+ 		goto power;
+@@ -1100,6 +1115,15 @@ static int mxc_isi_cap_streamon(struct file *file, void *priv,
+ 	if (ret < 0 && ret != -ENOIOCTLCMD)
+ 		goto disable;
  
 +#if 1
-+		src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
-+		ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
-+		if (ret) {
-+			v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
-+			return ret;
-+		}
++	src_sd = mxc_get_remote_subdev(&isi_cap->sd, __func__);
++	ret = (!src_sd) ? -EINVAL : v4l2_subdev_call(src_sd, core, s_power, 1);
++	if (ret) {
++		v4l2_err(&isi_cap->sd, "Call subdev s_power fail!\n");
++		return ret;
++	}
 +#endif
- 		isi_cap->is_streaming[isi_cap->id] = 1;
- 		mxc_isi->is_streaming = 1;
- 	}
-@@ -1354,6 +1378,210 @@ static int mxc_isi_cap_enum_frameintervals(struct file *file, void *fh,
++
+ 	isi_cap->is_streaming[isi_cap->id] = 1;
+ 	mxc_isi->is_streaming = 1;
+ 
+@@ -1320,6 +1344,210 @@ static int mxc_isi_cap_enum_frameintervals(struct file *file, void *fh,
  	return 0;
  }
  
@@ -288,7 +290,7 @@ index 880f0023f202..8caea3f9f3e9 100644
  static const struct v4l2_ioctl_ops mxc_isi_capture_ioctl_ops = {
  	.vidioc_querycap		= mxc_isi_cap_querycap,
  
-@@ -1370,6 +1598,11 @@ static const struct v4l2_ioctl_ops mxc_isi_capture_ioctl_ops = {
+@@ -1336,6 +1564,11 @@ static const struct v4l2_ioctl_ops mxc_isi_capture_ioctl_ops = {
  	.vidioc_prepare_buf		= vb2_ioctl_prepare_buf,
  	.vidioc_create_bufs		= vb2_ioctl_create_bufs,
  
@@ -300,7 +302,7 @@ index 880f0023f202..8caea3f9f3e9 100644
  	.vidioc_g_parm			= mxc_isi_cap_g_parm,
  	.vidioc_s_parm			= mxc_isi_cap_s_parm,
  
-@@ -1666,6 +1899,8 @@ static int mxc_isi_register_cap_device(struct mxc_isi_cap_dev *isi_cap,
+@@ -1632,6 +1865,8 @@ static int mxc_isi_register_cap_device(struct mxc_isi_cap_dev *isi_cap,
  	vdev->release	= video_device_release_empty;
  	vdev->queue	= q;
  	vdev->lock	= &isi_cap->lock;
