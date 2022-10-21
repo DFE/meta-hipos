@@ -1,0 +1,1 @@
+KERNEL=="ttymxc0", SUBSYSTEM=="tty", SYMLINK+="ttydribis"
