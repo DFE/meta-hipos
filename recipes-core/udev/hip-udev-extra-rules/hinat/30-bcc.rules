@@ -1,3 +1,0 @@
-KERNEL=="ttyS2", SUBSYSTEM=="tty", KERNELS=="kempld-uart", SUBSYSTEMS=="platform", SYMLINK+="ttydrbcc"
-KERNEL=="ttyS1", SUBSYSTEM=="tty", KERNELS=="00:02",       SUBSYSTEMS=="pnp",      SYMLINK+="ttydrbcc"
-KERNEL=="ttyS1", SUBSYSTEM=="tty", KERNELS=="dw-apb-uart.4", SUBSYSTEMS=="platform", SYMLINK+="ttydrbcc"
