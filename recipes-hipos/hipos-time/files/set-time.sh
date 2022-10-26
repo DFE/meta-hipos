@@ -9,7 +9,7 @@ SUB_TYPE="$(/usr/sbin/hip-machinfo -s)"
 # reset error signaling
 rm -f /etc/drerrors/RTC.json
 
-if [ "$SUB_TYPE" != "dvmon" -a "$SUB_TYPE" != "ipcam" ]; then
+if [ "$SUB_TYPE" != "dvmon" ] && [ "$SUB_TYPE" != "ipcam" ] && [ "$SUB_TYPE" != "hybdmon" ]; then
 	date_rtc=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
 	if [ -z "$date_rtc" ]; then
 		# in case of problems we log the commands
@@ -53,7 +53,7 @@ if [ -n "$date_rtc" ]; then
 		date -u -s "$date_rtc" > /dev/null && touch /run/time-valid
 	fi
 else
-	# dvmon and ipcam OR bcc read problems
+	# dvmon, ipcam and hybdmon OR bcc read problems
 	if [ -n "$last" ]; then
 		if [[ "$last" > "$date_now" ]]; then
 			log "no RTC time, using last shutdown: $last"
