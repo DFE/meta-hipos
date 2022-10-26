@@ -10,13 +10,13 @@ SUB_TYPE="$(/usr/sbin/hip-machinfo -s)"
 rm -f /etc/drerrors/RTC.json
 
 if [ "$SUB_TYPE" != "dvmon" -a "$SUB_TYPE" != "ipcam" ]; then
-	date=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
-	if [ -z "$date" ]; then
+	date_rtc=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
+	if [ -z "$date_rtc" ]; then
 		# in case of problems we log the commands
 		set -x
 		for try in 1 2 3 4 5; do
-			date=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
-			if [ -n "$date" ]; then
+			date_rtc=$(drbcc --dev=/dev/ttydrbcc --cmd=getrtc | cut -d\  -f2,3)
+			if [ -n "$date_rtc" ]; then
 				break
 			fi
 		done 2>&1 | log
@@ -28,14 +28,14 @@ fi
 last=$(cat /lib/systemd/systemd-timesyncd 2> /dev/null)
 date_now=$(date --iso-8601=seconds)
 
-# $date and $last may be empty or invalid here
-if [ -n "$date" ]; then
+# $date_rtc and $last may be empty or invalid here
+if [ -n "$date_rtc" ]; then
 	# empty battery
-	if [[ "$date" < "2019" ]]; then
-		log "Warning: RTC time outdated: $date"
+	if [[ "$date_rtc" < "2019" ]]; then
+		log "Warning: RTC time outdated: $date_rtc"
 		# signal error with LED
 		mkdir -p /etc/drerrors
-		echo "{\"error\":\"RTC time outdated: $date\"}" > /etc/drerrors/RTC.json
+		echo "{\"error\":\"RTC time outdated: $date_rtc\"}" > /etc/drerrors/RTC.json
 		if [ -n "$last" ]; then
 			log "no RTC time, using last shutdown: $last"
 			date -u -s "$last" > /dev/null
@@ -43,14 +43,14 @@ if [ -n "$date" ]; then
 	else
 		if [ -n "$last" ]; then
 			# just warn if RTC time went backwards (or last shutdown not written)
-			if [[ "$date" < "$last" ]]; then
-				log "Warning: RTC time: $date before last shutdown: $last"
+			if [[ "$date_rtc" < "$last" ]]; then
+				log "Warning: RTC time: $date_rtc before last shutdown: $last"
 			fi
 		else
 			log "RTC: last shutdown time unknown"
 		fi
-		log "set system clock from RTC time: $date"
-		date -u -s "$date" > /dev/null && touch /run/time-valid
+		log "set system clock from RTC time: $date_rtc"
+		date -u -s "$date_rtc" > /dev/null && touch /run/time-valid
 	fi
 else
 	# dvmon and ipcam OR bcc read problems
