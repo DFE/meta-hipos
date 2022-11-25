@@ -18,14 +18,11 @@ then
 	. /etc/hydraip-devid
 fi
 
+# Enable RX TX flow control pause frames HYP-29526
+ethtool -A eth0 rx on tx on
+
 if [[ ( "${MACHINE}" == "himx0294-ivap" && "${vout}" -eq 2 ) || ( "${MACHINE}" == "himx0294-imoc" ) ]]
 then
-	exit 0
-fi
-
-if [[ "${MACHINE}" == "himx0294-impec" ]]
-then
-	ethtool -A eth0 rx on tx on
 	exit 0
 fi
 
