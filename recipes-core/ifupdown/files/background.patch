@@ -1,6 +1,6 @@
-From 8f6a242b99b91eb2c716f987fbde44329ead9781 Mon Sep 17 00:00:00 2001
+From a7e983121cfebcd93f3cb16b74c9a7c81d6be555 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Fri, 29 Jan 2021 19:06:13 +0100
+Date: Mon, 5 Dec 2022 14:33:43 +0100
 Subject: [PATCH] ifupdown: enable udhcpc backgrounding HYP-17009
 
 The former default behaviour was to exit with failure if lease is not
@@ -14,18 +14,18 @@ Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/inet.defn b/inet.defn
-index 5c16fab..eaf258d 100644
+index 76ff23f..653f0a4 100644
 --- a/inet.defn
 +++ b/inet.defn
-@@ -103,7 +103,7 @@ method dhcp
+@@ -100,7 +100,7 @@ method dhcp
+     CLIENT="-i"; [[[ "%client%" = no ] && CLIENT="";]] /sbin/dhclient -4 -v $CLIENT -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases -I -df /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+ 	[[-e IF_METRIC=%metric%]] \
          if (execable("/sbin/dhclient"))
-     /sbin/pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
-         elsif (execable("/sbin/pump"))
 -    /sbin/udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
 +    systemctl stop hip-udhcpc_%iface% 2>/dev/null ; systemd-run --no-block --quiet --service-type=forking --collect --unit=hip-udhcpc_%iface% /sbin/udhcpc -b -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
          elsif (execable("/sbin/udhcpc"))
      /sbin/dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
             [[-l %leasetime%]] [[-m %metric%]] %iface% \
 -- 
-2.16.4
+2.35.3
 
