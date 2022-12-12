@@ -1,6 +1,6 @@
 DESCRIPTION = "HIPOS Boardcontroller communication tool"
 SECTION = "libs"
-DEPENDS = "readline lockdev"
+DEPENDS = "libedit lockdev"
 RDEPENDS:${PN} = "hip-udev-extra-rules"
 RDEPENDS:drbcc = "hip-udev-extra-rules"
 
@@ -24,6 +24,6 @@ PACKAGES += " drbcc "
 FILES:${PN} = "${libdir}/*.so.*"
 FILES:drbcc = "${bindir}/*"
 
-inherit autotools
+inherit autotools pkgconfig
 
 
