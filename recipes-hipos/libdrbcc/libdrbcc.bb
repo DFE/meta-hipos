@@ -17,7 +17,7 @@ S = "${WORKDIR}/git"
 DRSRCBRANCH="master"
 
 SRC_URI = "git://github.com/DFE/libdrbcc.git;branch=${DRSRCBRANCH};protocol=https"
-SRCREV = "9f14c1a33ad8b41bcd3cacbbb376f19ada7a0189"
+SRCREV = "55505ffb87aca4eee65bb6fb28247362de584aae"
 
 PACKAGES += " drbcc "
 
