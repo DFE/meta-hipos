@@ -18,7 +18,7 @@ then
 	. /etc/hydraip-devid
 fi
 
-logger "Setup network"
+logger -t "hipos-network-setup.sh" "Setup network"
 
 # Enable RX TX flow control pause frames HYP-29526
 ethtool -A eth0 rx on tx on
@@ -64,6 +64,13 @@ then
 		# Restart auto-negotiation process
 		mdio 0x0 0x0 0x1340
 	fi
+elif [ "${MACHINE}" == "himx0294-impec" ]
+then
+	# Reset all phys to ensure a correct connection HYP-29558
+	spi-reg 0x1d 0x20
+	spi-reg 0x2d 0x20
+	spi-reg 0x3d 0x20
+	spi-reg 0x4d 0x20
 fi
 
 exit 0
