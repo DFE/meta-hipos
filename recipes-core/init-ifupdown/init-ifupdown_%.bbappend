@@ -1,6 +1,8 @@
 # look for files in the layer first
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
+RDEPENDS:${PN} += " bash "
+
 SRC_URI += " file://99-ifupdown.conf \
              file://ethconfig \
 "
