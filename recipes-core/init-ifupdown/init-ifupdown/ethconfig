@@ -1,6 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 VERBOSITY=0
+
+if [ "${IFACE}" != "eth0" ] && [ "${IFACE}" != "br0" ]; then
+	exit 0
+fi
 
 if [ -f "/etc/hipos/hipos-network-setup.sh" ]; then
 . /etc/hipos/hipos-network-setup.sh >/dev/null
