@@ -1,6 +1,6 @@
-From fc5aebcd86af119b697f023dd528e92c2e1e2175 Mon Sep 17 00:00:00 2001
+From 58bc965d2c5ba56e32a8c062922e0cf5e9e0e3ba Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 20 Jun 2022 18:58:33 +0200
+Date: Fri, 20 Jan 2023 07:43:56 +0100
 Subject: [PATCH] Revert: leds-pwm: add note/frequency support
 
 The reverted commit causes a crash when loading the driver. The commit
@@ -8,11 +8,11 @@ is not in the mainline kernel.
 
 Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
 ---
- drivers/leds/leds-pwm.c | 247 +---------------------------------------
- 1 file changed, 1 insertion(+), 246 deletions(-)
+ drivers/leds/leds-pwm.c | 248 +---------------------------------------
+ 1 file changed, 1 insertion(+), 247 deletions(-)
 
 diff --git a/drivers/leds/leds-pwm.c b/drivers/leds/leds-pwm.c
-index 60740c77753e..6832180c1c54 100644
+index a9a69d44b6db..6832180c1c54 100644
 --- a/drivers/leds/leds-pwm.c
 +++ b/drivers/leds/leds-pwm.c
 @@ -9,8 +9,6 @@
@@ -74,7 +74,7 @@ index 60740c77753e..6832180c1c54 100644
  };
  
  struct led_pwm_priv {
-@@ -76,177 +38,6 @@ struct led_pwm_priv {
+@@ -76,178 +38,6 @@ struct led_pwm_priv {
  	struct led_pwm_data leds[];
  };
  
@@ -232,11 +232,12 @@ index 60740c77753e..6832180c1c54 100644
 -		led_dat->note_mode = note_mode;
 -		if (period >= 0) {
 -			period >>= octave;
--			led_dat->pwmstate.period = period;
+-			if (period)
+-				led_dat->pwmstate.period = period;
 -			if (!led_cdev->brightness)
 -				led_cdev->brightness = led_cdev->max_brightness
 -							>> 1;
--			led_set_brightness(led_cdev, led_cdev->brightness);
+-			led_set_brightness(led_cdev, period ? led_cdev->brightness : 0);
 -			led_dat->note_mode = NM_NORMAL;
 -			if (count < size)
 -				msleep(period ? 1000 : 100);
@@ -252,7 +253,7 @@ index 60740c77753e..6832180c1c54 100644
  static int led_pwm_set(struct led_classdev *led_cdev,
  		       enum led_brightness brightness)
  {
-@@ -266,17 +57,6 @@ static int led_pwm_set(struct led_classdev *led_cdev,
+@@ -267,17 +57,6 @@ static int led_pwm_set(struct led_classdev *led_cdev,
  	return pwm_apply_state(led_dat->pwm, &led_dat->pwmstate);
  }
  
@@ -270,18 +271,24 @@ index 60740c77753e..6832180c1c54 100644
  __attribute__((nonnull))
  static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
  		       struct led_pwm *led, struct fwnode_handle *fwnode)
-@@ -290,8 +70,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
+@@ -291,14 +70,12 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
  	led_data->cdev.brightness = LED_OFF;
  	led_data->cdev.max_brightness = led->max_brightness;
  	led_data->cdev.flags = LED_CORE_SUSPENDRESUME;
 -	led_data->octave = 4;
--	led_data->pwmstate.period = led_data->pwm->state.period;
  
  	led_data->pwm = devm_fwnode_pwm_get(dev, fwnode, NULL);
  	if (IS_ERR(led_data->pwm))
-@@ -316,17 +94,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
- 		pwm_init_state(led_data->pwm, &led_data->pwmstate);
- 		break;
+ 		return dev_err_probe(dev, PTR_ERR(led_data->pwm),
+ 				     "unable to request PWM for %s\n",
+ 				     led->name);
+-	led_data->pwmstate.period = led_data->pwm->state.period;
+ 
+ 	led_data->cdev.brightness_set_blocking = led_pwm_set;
+ 
+@@ -341,17 +118,6 @@ static int led_pwm_add(struct device *dev, struct led_pwm_priv *priv,
+ 			led->name, ret);
+ 		return ret;
  	}
 -	/* register the attributes */
 -	ret = device_create_file(led_data->cdev.dev,
@@ -295,9 +302,9 @@ index 60740c77753e..6832180c1c54 100644
 -	if (ret)
 -		return ret;
  
- 	/* set brightness */
- 	switch (led->default_state) {
-@@ -420,25 +187,14 @@ static int led_pwm_probe(struct platform_device *pdev)
+ 	if (led->default_state != LEDS_DEFSTATE_KEEP) {
+ 		ret = led_pwm_set(&led_data->cdev, led_data->cdev.brightness);
+@@ -421,25 +187,14 @@ static int led_pwm_probe(struct platform_device *pdev)
  
  	ret = led_pwm_create_fwnode(&pdev->dev, priv);
  
@@ -324,7 +331,7 @@ index 60740c77753e..6832180c1c54 100644
  static const struct of_device_id of_pwm_leds_match[] = {
  	{ .compatible = "pwm-leds", },
  	{},
-@@ -447,7 +203,6 @@ MODULE_DEVICE_TABLE(of, of_pwm_leds_match);
+@@ -448,7 +203,6 @@ MODULE_DEVICE_TABLE(of, of_pwm_leds_match);
  
  static struct platform_driver led_pwm_driver = {
  	.probe		= led_pwm_probe,
