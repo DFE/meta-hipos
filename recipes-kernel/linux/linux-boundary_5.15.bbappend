@@ -59,6 +59,7 @@ SRC_URI:append:himx0294 = " \
 	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
 	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \
+	file://0001-Add-parameter-to-module-brcmfmac-HYP-29550.patch \
 "
 
 #	file://rafi-touchscreen-support.patch 
