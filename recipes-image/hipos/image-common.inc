@@ -128,6 +128,7 @@ IMAGE_INSTALL += "  \
     iperf3          \
     procps          \
     init-ifupdown   \
+    avahi-utils     \
 "
 
 # file system tools
