@@ -1,5 +1,5 @@
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-5.15:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-6.1:"
 
 SRC_URI:append:himx8 = " \
         file://imx8mp-tqma8mpql-mba8mpxl.dts \
@@ -9,10 +9,11 @@ SRC_URI:append:himx8 = " \
         file://imx8mp-tqma8mpql-mba8mpxl-hdmi-imx327.dts \
         file://imx8mp-mba8mpxl-imx327.dtsi \
         file://imx8mp-tqma8mpql-mba8mpxl-lvds-g101evn010.dts \
-	file://0001-adv7180-Add-link_setup-function-HYP-27448.patch \
-	file://0001-adv7180-Reset-and-interrupt-HYP-27448.patch \
-	file://0001-imx8-isi-cap-Fix-interaction-with-adv7280-m-HYP-2744.patch \
 "
+
+#	file://0001-adv7180-Add-link_setup-function-HYP-27448.patch 
+#	file://0001-adv7180-Reset-and-interrupt-HYP-27448.patch 
+#	file://0001-imx8-isi-cap-Fix-interaction-with-adv7280-m-HYP-2744.patch 
 
 do_configure:prepend:himx8() {
 	cp ${WORKDIR}/imx8mp-tqma8mpql-mba8mpxl.dts ${S}/arch/arm64/boot/dts/freescale/
