@@ -11,6 +11,8 @@ do_install:append() {
     chown root:root ${D}${NTP_USER_HOME}
 
     # Remove sntp
-    rm -f ${D}/etc/default/sntp
+    rm -f ${D}${sysconfdir}/default/sntp
     rm -f ${D}${systemd_unitdir}/system/sntp.service
+    # Remove the empty ${sysconfdir}/default/.
+    rmdir --ignore-fail-on-non-empty ${D}${sysconfdir}/default/
 }
