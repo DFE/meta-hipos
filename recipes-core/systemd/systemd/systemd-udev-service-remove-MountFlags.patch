@@ -1,6 +1,6 @@
-From a54e6c8c01a02ea47cdc7b76a819b137877d6ae5 Mon Sep 17 00:00:00 2001
+From 5e6e75715d1f714f9aad429f106407de3efecc4e Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Sun, 7 Mar 2021 08:48:50 +0100
+Date: Tue, 2 May 2023 16:39:02 +0200
 Subject: [PATCH] systemd-udev.service remove MountFlags
 
 Remove MountFlags=slave. The default MountFlags=shared is now active.
@@ -19,17 +19,17 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 1 deletion(-)
 
 diff --git a/units/systemd-udevd.service.in b/units/systemd-udevd.service.in
-index 9ada3a6a74..121d574564 100644
+index dfc2a0e341..ecc0ff4980 100644
 --- a/units/systemd-udevd.service.in
 +++ b/units/systemd-udevd.service.in
-@@ -28,7 +28,6 @@ ExecStart=@rootlibexecdir@/systemd-udevd
- ExecReload=udevadm control --reload --timeout 0
+@@ -27,7 +27,6 @@ RestartSec=0
+ ExecStart={{ROOTLIBEXECDIR}}/systemd-udevd
  KillMode=mixed
  TasksMax=infinity
 -PrivateMounts=yes
- ProtectClock=yes
  ProtectHostname=yes
  MemoryDenyWriteExecute=yes
+ RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
 -- 
-2.26.2
+2.25.1
 

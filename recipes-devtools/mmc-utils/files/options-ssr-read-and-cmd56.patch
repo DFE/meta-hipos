@@ -1,6 +1,6 @@
-From d284b8f100229976c6979642d62a322b5b58bc4a Mon Sep 17 00:00:00 2001
+From 9d7fff7976968c436e5831e0cbef3f18fbb5ffdc Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Thu, 16 Jun 2022 14:36:18 +0200
+Date: Wed, 3 May 2023 09:17:12 +0200
 Subject: [PATCH] New options ssr read and cmd56
 
 Option ssr read:
@@ -18,12 +18,12 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  4 files changed, 132 insertions(+)
 
 diff --git a/mmc.c b/mmc.c
-index 6c56387..dc24cba 100644
+index b9aa478..625f3af 100644
 --- a/mmc.c
 +++ b/mmc.c
-@@ -245,6 +245,17 @@ static struct Command commands[] = {
- 		"be 1.",
- 	NULL
+@@ -272,6 +272,17 @@ static struct Command commands[] = {
+ 	  "4. The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.\n",
+ 	  NULL
  	},
 +	{ do_read_ssr, -1,
 +	  "ssr read", "<device>\n"
@@ -40,10 +40,10 @@ index 6c56387..dc24cba 100644
  };
  
 diff --git a/mmc.h b/mmc.h
-index daff62c..9f34c6e 100644
+index 6f1bf3e..156defd 100644
 --- a/mmc.h
 +++ b/mmc.h
-@@ -243,3 +243,6 @@
+@@ -250,3 +250,6 @@
  
  #define MMC_RSP_R1	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
  #define MMC_RSP_R1B	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE|MMC_RSP_BUSY)
@@ -51,12 +51,12 @@ index daff62c..9f34c6e 100644
 +#define SD_APP_SD_STATUS 13   /* adtc, R1 */
 +#define SD_GEN_CMD 56 /* adtc, R1 */
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index bb0f022..83bbb08 100644
+index df66986..81619e5 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -3038,3 +3038,119 @@ out:
- 	close(dev_fd);
- 	return ret;
+@@ -3247,3 +3247,119 @@ dev_fd_close:
+ 		exit(1);
+ 	return 0;
  }
 +
 +static void dump_data_block(char *block_data, int len)
@@ -175,15 +175,15 @@ index bb0f022..83bbb08 100644
 +	return ret;
 +}
 diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 0f7c004..39e0fea 100644
+index 5f2bef1..11b0b44 100644
 --- a/mmc_cmds.h
 +++ b/mmc_cmds.h
-@@ -47,3 +47,5 @@ int do_read_cid(int argc, char **argv);
- int do_read_csd(int argc, char **argv);
- int do_erase(int nargs, char **argv);
- int do_general_cmd_read(int nargs, char **argv);
+@@ -50,3 +50,5 @@ int do_general_cmd_read(int nargs, char **argv);
+ int do_softreset(int nargs, char **argv);
+ int do_preidle(int nargs, char **argv);
+ int do_alt_boot_op(int nargs, char **argv);
 +int do_read_ssr(int argc, char **argv);
 +int do_cmd56(int argc, char **argv);
 -- 
-2.35.3
+2.25.1
 
