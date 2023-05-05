@@ -1,6 +1,8 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/linux-imx-6.1:"
 
+KBUILD_DEFCONFIG:mx8-generic-bsp = ""
+
 SRC_URI:append:himx8 = " \
         file://imx8mp-tqma8mpql-mba8mpxl.dts \
         file://imx8mp-tqma8mpql.dtsi \
