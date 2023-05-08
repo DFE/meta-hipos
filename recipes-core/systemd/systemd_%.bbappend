@@ -28,3 +28,9 @@ SRC_URI:append:himx0438 = " \
 	       file://0001-systemd-halt.service-always-reboot-on-halt.patch \
 "
 
+do_install:append () {
+	# Disable Predictable Network Interface Names
+	# https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/
+	install -d ${D}/etc/systemd/network/
+	ln -s /dev/null ${D}/etc/systemd/network/99-default.link
+}
