@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Copyright (C) 2016-2023 DResearch Fahrzeugelektronik GmbH
+#
+
 PORT=/dev/modem_at
 
 sleep 1.5

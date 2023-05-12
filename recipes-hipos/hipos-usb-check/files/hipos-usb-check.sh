@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2016-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 if [ -e /lib/systemd/system/hip-opmode-normal.target ]
 	then

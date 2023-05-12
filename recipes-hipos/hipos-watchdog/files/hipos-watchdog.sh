@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2016-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 if [ -a /var/run/lock/hipos-watchdog.lock ]; then
 	exit

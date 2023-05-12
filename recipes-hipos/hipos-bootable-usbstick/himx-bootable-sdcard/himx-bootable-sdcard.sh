@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2015-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 export LANG=c
 

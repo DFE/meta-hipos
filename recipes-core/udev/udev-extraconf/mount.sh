@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# Copyright (C) 2020-2023 DResearch Fahrzeugelektronik GmbH
+#
 # Called from udev
 #
 # Attempt to mount any added block devices and umount any removed devices

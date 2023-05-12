@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2015-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 log() {
 	logger -t set-time.sh $1
