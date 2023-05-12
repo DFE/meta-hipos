@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2018-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 wait_sec=30;
 PRODUCT=$(/usr/sbin/hip-productname)

@@ -7,7 +7,8 @@
 #              local root is valid. The script can be sourced to set all variables in DEVID_FILE.
 # \author Ralf Schröder
 #
-# (C) 2013 DResearch Fahrzeugelektonik GmbH
+# Copyright (C) 2013-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 
 #set -x

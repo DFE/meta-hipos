@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (C) 2015-2023 DResearch Fahrzeugelektronik GmbH
+#
 
 # get CPU-Core count
 cores="$(/bin/grep processor /proc/cpuinfo | /usr/bin/wc -l)"

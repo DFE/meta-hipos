@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Copyright (C) 2016-2023 DResearch Fahrzeugelektronik GmbH
+#
+
 echo 2 > /sys/class/gpio/export
 sleep 1.5
 cd /sys/class/gpio/gpio2
