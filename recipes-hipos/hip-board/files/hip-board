@@ -3,7 +3,8 @@
 #
 # \brief board specfic util
 #
-# (C) 2017 DResearch Fahrzeugelektonik GmbH
+# Copyright (C) 2017-2023 DResearch Fahrzeugelektronik GmbH
+#
 #set -x
 
 SCRIPT_NAME=$(basename "$0")
