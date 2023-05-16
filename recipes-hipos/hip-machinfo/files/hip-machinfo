@@ -3,7 +3,8 @@
 #
 # \brief obtain machine/submachine info
 #
-# (C) 2015,2016 DResearch Fahrzeugelektonik GmbH
+# Copyright (C) 2015-2023 DResearch Fahrzeugelektronik GmbH
+#
 #set -x
 
 NAME=$(basename "$0")
