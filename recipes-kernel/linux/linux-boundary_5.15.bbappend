@@ -23,6 +23,8 @@ SRC_URI:append = " \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
+	file://LF-8313-1-Update-License-to-GPL-2.0.patch \
+	file://LF-8313-2-Update-License-to-GPL-2.0.patch \
 "
 
 

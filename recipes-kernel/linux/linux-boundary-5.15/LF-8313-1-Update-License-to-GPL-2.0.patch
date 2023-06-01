@@ -1,0 +1,41 @@
+From 12e0756dd51a2481770b38798cb6a15645d5fcc3 Mon Sep 17 00:00:00 2001
+From: Kshitiz Varshney <kshitiz.varshney@nxp.com>
+Date: Mon, 6 Feb 2023 19:10:05 +0100
+Subject: [PATCH] LF-8313-1: Update License to GPL-2.0
+
+The license was wrong by mistake, this commit updates the license to
+GPL-2.0 and removes the author name from file for maintaining
+confidentiality as this code is NXP owned.
+
+Signed-off-by: Kshitiz Varshney <kshitiz.varshney@nxp.com>
+---
+ include/keys/trusted_dcp.h               | 3 +--
+ security/keys/trusted-keys/trusted_dcp.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/include/keys/trusted_dcp.h b/include/keys/trusted_dcp.h
+index 5c9b6550f6412..49d9c4c66dfd1 100644
+--- a/include/keys/trusted_dcp.h
++++ b/include/keys/trusted_dcp.h
+@@ -1,7 +1,6 @@
+-/* SPDX-License-Identifier: GPL-3.0-only */
++/* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+  * Copyright (C) 2022 NXP
+- * Author:- Kshitiz Varshney <kshitiz.varshney@nxp.com>
+  */
+ 
+ #ifndef __DCP_TRUSTED_KEY_H__
+diff --git a/security/keys/trusted-keys/trusted_dcp.c b/security/keys/trusted-keys/trusted_dcp.c
+index 2421cf9e852fc..dd1df54f0a534 100644
+--- a/security/keys/trusted-keys/trusted_dcp.c
++++ b/security/keys/trusted-keys/trusted_dcp.c
+@@ -1,7 +1,6 @@
+-// SPDX-License-Identifier: GPL-3.0-only
++// SPDX-License-Identifier: GPL-2.0-only
+ /*
+  * Copyright (C) 2022 NXP
+- * Author:-Kshitiz Varshney <kshitiz.varshney@nxp.com>
+  */
+ 
+ #include <keys/trusted_dcp.h>

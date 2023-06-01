@@ -1,0 +1,27 @@
+From 95448dd0dc9b621ae027cbefedaaa7c3d0d3ad2d Mon Sep 17 00:00:00 2001
+From: Kshitiz Varshney <kshitiz.varshney@nxp.com>
+Date: Mon, 6 Feb 2023 19:18:25 +0100
+Subject: [PATCH] LF-8313-2: Update License to GPL-2.0
+
+The license was wrong by mistake, this commit updates the license to
+GPL-2.0 and removes the author name from file for maintaining
+confidentiality as this code is NXP owned.
+
+Signed-off-by: Kshitiz Varshney <kshitiz.varshney@nxp.com>
+---
+ include/soc/fsl/dcp-blob.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/soc/fsl/dcp-blob.h b/include/soc/fsl/dcp-blob.h
+index 95ceaadcd4adc..d2801cfc48c34 100644
+--- a/include/soc/fsl/dcp-blob.h
++++ b/include/soc/fsl/dcp-blob.h
+@@ -1,6 +1,6 @@
+-/* SPDX-License-Identifier: GPL-3.0-only */
++/* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * Copyright (C) 2022 NXP, Kshitiz Varshney <kshitiz.varshney@nxp.com>
++ * Copyright (C) 2022 NXP
+  */
+ 
+ #ifndef __DCP_BLOB_H__
