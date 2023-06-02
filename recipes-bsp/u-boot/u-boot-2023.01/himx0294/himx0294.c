@@ -290,7 +290,7 @@ int board_mmc_init(struct bd_info *bis)
 	usdhc_cfg[0].max_bus_width = 4;
 	usdhc_cfg[1].max_bus_width = 4;
 
-	for (index = 0; index < CONFIG_SYS_FSL_USDHC_NUM; ++index) {
+	for (index = 0; index < 2; ++index) {
 		switch (index) {
 		case 0:
 			imx_iomux_v3_setup_multiple_pads(
@@ -303,7 +303,7 @@ int board_mmc_init(struct bd_info *bis)
 		default:
 		       printf("Warning: you configured more USDHC controllers"
 			       "(%d) then supported by the board (%d)\n",
-			       index + 1, CONFIG_SYS_FSL_USDHC_NUM);
+			       index + 1, 2);
 		       return status;
 		}
 
@@ -496,7 +496,7 @@ int board_eth_init(struct bd_info *bis)
 	if (!bus)
 		return -EINVAL;
 	/* scan phy 0 and 16 */
-	phydev = phy_find_by_mask(bus, 0x10001, PHY_INTERFACE_MODE_RGMII);
+	phydev = phy_find_by_mask(bus, 0x10001);
 	if (!phydev) {
 		ret = -EINVAL;
 		goto free_bus;
@@ -507,7 +507,7 @@ int board_eth_init(struct bd_info *bis)
 		goto free_phydev;
 #endif
 
-#ifdef CONFIG_CI_UDC
+#if defined(CONFIG_USB_ETHER) && defined(CONFIG_USB_MUSB_GADGET)
 	/* For otg ethernet*/
 	usb_eth_initialize(bis);
 #endif

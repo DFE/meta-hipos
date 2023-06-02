@@ -1,6 +1,6 @@
-From 8fb979a9c7f4d7ce54d13de9e94c01f6c3c78a06 Mon Sep 17 00:00:00 2001
+From 89eed9e7194808f655cd08e3b5b24fe2cfffbbde Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
-Date: Wed, 17 Nov 2021 14:20:39 +0100
+Date: Fri, 2 Jun 2023 05:54:37 +0000
 Subject: [PATCH] himx0432: Add Kconfig
 
 Add Kconfig support for himx0432 board.
@@ -11,10 +11,10 @@ Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
  1 file changed, 8 insertions(+)
 
 diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
-index 2aa97705b2..7efd7e1ce3 100644
+index d313df906c..1aec3494cd 100644
 --- a/arch/arm/mach-imx/mx6/Kconfig
 +++ b/arch/arm/mach-imx/mx6/Kconfig
-@@ -445,6 +445,13 @@ config TARGET_MYS_6ULX
+@@ -489,6 +489,13 @@ config TARGET_MYS_6ULX
  	select DM_THERMAL
  	select SUPPORT_SPL
  
@@ -28,14 +28,14 @@ index 2aa97705b2..7efd7e1ce3 100644
  config TARGET_NITROGEN6X
  	bool "nitrogen6x"
  	depends on MX6DL || MX6Q || MX6QDL || MX6S
-@@ -673,6 +680,7 @@ source "board/freescale/mx6sxsabresd/Kconfig"
+@@ -713,6 +720,7 @@ source "board/freescale/mx6sxsabresd/Kconfig"
  source "board/freescale/mx6sxsabreauto/Kconfig"
  source "board/freescale/mx6ul_14x14_evk/Kconfig"
  source "board/freescale/mx6ullevk/Kconfig"
 +source "board/freescale/himx0432/Kconfig"
+ source "board/bosch/acc/Kconfig"
  source "board/grinn/liteboard/Kconfig"
  source "board/phytec/pcm058/Kconfig"
- source "board/phytec/pcl063/Kconfig"
 -- 
-2.26.2
+2.34.1
 

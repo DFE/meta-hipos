@@ -16,8 +16,10 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/io.h>
 #include <common.h>
+#include <env.h>
 #include <i2c.h>
 #include <fsl_esdhc.h>
+#include <netdev.h>
 #include <linux/sizes.h>
 #include <linux/delay.h>
 #include <mmc.h>

@@ -27,17 +27,7 @@
 
 /* MMC Configs */
 #ifdef CONFIG_FSL_USDHC
-#define CONFIG_SYS_FSL_ESDHC_ADDR	USDHC2_BASE_ADDR
-
-/* NAND pin conflicts with usdhc2 */
-#ifdef CONFIG_SYS_USE_NAND
-#define CONFIG_SYS_FSL_USDHC_NUM	1
-#else
-#define CONFIG_SYS_FSL_USDHC_NUM	2
 #endif
-#endif
-
-#define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #define HIMX_DEFAULT_FDT_FILE_IMPEC_1 "/boot/imx6ull-himx0294-impec.dtb"
 
@@ -77,13 +67,10 @@
 
 #define CONFIG_SYS_INIT_SP_OFFSET \
 	(CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
-#define CONFIG_SYS_INIT_SP_ADDR \
-	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
 /* environment organization */
 #define CONFIG_SYS_MMC_ENV_DEV		0	/* USDHC1 */
 #define CONFIG_SYS_MMC_ENV_PART		0	/* user area */
-#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
 
 #define CONFIG_IMX_THERMAL
 
@@ -104,7 +91,6 @@
 
 #define IMX_FEC_BASE                    ENET_BASE_ADDR
 #define CONFIG_FEC_MXC_PHYADDR          0x1
-#define CONFIG_FEC_XCV_TYPE             RMII
 #define CONFIG_ETHPRIME                 "eth0"
 #define CONFIG_FEC_FIXED_SPEED          100
 #endif

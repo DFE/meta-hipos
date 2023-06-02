@@ -1,0 +1,32 @@
+From 1079b72e6ccf4c50db1a5a33cc5ffa74fe1960fa Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Date: Fri, 2 Jun 2023 13:46:22 +0000
+Subject: [PATCH 2/2] Set mmc alias in device tree
+
+First SD card must have index 0 to be consistent with the u-boot
+environment variables.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+---
+ arch/arm/dts/imx6qdl-nitrogen6x.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm/dts/imx6qdl-nitrogen6x.dtsi b/arch/arm/dts/imx6qdl-nitrogen6x.dtsi
+index 904d5d051d..930f9e52fe 100644
+--- a/arch/arm/dts/imx6qdl-nitrogen6x.dtsi
++++ b/arch/arm/dts/imx6qdl-nitrogen6x.dtsi
+@@ -8,6 +8,11 @@
+ #include <dt-bindings/input/input.h>
+ 
+ / {
++	aliases {
++                mmc0 = &usdhc3;
++                mmc1 = &usdhc4;
++        };
++
+ 	chosen {
+ 		stdout-path = &uart2;
+ 	};
+-- 
+2.34.1
+
