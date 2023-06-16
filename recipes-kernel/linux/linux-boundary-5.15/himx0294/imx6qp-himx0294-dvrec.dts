@@ -19,8 +19,8 @@
 #include "imx6qdl-himx0294-dvrec.dtsi"
 
 / {
-	model = "dfe,himx0294-dvrec";
-	compatible = "dfe,himx0294-dvrec", "fsl,imx6qp";
+	model = "dfe,himx0294-ivap";
+	compatible = "dfe,himx0294-ivap", "fsl,imx6qp";
 };
 
 &mxcfb1 {
