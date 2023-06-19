@@ -27,6 +27,10 @@
 	status = "okay";
 };
 
+&mxcfb2 {
+	status = "okay";
+};
+
 &pinctrl_adv7391_2 {
 	fsl,pins = <
 		MX6QDL_PAD_DI0_DISP_CLK__IPU2_DI0_DISP_CLK 0x10		/* Pixclk */
