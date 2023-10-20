@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
 
 inherit systemd allarch
 
-RDEPENDS:${PN} = "drbcc gawk bash"
+RDEPENDS:${PN} = "drbcc bash"
 
 PR = "r16"
 
