@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 
 # utils 
 IMAGE_INSTALL += " \
+  mc \
   mmc-utils \
   i2c-tools \
   memtester \
