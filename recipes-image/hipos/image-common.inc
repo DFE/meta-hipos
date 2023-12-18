@@ -109,7 +109,6 @@ IMAGE_INSTALL += "  \
 # helpers
 IMAGE_INSTALL += "  \
   mtd-utils         \
-  mc                \
   nano              \
   screen            \
   file              \
