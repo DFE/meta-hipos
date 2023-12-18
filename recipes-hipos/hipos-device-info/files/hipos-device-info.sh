@@ -68,12 +68,8 @@ fetch_info()
 	local resp=""
 	local machine=$(hip-machinfo -a)
 
-	if [ "${machine}" == "himx0294-ipcam" ]; then
-		resp=$(hip-board devid 2>&1 > ${TMP_DEVID_FILE})
-	else
-		# fetch device info file from BCTRL
-		resp=$(${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1)
-	fi
+	# fetch device info file from BCTRL
+	resp=$(${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="gfiletype 0x50,${TMP_DEVID_FILE}" 2>&1)
 	if [ ! -s ${TMP_DEVID_FILE} ]; then
 		loggerANDstdoutError "No device identity info file available in BCTRL, drbcc resp: \'$resp\'"
 		ret=1
@@ -87,11 +83,7 @@ fetch_info()
 		if ! diff ${TMP_DEVID_FILE} ${TMP_DEVID_FILE_SORT} > /dev/null; then
 			loggerANDstdoutError "Fix dublicated entries in devid file"
 			mv ${TMP_DEVID_FILE_SORT} ${TMP_DEVID_FILE}
-			if [ "${machine}" == "himx0294-ipcam" ]; then
-				hip-board devid ${TMP_DEVID_FILE} 2>&1
-			else
-				${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="pfiletype 0x50,${TMP_DEVID_FILE}" 2>&1
-			fi
+			${DRBCC_BIN} --dev=${BCTRL_DEV} --cmd="pfiletype 0x50,${TMP_DEVID_FILE}" 2>&1
 		else
 			rm ${TMP_DEVID_FILE_SORT}
 		fi
