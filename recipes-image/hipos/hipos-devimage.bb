@@ -20,6 +20,7 @@ IMAGE_INSTALL += " \
   mc \
   mmc-utils \
   mtd-utils \
+  nano \
   i2c-tools \
   memtester \
   bonnie++ \
