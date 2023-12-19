@@ -132,7 +132,6 @@ IMAGE_INSTALL += "      \
     dosfstools          \
     exfat-utils         \
     parted              \
-    mdadm               \
     hdparm		\
     smartmontools	\
 "

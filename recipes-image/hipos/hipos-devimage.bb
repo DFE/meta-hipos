@@ -24,6 +24,7 @@ IMAGE_INSTALL += " \
   nano \
   i2c-tools \
   memtester \
+  mdadm \
   bonnie++ \
   screen \
   strace \
