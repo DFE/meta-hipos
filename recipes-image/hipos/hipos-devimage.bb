@@ -24,6 +24,7 @@ IMAGE_INSTALL += " \
   i2c-tools \
   memtester \
   bonnie++ \
+  screen \
   tiobench \
 "
 
