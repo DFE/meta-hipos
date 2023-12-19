@@ -26,6 +26,7 @@ IMAGE_INSTALL += " \
   memtester \
   bonnie++ \
   screen \
+  strace \
   tiobench \
 "
 
