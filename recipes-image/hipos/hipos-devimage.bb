@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 
 # utils 
 IMAGE_INSTALL += " \
+  bluez5 \
   ltrace \
   mc \
   mmc-utils \
