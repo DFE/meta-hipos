@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 
 # utils 
 IMAGE_INSTALL += " \
+  ltrace \
   mc \
   mmc-utils \
   mtd-utils \
