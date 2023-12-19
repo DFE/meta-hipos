@@ -117,7 +117,6 @@ IMAGE_INSTALL += "  \
 IMAGE_INSTALL += "  \
     ethtool         \
     bridge-utils    \
-    ltrace          \
     strace          \
     pciutils        \
     tcpdump         \
