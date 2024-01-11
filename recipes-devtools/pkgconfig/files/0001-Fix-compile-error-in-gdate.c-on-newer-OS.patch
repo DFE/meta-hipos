@@ -1,0 +1,33 @@
+From 11a6b27dfd20cdfb81695e98437d972c3b2bc9ba Mon Sep 17 00:00:00 2001
+From: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+Date: Thu, 11 Jan 2024 06:18:05 -0300
+Subject: [PATCH] Fix compile error in gdate.c on newer OS.
+
+Signed-off-by: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+---
+ glib/glib/gdate.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/glib/glib/gdate.c b/glib/glib/gdate.c
+index 1978cf7..beaccf3 100644
+--- a/glib/glib/gdate.c
++++ b/glib/glib/gdate.c
+@@ -2416,6 +2416,9 @@ win32_strftime_helper (const GDate     *d,
+ 
+ #endif
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wformat-nonliteral"
++
+ /**
+  * g_date_strftime:
+  * @s: destination buffer
+@@ -2549,3 +2552,5 @@ g_date_strftime (gchar       *s,
+   return retval;
+ #endif
+ }
++
++#pragma GCC diagnostic pop
+-- 
+2.30.2
+
