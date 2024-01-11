@@ -86,10 +86,6 @@ IMAGE_INSTALL:append:himx0294 = " \
   tslib \
   tslib-calibrate \
   tslib-tests \
-  gstreamer1.0-plugins-imx \
-  gstreamer1.0-plugins-base \
-  gstreamer1.0-plugins-bad-mpegtsmux \
-  fsl-alsa-plugins \
 "
 
 IMAGE_INSTALL:append:himx8 = " \
