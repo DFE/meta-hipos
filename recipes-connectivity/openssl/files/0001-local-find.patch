@@ -1,0 +1,11 @@
+--- a/util/perlpath.pl
++++ b/util/perlpath.pl
+@@ -4,7 +4,7 @@
+ # line in all scripts that rely on perl.
+ #
+ 
+-require "find.pl";
++require "./find.pl";
+ 
+ $#ARGV == 0 || print STDERR "usage: perlpath newpath  (eg /usr/bin)\n";
+ &find(".");
