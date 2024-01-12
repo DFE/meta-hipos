@@ -15,7 +15,6 @@ DRSRCBRANCH="master"
 SRC_URI_append = " \
 	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
-	file://0001-tw6869-module_param-is-ulong-instead-of-ullong.patch \
 	file://0001-HYP-12986-run-tasklet-function-of-UART-DMA-within-IS.patch \
 	file://imx-sdma-update-channel.patch \
 	file://mmc-sd-show-ssr-in-sysfs.patch \
@@ -64,6 +63,7 @@ do_configure_prepend() {
 	mkdir -p ${S}/drivers/media/pci/drtw6869
 	cd ${S}/drivers/media/pci/drtw6869; tar cf - -C ${WORKDIR}/git.tw6869 . | tar xf -
 	sed -i -e's/VIDEO_TW6869/VIDEO_DRTW6869/g' ${S}/drivers/media/pci/drtw6869/*
+	sed -i -e's/ullong/ulong/g' ${S}/drivers/media/pci/drtw6869/tw6869.c
 }
 
 do_configure_prepend_himx0294() {
