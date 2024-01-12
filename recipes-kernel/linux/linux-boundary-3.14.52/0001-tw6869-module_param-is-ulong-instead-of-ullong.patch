@@ -1,0 +1,26 @@
+From cae670faf7c2b77f481ac738c2302fe4434f706f Mon Sep 17 00:00:00 2001
+From: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+Date: Fri, 12 Jan 2024 16:13:37 +0000
+Subject: [PATCH] tw6869: module_param is ulong instead of ullong
+
+Signed-off-by: Andreas Zisowsky <zisowsky@dresearch-fe.de>
+---
+ tw6869.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tw6869.c b/tw6869.c
+index 2ddb5ca..64c0d40 100755
+--- a/tw6869.c
++++ b/tw6869.c
+@@ -169,7 +169,7 @@ static ramdp;
+  * Alternative for NTSC        : 0x0000f900 (V4L2_STD_525_60)
+  */
+ static u64 video_standard = 0x00ff06ff;
+-module_param(video_standard, ullong, 0444);
++module_param(video_standard, ulong, 0444);
+ MODULE_PARM_DESC(video_standard, "video standard expected on the video inputs (v4l2_std_id)");
+ 
+ 
+-- 
+1.9.1
+
