@@ -1,0 +1,33 @@
+Author: Mårten Nordheim <marten.nordheim@qt.io>
+Date:   Mon Aug 3 13:25:04 2020 +0200
+
+    QAuth.: Reset the nonce-count when the server requests using a new nonce
+    
+    Some servers have an upper limit on how many times a nonce can be
+    reused. Because the nc was not being reset the server would get a
+    high nc and would close the connection.
+    
+    Change-Id: I71d5a316f79777a45c7323d93e28b3845aefcfad
+    Original-patch-by: Benjamin Reikowski
+    Fixes: QTBUG-85729
+    Reviewed-by: Timur Pocheptsov <timur.pocheptsov@qt.io>
+    (cherry picked from commit bbb3619a13526da5ec39fbfd62ab2e8150ed4fc3)
+    Reviewed-by: Qt Cherry-pick Bot <cherrypick_bot@qt-project.org>
+
+diff --git a/src/network/kernel/qauthenticator.cpp b/src/network/kernel/qauthenticator.cpp
+index 3ac54605e4..1aeac6a589 100644
+--- a/src/network/kernel/qauthenticator.cpp
++++ b/src/network/kernel/qauthenticator.cpp
+@@ -436,8 +436,10 @@ void QAuthenticatorPrivate::parseHttpResponse(const QList<QPair<QByteArray, QByt
+         break;
+     case DigestMd5: {
+         this->options[QLatin1String("realm")] = realm = QString::fromLatin1(options.value("realm"));
+-        if (options.value("stale").toLower() == "true")
++        if (options.value("stale").toLower() == "true") {
+             phase = Start;
++            nonceCount = 0;
++        }
+         if (user.isEmpty() && password.isEmpty())
+             phase = Done;
+         break;
+
