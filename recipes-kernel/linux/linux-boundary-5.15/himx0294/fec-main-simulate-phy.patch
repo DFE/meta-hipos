@@ -49,7 +49,7 @@ index 5fdb87c85366..515076017d12 100644
 +	int val;
 +
 +	val = fec_enet_mdio_read(bus, 0x10, 3);
-+	if(((val & 0xfff0) == 0x1760) || ((val & 0xfff0) == 0x1720)) {
++	if(((val & 0xfff0) == 0x1760) || ((val & 0xfff0) == 0x1720) || ((val & 0xfff0) == 0x3520)) {
 +		pr_info("fec: Marvell switch detected\n");
 +		is_direct_switch = 1;
 +		return;
