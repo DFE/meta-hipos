@@ -1,4 +1,4 @@
-DESCRIPTION = "This systemd-service is used to setup network phys"
+DESCRIPTION = "This systemd-service is used to display statistical data"
 SECTION = "base"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = " file://../COPYING;md5=9ac2e7cff1ddaf48b6eab6028f23ef88 "
