@@ -1,6 +1,6 @@
 DESCRIPTION = "HIPOS Boardcontroller communication tool"
 SECTION = "libs"
-DEPENDS = "libedit lockdev"
+DEPENDS = "libedit lockdev glib-2.0"
 RDEPENDS:${PN} = "hip-udev-extra-rules"
 RDEPENDS:drbcc = "hip-udev-extra-rules"
 
