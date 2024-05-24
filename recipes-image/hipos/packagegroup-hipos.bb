@@ -24,20 +24,12 @@ RDEPENDS:packagegroup-hipos-qt = "\
     qtsvg-plugins \
     qtsensors \
     qtimageformats-plugins \
-    qtsystems \
-    qtsystems-tools \
-    qtsystems-qmlplugins \
-    qtscript \
-    qtgraphicaleffects-qmlplugins \
     qtconnectivity-qmlplugins \
     qtlocation-plugins \
     qtlocation-qmlplugins \
 "
 
 RDEPENDS:packagegroup-hipos-qt-examples = "\
-    cinematicexperience \
-    qtsmarthome \
-    qt5everywheredemo \
 "
 
 RDEPENDS:packagegroup-hipos-gstreamer = "\
