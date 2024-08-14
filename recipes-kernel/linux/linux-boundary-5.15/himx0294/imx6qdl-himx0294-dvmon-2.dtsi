@@ -477,15 +477,15 @@
 		display-timings {
 			native-mode = <&timing0>;
 			timing0: 1280p60 {
-				clock-frequency = <71107200>;
+				clock-frequency = <71625600>;
 				hactive = <1280>;
 		 		vactive = <800>;
 		 		hback-porch = <50>;
-		 		hfront-porch = <50>;
-		 		vback-porch = <4>;
-		 		vfront-porch = <14>;
+				hfront-porch = <50>;
+				vback-porch = <10>;
+				vfront-porch = <10>;
 		 		hsync-len = <60>;
-		 		vsync-len = <5>;
+				vsync-len = <9>;
 	 		};
 		};
 	};
