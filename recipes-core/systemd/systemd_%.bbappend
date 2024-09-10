@@ -2,7 +2,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 # Remove unnecessary package 'vconsole' to avoid installing furhter
 # unnecessary packages, e.g. 'kbd' or 'kbd-keymaps'.
-PACKAGECONFIG:remove = "networkd vconsole"
+# disable sysvinit to avoid installation of not needed packages
+PACKAGECONFIG:remove = "networkd vconsole sysvinit"
 
 # Enable kmod package configuration
 # A recipe append from meta-angstrom removes kmod configuration.
