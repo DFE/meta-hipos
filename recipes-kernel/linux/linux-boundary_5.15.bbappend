@@ -62,6 +62,7 @@ SRC_URI:append:himx0294 = " \
 	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \
 	file://0001-Add-parameter-to-module-brcmfmac-HYP-29550.patch \
+	file://config-security-patch \
 "
 
 #	file://rafi-touchscreen-support.patch 
@@ -91,6 +92,10 @@ do_configure:prepend:himx0294() {
         cp ${WORKDIR}/imx6qp-himx0294-dvrec.dts ${S}/arch/arm/boot/dts/imx6qp-himx0294-dvrec.dts
         cp ${WORKDIR}/imx6ull-himx0294-impec.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec.dts
         cp ${WORKDIR}/imx6ull-himx0294-impec-2.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec-2.dts
+
+	if ${@bb.utils.contains('CYSEC_BUILD', '1', 'true', 'false', d)}; then
+		patch --verbose -p1 -d ${B} < ${WORKDIR}/config-security-patch
+	fi
 }
 
 do_configure:prepend:nitrogen6x() {
