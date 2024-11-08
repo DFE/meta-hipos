@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 
 # utils 
 IMAGE_INSTALL += " \
+  htop \
   bluez5 \
   ltrace \
   mc \

@@ -36,7 +36,6 @@ IMAGE_INSTALL += "          \
   distro-feed-configs       \
   kernel-modules            \
   linux-firmware-ralink     \
-  htop                      \
   bash                      \
   udev-extraconf            \
   hip-udev-extra-rules      \
