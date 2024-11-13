@@ -25,8 +25,6 @@ RDEPENDS:packagegroup-hipos-qt = "\
     qtsensors \
     qtimageformats-plugins \
     qtconnectivity-qmlplugins \
-    qtlocation-plugins \
-    qtlocation-qmlplugins \
 "
 
 RDEPENDS:packagegroup-hipos-qt-examples = "\
