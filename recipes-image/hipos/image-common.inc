@@ -113,7 +113,6 @@ IMAGE_INSTALL += "  \
     bridge-utils    \
     pciutils        \
     tcpdump         \
-    iperf3          \
     procps          \
     init-ifupdown   \
     avahi-utils     \
