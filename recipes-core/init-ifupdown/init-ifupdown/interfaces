@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2025 iris-GmbH infrared & intelligent sensors
+#
+# SPDX-License-Identifier: MIT
+#
 # /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
 
 # The loopback interface

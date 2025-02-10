@@ -1,6 +1,9 @@
 #!/bin/bash
 #
 # Copyright (C) 2016-2023 DResearch Fahrzeugelektronik GmbH
+# Copyright (C) 2025 iris-GmbH infrared & intelligent sensors
+#
+# SPDX-License-Identifier: MIT
 #
 
 VERBOSITY=0
