@@ -1,0 +1,14 @@
+--- libsoup-2.74.2/libsoup/soup-websocket-connection.c	2021-11-24 21:32:05.000000000 +0100
++++ libsoup-2.74.2/libsoup/soup-websocket-connection.c	2025-04-22 11:41:50.820401699 +0200
+@@ -1122,6 +1122,11 @@
+ 
+ 	do {
+ 		len = pv->incoming->len;
++		if (self->pv->max_incoming_payload_size > 0 &&
++			len >= self->pv->max_incoming_payload_size) {
++			too_big_error_and_close (self, len);
++			return;
++		}
+ 		g_byte_array_set_size (pv->incoming, len + READ_BUFFER_SIZE);
+ 
+ 		count = g_pollable_input_stream_read_nonblocking (pv->input,
