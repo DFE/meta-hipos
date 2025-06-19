@@ -9,6 +9,8 @@ point.
 In order to be able to process Diag-USB sticks, the previous behavior is
 restored.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
  archival/libarchive/unsafe_symlink_target.c | 4 ++--

@@ -4,6 +4,8 @@ Date: Thu, 14 Apr 2016 14:13:40 +0200
 Subject: [PATCH] udev: wait for ldconfig.service and opkg-configure.service
  HYP-13876
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
 ---
  units/systemd-udev-trigger.service | 2 +-

@@ -11,6 +11,9 @@ It is therefore needed to check if a new address does belong to an allowed
 interface label before actually adding it to the hardware interface.
 
 From: https://github.com/avahi/avahi/commit/52fe226909cc63381be9962b830f52c1779a0a89
+
+Upstream-Status: Inappropriate [oe specific]
+
 ---
  avahi-core/iface-linux.c | 23 +++++++++++++++++++++--
  avahi-core/iface.c       | 27 ++++++++++++++++-----------

@@ -9,6 +9,8 @@ To avoid the necessary interaction in our scripts we define a short
 proceed delay of just a second after which mke2fs continues
 automatically.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
  misc/mke2fs.conf.in | 3 +++

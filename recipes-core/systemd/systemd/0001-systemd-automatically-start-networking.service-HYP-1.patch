@@ -5,6 +5,8 @@ Subject: [PATCH] systemd: automatically start networking.service, HYP-11339
 
 The service has been added to network.target.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
 Signed-off-by: Angelika Tobisch <tobisch@dresearch-fe.de>
 
@@ -17,7 +19,7 @@ index 3e4fdff14..8b3b27959 100644
 --- a/units/network.target
 +++ b/units/network.target
 @@ -13,3 +13,5 @@ Documentation=man:systemd.special(7)
- Documentation=https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget
+ Documentation=https://systemd.io/NETWORK_ONLINE
  After=network-pre.target
  RefuseManualStart=yes
 +Requires=networking.service

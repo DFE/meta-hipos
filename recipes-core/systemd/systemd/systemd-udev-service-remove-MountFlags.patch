@@ -13,6 +13,8 @@ http://www.freedesktop.org/software/systemd/man/systemd.exec.html
 With systemd version 239 the flag PrivateMounts=yes must be removed to
 get the old behavior.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
  units/systemd-udevd.service.in | 1 -
@@ -23,13 +25,13 @@ index 9ada3a6a74..121d574564 100644
 --- a/units/systemd-udevd.service.in
 +++ b/units/systemd-udevd.service.in
 @@ -28,7 +28,6 @@ ExecStart=@rootlibexecdir@/systemd-udevd
- ExecReload=udevadm control --reload --timeout 0
+ ExecStart={{LIBEXECDIR}}/systemd-udevd
  KillMode=mixed
  TasksMax=infinity
 -PrivateMounts=yes
- ProtectClock=yes
  ProtectHostname=yes
  MemoryDenyWriteExecute=yes
+ RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
 -- 
 2.26.2
 

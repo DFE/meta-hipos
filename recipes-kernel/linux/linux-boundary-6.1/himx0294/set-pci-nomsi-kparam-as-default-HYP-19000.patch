@@ -1,0 +1,13 @@
+diff --git a/drivers/pci/msi/msi.c b/drivers/pci/msi/msi.c
+index 0e9a9dbeb184..b4709f09ab3c 100644
+--- a/drivers/pci/msi/msi.c
++++ b/drivers/pci/msi/msi.c
+@@ -13,7 +13,7 @@
+ #include "../pci.h"
+ #include "msi.h"
+ 
+-static int pci_msi_enable = 1;
++static int pci_msi_enable = 0;
+ int pci_msi_ignore_mask;
+
+ static noinline void pci_msi_update_mask(struct msi_desc *desc, u32 clear, u32 set) 

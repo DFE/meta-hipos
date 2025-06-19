@@ -5,6 +5,8 @@ Subject: [PATCH] himx-impec revision detection pin
 
 Configure himx-impec revision detection pin.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---
  arch/arm/dts/imx6ul-14x14-evk.dtsi | 1 +

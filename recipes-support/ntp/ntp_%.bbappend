@@ -12,5 +12,6 @@ do_install:append() {
 
     # Remove sntp
     rm -f ${D}/etc/default/sntp
+    [ -z "$(ls -A ${D}/etc/default)" ] && rm -rf ${D}/etc/default
     rm -f ${D}${systemd_unitdir}/system/sntp.service
 }

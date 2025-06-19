@@ -6,6 +6,8 @@ Subject: [PATCH] mount.sh: remount ro before unmounting, HYP-29031
 Since honister systemd crashes when the target is busy upon unmounting.
 Hence, remount read-only beforehands to prevent the crash.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Andreas Zisowsky <zisowsky@dresearch-fe.de>
 ---
  meta/recipes-core/udev/udev-extraconf/mount.sh | 2 ++

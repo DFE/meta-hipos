@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [oe specific]
+
 --- libsoup-2.74.2/libsoup/soup-websocket-connection.c	2021-11-24 21:32:05.000000000 +0100
 +++ libsoup-2.74.2/libsoup/soup-websocket-connection.c	2025-04-22 11:41:50.820401699 +0200
 @@ -1122,6 +1122,11 @@

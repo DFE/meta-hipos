@@ -2,7 +2,7 @@ inherit kernel_wireless_regdb
 
 COMPATIBLE_MACHINE = "(himx0294|himx-nxp-bsp|nitrogen6x|nitrogen6x-lite|mx6-nxp-bsp)"
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-5.15:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/linux-boundary-6.1:"
 
 # use HEAD revision of special tw6869 driver
 SRCREV_FORMAT = "tw6869"
@@ -23,8 +23,6 @@ SRC_URI:append = " \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
 	file://0001-Add-IPU_QUEUE_TASK-mutex-HYP-19476.patch \
-	file://LF-8313-1-Update-License-to-GPL-2.0.patch \
-	file://LF-8313-2-Update-License-to-GPL-2.0.patch \
 "
 
 
@@ -57,7 +55,6 @@ SRC_URI:append:himx0294 = " \
         file://set-pci-nomsi-kparam-as-default-HYP-19000.patch \
 	file://pixcir-touch-moving-mode-HYP-19464.patch \
 	file://0001-Disable-workaround-MLK-11444.patch \
-	file://0001-ahci_imx-fix-module-unload-HYP-23856.patch \
 	file://0001-Revert-leds-pwm-add-note-frequency-support.patch \
 	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \

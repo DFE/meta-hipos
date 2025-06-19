@@ -1,0 +1,30 @@
+From 6645c772d4ff9e7217396f0b5df3a08b98a85a90 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Wed, 18 Jun 2025 09:33:30 +0200
+Subject: [PATCH] Enable classic interface names by default HYP-31820
+
+Upstream-Status: Inappropriate [oe specific]
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ src/udev/net/link-config.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/udev/net/link-config.c b/src/udev/net/link-config.c
+index 910ec2709e..d439ade495 100644
+--- a/src/udev/net/link-config.c
++++ b/src/udev/net/link-config.c
+@@ -705,7 +705,9 @@ static bool enable_name_policy(void) {
+         if (r < 0)
+                 log_warning_errno(r, "Failed to parse net.ifnames= kernel command line option, ignoring: %m");
+         if (r <= 0)
+-                return (cached = true);
++                /* Enable classic interface names by default HYP-31820
++                return (cached = true); */
++                return (cached = 0);
+ 
+         if (!b)
+                 log_info("Network interface NamePolicy= disabled on kernel command line.");
+-- 
+2.34.1
+

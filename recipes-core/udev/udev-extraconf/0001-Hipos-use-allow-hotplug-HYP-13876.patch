@@ -3,6 +3,8 @@ From: Eik Binschek <binschek@dresearch-fe.de>
 Date: Mon, 14 Mar 2016 10:28:26 +0200
 Subject: [PATCH] Hipos: use allow-hotplug HYP-13876
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Eik Binschek <binschek@dresearch-fe.de>
 ---
  network.sh | 11 +-

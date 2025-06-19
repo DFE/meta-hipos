@@ -5,6 +5,8 @@ Subject: [PATCH] systemd-reboot.service: always poweroff on reboot
 
 reboot without poweroff makes no sense on our hipos hardware.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 ---

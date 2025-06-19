@@ -5,6 +5,8 @@ Subject: [PATCH] systemd-halt.service: always poweroff on halt
 
 halt without poweroff makes no sense on our hipos hardware.
 
+Upstream-Status: Inappropriate [oe specific]
+
 Signed-off-by: Steffen Sledz <sledz@dresearch-fe.de>
 ---
  units/systemd-halt.service | 2 +-
@@ -14,12 +16,12 @@ diff --git a/units/systemd-halt.service b/units/systemd-halt.service
 index cd16d1de20..09741375fa 100644
 --- a/units/systemd-halt.service
 +++ b/units/systemd-halt.service
-@@ -16,4 +16,4 @@ After=shutdown.target umount.target final.target
- 
- [Service]
- Type=oneshot
--ExecStart=systemctl --force halt
-+ExecStart=systemctl --force poweroff
+@@ -13,4 +13,4 @@
+ DefaultDependencies=no
+ Requires=shutdown.target umount.target final.target
+ After=shutdown.target umount.target final.target
+-SuccessAction=halt-force
++SuccessAction=poweroff-force
 -- 
 2.26.2
 
