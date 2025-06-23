@@ -1,31 +1,30 @@
-From 1ce9b89957017e70808a48b3b12efdcc963fe382 Mon Sep 17 00:00:00 2001
-From: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
-Date: Mon, 12 Sep 2022 10:24:35 +0200
+From 31dcb3f2e64c1aeb8382f2af5a364545672b4347 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Fri, 20 Jun 2025 13:36:50 +0200
 Subject: [PATCH] adv7180: Reset and interrupt HYP-27448
 
 Extra reset to improve the interaction with MIPI CSI2 interface.
 Enable field has changed interrupt to determine which is current field.
 Read status in interrupt service routine.
 
-Signed-off-by: OpenEmbedded <mario.schuknecht@dresearch-fe.de>
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
 ---
- drivers/media/i2c/adv7180.c | 79 +++++++++++++++++++++++++++++++++++--
- 1 file changed, 76 insertions(+), 3 deletions(-)
+ drivers/media/i2c/adv7180.c | 78 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 75 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/media/i2c/adv7180.c b/drivers/media/i2c/adv7180.c
-index 5a2263d99b72..fb1bc01a060a 100644
+index 1c9b84a3a051..dd29deafe6c7 100644
 --- a/drivers/media/i2c/adv7180.c
 +++ b/drivers/media/i2c/adv7180.c
-@@ -66,6 +66,8 @@
- #define ADV7180_HUE_DEF		0
- #define ADV7180_HUE_MAX		128
- 
-+#define ADV7180_REG_DEFAULT_VALUE_Y	0x000c
-+#define ADV7180_REG_DEFAULT_VALUE_C	0x000d
+@@ -70,6 +70,7 @@
+ #define ADV7180_REG_DEF_VALUE_Y	0x000c
+ #define ADV7180_DEF_VAL_EN		0x1
+ #define ADV7180_DEF_VAL_AUTO_EN	0x2
++#define ADV7180_REG_DEF_VALUE_C	0x000d
  #define ADV7180_REG_CTRL		0x000e
  #define ADV7180_CTRL_IRQ_SPACE		0x20
  
-@@ -120,6 +122,9 @@
+@@ -124,6 +125,9 @@
  #define ADV7180_REG_ISR1	0x2042
  #define ADV7180_REG_ICR1	0x2043
  #define ADV7180_REG_IMR1	0x2044
@@ -35,7 +34,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  #define ADV7180_REG_IMR2	0x2048
  #define ADV7180_IRQ3_AD_CHANGE	0x08
  #define ADV7180_REG_ISR3	0x204A
-@@ -191,6 +196,9 @@ struct adv7180_state;
+@@ -195,6 +199,9 @@ struct adv7180_state;
  #define ADV7180_FLAG_MIPI_CSI2		BIT(2)
  #define ADV7180_FLAG_I2P		BIT(3)
  
@@ -45,7 +44,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  struct adv7180_chip_info {
  	unsigned int flags;
  	unsigned int valid_input_mask;
-@@ -356,7 +364,9 @@ static int adv7180_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
+@@ -360,7 +367,9 @@ static int adv7180_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
  		return err;
  
  	if (state->streaming) {
@@ -56,7 +55,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  		goto unlock;
  	}
  
-@@ -516,6 +526,46 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
+@@ -520,6 +529,46 @@ static int adv7180_set_power(struct adv7180_state *state, bool on)
  
  	if (state->chip_info->flags & ADV7180_FLAG_MIPI_CSI2) {
  		if (on) {
@@ -69,8 +68,8 @@ index 5a2263d99b72..fb1bc01a060a 100644
 +			/* Restore input */
 +			adv7180_write(state, ADV7180_REG_INPUT_CONTROL, insel);
 +			/* Default to black output */
-+			adv7180_write(state, ADV7180_REG_DEFAULT_VALUE_Y, 0x02);
-+			adv7180_write(state, ADV7180_REG_DEFAULT_VALUE_C, 0x88);
++			adv7180_write(state, ADV7180_REG_DEF_VALUE_Y, 0x02);
++			adv7180_write(state, ADV7180_REG_DEF_VALUE_C, 0x88);
 +			/* Reinitialize */
 +			state->chip_info->init(state);
 +			adv7180_set_field_mode(state);
@@ -103,7 +102,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  			adv7180_csi_write(state, 0xDE, 0x02);
  			adv7180_csi_write(state, 0xD2, 0xF7);
  			adv7180_csi_write(state, 0xD8, 0x65);
-@@ -681,9 +731,10 @@ static int adv7180_mbus_fmt(struct v4l2_subdev *sd,
+@@ -728,9 +777,10 @@ static int adv7180_mbus_fmt(struct v4l2_subdev *sd,
  	fmt->width = 720;
  	fmt->height = state->curr_norm & V4L2_STD_525_60 ? 480 : 576;
  
@@ -115,7 +114,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  	return 0;
  }
  
-@@ -910,12 +961,21 @@ static const struct v4l2_subdev_ops adv7180_ops = {
+@@ -957,12 +1007,21 @@ static const struct v4l2_subdev_ops adv7180_ops = {
  	.sensor = &adv7180_sensor_ops,
  };
  
@@ -138,7 +137,7 @@ index 5a2263d99b72..fb1bc01a060a 100644
  	isr3 = adv7180_read(state, ADV7180_REG_ISR3);
  	/* clear */
  	adv7180_write(state, ADV7180_REG_ICR3, isr3);
-@@ -928,6 +988,19 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
+@@ -975,6 +1034,19 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
  
  		v4l2_subdev_notify_event(&state->sd, &src_ch);
  	}
@@ -159,5 +158,5 @@ index 5a2263d99b72..fb1bc01a060a 100644
  
  	return IRQ_HANDLED;
 -- 
-2.35.3
+2.34.1
 
