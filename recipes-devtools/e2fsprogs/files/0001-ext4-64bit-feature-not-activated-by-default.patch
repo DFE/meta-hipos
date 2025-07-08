@@ -25,7 +25,7 @@ index 83c75a31..a39ef2a4 100644
  	}
  	ext4 = {
 -		features = has_journal,extent,huge_file,flex_bg,metadata_csum,metadata_csum_seed,64bit,dir_nlink,extra_isize,orphan_file
-+		features = has_journal,extent,huge_file,flex_bg,metadata_csum,dmetadata_csum_seed,dir_nlink,extra_isize,orphan_file
++		features = has_journal,extent,huge_file,flex_bg,metadata_csum,metadata_csum_seed,dir_nlink,extra_isize,orphan_file
 +		auto_64-bit_support = 1
  	}
  	small = {
