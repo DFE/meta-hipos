@@ -3,6 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-${PV}:${THISDIR}/u-boot:${THISDIR}
 SRC_URI:append:himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
 	file://0001-himx-impec-revision-detection-pin.patch \
+        file://0001-Activate-only-sdhc-3-and-4-HYP-31820.patch \
 	file://himx0294.c \
 	file://Makefile \
 	file://Kconfig \
