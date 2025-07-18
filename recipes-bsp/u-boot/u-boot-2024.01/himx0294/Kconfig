@@ -1,5 +1,22 @@
 if TARGET_HIMX0294
 
+choice
+	prompt "Board variant"
+
+config BOARD_IS_HIMX_IVAP
+	bool "ivap"
+
+config BOARD_IS_HIMX_IMOC
+	bool "imoc"
+
+config BOARD_IS_HIMX_DVMON
+	bool "dvmon"
+
+config BOARD_IS_IMX_IPCAM
+	bool "ipcam"
+
+endchoice
+
 config SYS_BOARD
 	default "himx0294"
 
