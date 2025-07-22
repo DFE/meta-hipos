@@ -1,13 +1,17 @@
 From 4c93877e34023ea14b819e942edb8d2166522c41 Mon Sep 17 00:00:00 2001
 From: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
 Date: Wed, 17 Nov 2021 09:03:11 +0100
-Subject: [PATCH] ext4 64bit feature not activated by default HYP-24046
+Subject: [PATCH] ext4 64bit and orphan_file feature not activated by default HYP-24046
 
 The ext4 64bit feature allows partitioning greater than 16TiB. But with
 older u-boot versions it leads to boot problems, because the ext4 64bit
 feature is not yet supported.
 To remain backwards compatible, the ext4 64bit feature is no longer
 activated by default.
+
+The orphan_file feature is not supported in older firmware versions (up
+to kirkstone). To ensure compatibility with downgrades, this feature is
+disabled.
 
 Upstream-Status: Inappropriate [oe specific]
 
@@ -25,7 +29,7 @@ index 83c75a31..a39ef2a4 100644
  	}
  	ext4 = {
 -		features = has_journal,extent,huge_file,flex_bg,metadata_csum,metadata_csum_seed,64bit,dir_nlink,extra_isize,orphan_file
-+		features = has_journal,extent,huge_file,flex_bg,metadata_csum,metadata_csum_seed,dir_nlink,extra_isize,orphan_file
++		features = has_journal,extent,huge_file,flex_bg,metadata_csum,metadata_csum_seed,dir_nlink,extra_isize
 +		auto_64-bit_support = 1
  	}
  	small = {
