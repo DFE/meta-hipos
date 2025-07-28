@@ -13,6 +13,5 @@ IMAGE_INSTALL:append:himx0294 = " \
 IMAGE_INSTALL += "         \
     lighttpd               \
     lighttpd-module-webdav \
-    lighttpd-module-alias  \
 "
 
