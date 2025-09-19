@@ -1,0 +1,73 @@
+From 42aaab9c890733d5327261f7c517d9969b9d726f Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Fri, 19 Sep 2025 09:06:48 +0200
+Subject: [PATCH] tsl2772.c: Allow tsl2771 and tsl2772 HYP-33226
+
+Driver detects tsl2771 and tsl2772 if tsl2771 is configured in device
+tree.
+This avoids the need to maintain separate DTs for each variant.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ drivers/iio/light/tsl2772.c | 38 +++++++++++++++++++++++++++++--------
+ 1 file changed, 30 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/iio/light/tsl2772.c b/drivers/iio/light/tsl2772.c
+index d79205361dfa..95151b020153 100644
+--- a/drivers/iio/light/tsl2772.c
++++ b/drivers/iio/light/tsl2772.c
+@@ -1802,11 +1802,31 @@ static int tsl2772_probe(struct i2c_client *clientp,
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	if (tsl2772_device_id_verif(ret, id->driver_data) <= 0) {
+-		dev_info(&chip->client->dev,
+-			 "%s: i2c device found does not match expected id\n",
+-				__func__);
+-		return -EINVAL;
++	if (id->driver_data == tsl2771) {
++		switch (ret & 0xf0) {
++		case TRITON_ID:
++			chip->id = tsl2771;
++			chip->chip_info =
++				&tsl2772_chip_info_tbl[device_channel_config[tsl2771]];
++			dev_info(&chip->client->dev, "Detected TSL2771\n");
++			break;
++		case SWORDFISH_ID:
++			chip->id = tsl2772;
++			chip->chip_info =
++				&tsl2772_chip_info_tbl[device_channel_config[tsl2772]];
++			dev_info(&chip->client->dev, "Detected TSL2772\n");
++			break;
++		default:
++			dev_err(&chip->client->dev, "Unsupported chip ID: 0x%x\n", ret);
++			return -EINVAL;
++		}
++	} else {
++		if (tsl2772_device_id_verif(ret, id->driver_data) <= 0) {
++			dev_info(&chip->client->dev,
++				 "%s: i2c device found does not match expected id\n",
++					__func__);
++			return -EINVAL;
++		}
+ 	}
+ 
+ 	ret = i2c_smbus_write_byte(clientp, TSL2772_CMD_REG | TSL2772_CNTRL);
+@@ -1822,9 +1842,11 @@ static int tsl2772_probe(struct i2c_client *clientp,
+ 
+ 	chip->tsl2772_chip_status = TSL2772_CHIP_UNKNOWN;
+ 	chip->pdata = dev_get_platdata(&clientp->dev);
+-	chip->id = id->driver_data;
+-	chip->chip_info =
+-		&tsl2772_chip_info_tbl[device_channel_config[id->driver_data]];
++	if (id->driver_data != tsl2771) {
++		chip->id = id->driver_data;
++		chip->chip_info =
++			&tsl2772_chip_info_tbl[device_channel_config[id->driver_data]];
++	}
+ 
+ 	indio_dev->info = chip->chip_info->info;
+ 	indio_dev->modes = INDIO_DIRECT_MODE;
+-- 
+2.50.1
+
