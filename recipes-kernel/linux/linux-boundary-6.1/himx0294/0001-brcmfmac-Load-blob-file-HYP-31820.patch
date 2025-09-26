@@ -1,0 +1,106 @@
+From 58ad635590b73de1d74d7c2b71cb9c33cd942483 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Fri, 26 Sep 2025 13:36:45 +0200
+Subject: [PATCH] brcmfmac: Load blob file HYP-31820
+
+'blob' file is also required in the USB version.
+Remove instructions that do not originate from the mainline kernel
+and cause the function to terminate.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ .../broadcom/brcm80211/brcmfmac/common.c      |  4 ++
+ .../broadcom/brcm80211/brcmfmac/usb.c         | 43 ++++++++++++++++++-
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
+index 78dfd2b2dcbe..53c8bbd5ba1c 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
+@@ -458,6 +458,9 @@ int brcmf_c_preinit_dcmds(struct brcmf_if *ifp)
+ 
+ 	/* Enable tx beamforming, errors can be ignored (not supported) */
+ 	(void)brcmf_fil_iovar_int_set(ifp, "txbf", 1);
++#if 0
++	/* The following instructions do not originate from the mainline
++	 * kernel and cause the function to terminate. */
+ 	err = brcmf_fil_iovar_int_set(ifp, "chanspec", 0x1001);
+ 	if (err < 0)
+ 		bphy_err(drvr, "Initial Channel failed %d\n", err);
+@@ -471,6 +474,7 @@ int brcmf_c_preinit_dcmds(struct brcmf_if *ifp)
+ 	} else if (err) {
+ 		bphy_err(drvr, "Add unicast filter error (%d)\n", err);
+ 	}
++#endif
+ 
+ done:
+ 	return err;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
+index ebc2ef54a978..3da309bf786e 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
+@@ -40,7 +40,7 @@ BRCMF_FW_DEF(43143, "brcmfmac43143");
+ BRCMF_FW_DEF(43236B, "brcmfmac43236b");
+ BRCMF_FW_DEF(43242A, "brcmfmac43242a");
+ BRCMF_FW_DEF(43569, "brcmfmac43569");
+-CY_FW_DEF(4373, "cyfmac4373");
++BRCMF_FW_DEF(4373, "brcmfmac4373");
+ 
+ static const struct brcmf_firmware_mapping brcmf_usb_fwnames[] = {
+ 	BRCMF_FW_ENTRY(BRCM_CC_43143_CHIP_ID, 0xFFFFFFFF, 43143),
+@@ -1159,11 +1159,52 @@ struct brcmf_usbdev *brcmf_usb_attach(struct brcmf_usbdev_info *devinfo,
+ 	return NULL;
+ }
+ 
++static
++int brcmf_usb_get_fwname(struct device *dev, const char *ext, u8 *fw_name)
++{
++        struct brcmf_bus *bus = dev_get_drvdata(dev);
++        struct brcmf_fw_request *fwreq;
++        struct brcmf_fw_name fwnames[] = {
++                { ext, fw_name },
++        };
++
++        fwreq = brcmf_fw_alloc_request(bus->chip, bus->chiprev,
++                                       brcmf_usb_fwnames,
++                                       ARRAY_SIZE(brcmf_usb_fwnames),
++                                       fwnames, ARRAY_SIZE(fwnames));
++        if (!fwreq)
++                return -ENOMEM;
++
++        kfree(fwreq);
++        return 0;
++}
++
+ static int brcmf_usb_get_blob(struct device *dev, const struct firmware **fw,
+ 			      enum brcmf_blob_type type)
+ {
++#if 0
+ 	/* No blobs for USB devices... */
+ 	return -ENOENT;
++#else
++	struct brcmf_bus *bus = dev_get_drvdata(dev);
++	u8 clm_name[BRCMF_FW_NAME_LEN];
++	s32 err;
++	memset(clm_name, 0, sizeof(clm_name));
++        err = brcmf_usb_get_fwname(dev, ".clm_blob", clm_name);
++        if (err) {
++                brcmf_err("get CLM blob file name failed (%d)\n", err);
++                return err;
++        }
++
++        err = firmware_request_nowarn(fw, clm_name, bus->dev);
++        if (err) {
++                brcmf_info("no clm_blob available (err=%d), device may have limited channels available\n",
++                           err);
++                return -1;
++        }
++
++	return 0;
++#endif
+ }
+ 
+ static const struct brcmf_bus_ops brcmf_usb_bus_ops = {
+-- 
+2.50.1
+
