@@ -18,7 +18,7 @@ KBUILD_DEFCONFIG = ""
 DRSRCBRANCH="master"
 
 SRC_URI:append = " \
-	git://github.com/DFE/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
+	git://github.com/iris-GmbH/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
 	file://defconfig \
 	file://support-mitsubishi-touch-controller.patch \
 	file://0001-add-tw6869-to-parent-Kconfig-and-Makefile-HYP-11342.patch \
