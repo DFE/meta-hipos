@@ -19,10 +19,11 @@
 #define CONFIG_INITRD_TAG
 #define CONFIG_REVISION_TAG
 
-#define CONFIG_BOARD_LATE_INIT
 #define CONFIG_USBD_HS
 
 #define CFG_MXC_UART_BASE	       UART2_BASE
+
+#define CFG_FEC_MXC_PHYADDR  -1
 
 #ifdef CONFIG_CMD_SF
 #define CONFIG_SF_DEFAULT_BUS  0
@@ -100,9 +101,6 @@
 #define HIMX_DEFAULT_FDT_FILE_DVMON_2 "/boot/imx6q-himx0294-dvmon-2.dtb"
 #define HIMX_DEFAULT_FDT_HIGH ""
 #define HIMX_DEFAULT_LINUX_DEV "2"
-#elif defined(CONFIG_BOARD_IS_HIMX_IPCAM)
-#define HIMX_DEFAULT_FDT_HIGH ""
-#define HIMX_DEFAULT_LINUX_DEV "0"
 #else
 #define HIMX_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #define HIMX_DEFAULT_LINUX_DEV "2"
