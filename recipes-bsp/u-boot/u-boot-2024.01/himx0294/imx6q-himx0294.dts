@@ -1,0 +1,89 @@
+// SPDX-License-Identifier: GPL-2.0 OR X11
+/*
+ * Copyright 2025 iris-GmbH infrared & intelligent sensors
+ * Copyright 2013 Boundary Devices, Inc.
+ * Copyright 2012 Freescale Semiconductor, Inc.
+ * Copyright 2011 Linaro Ltd.
+ */
+
+/dts-v1/;
+#include "imx6q.dtsi"
+#include "imx6qdl-nitrogen6x.dtsi"
+
+/ {
+	model = "i.MX6 himx0294 Board";
+	compatible = "boundary,imx6q-nitrogen6x", "fsl,imx6q";
+
+	// use only usdhc3/4 as mmc0/1
+	aliases {
+		/delete-property/ mmc2;
+		/delete-property/ mmc3;
+		mmc0 = &usdhc3;
+		mmc1 = &usdhc4;
+	};
+
+	// Use watchdog for system reset
+	// see commit be23b1331fb35b7d5a095ef2c0b522c1f241eee9
+	wdt-reboot {
+		compatible = "wdt-reboot";
+		wdt = <&wdog1>;
+		bootph-pre-ram;
+	};
+};
+
+&sata {
+	status = "okay";
+};
+
+// change phy reset to GPIO01_25 and increase post delay
+&fec {
+	phy-reset-gpios = <&gpio1 25 GPIO_ACTIVE_LOW>;
+	phy-reset-post-delay = <100>;
+
+	/* Set CFG_FEC_MXC_PHYADDR to -1, so PHY addr 0 and 16 are auto detected */
+};
+
+&pinctrl_enet {
+    fsl,pins = <
+        MX6QDL_PAD_ENET_MDIO__ENET_MDIO		0x100b0
+        MX6QDL_PAD_ENET_MDC__ENET_MDC		0x100b0
+        MX6QDL_PAD_RGMII_TXC__RGMII_TXC		0x10030
+        MX6QDL_PAD_RGMII_TD0__RGMII_TD0		0x10030
+        MX6QDL_PAD_RGMII_TD1__RGMII_TD1		0x10030
+        MX6QDL_PAD_RGMII_TD2__RGMII_TD2		0x10030
+        MX6QDL_PAD_RGMII_TD3__RGMII_TD3		0x10030
+        MX6QDL_PAD_RGMII_TX_CTL__RGMII_TX_CTL	0x10030
+        MX6QDL_PAD_ENET_REF_CLK__ENET_TX_CLK	0x100b0
+        MX6QDL_PAD_RGMII_RXC__RGMII_RXC		0x1b030
+        MX6QDL_PAD_RGMII_RD0__RGMII_RD0		0x1b030
+        MX6QDL_PAD_RGMII_RD1__RGMII_RD1		0x1b030
+        MX6QDL_PAD_RGMII_RD2__RGMII_RD2		0x1b030
+        MX6QDL_PAD_RGMII_RD3__RGMII_RD3		0x1b030
+        MX6QDL_PAD_RGMII_RX_CTL__RGMII_RX_CTL	0x1b030
+        /* Phy reset */
+        MX6QDL_PAD_ENET_CRS_DV__GPIO1_IO25	0x000b0
+    >;
+};
+
+// delete i2c devices
+&i2c1 {
+	/delete-node/ codec;
+	/delete-node/ rtc;
+};
+
+&i2c3 {
+	/delete-node/ touchscreen@4;
+	/delete-node/ touchscreen@38;
+};
+
+// change i2c3 pins (SDA on GPIO_6)
+&pinctrl_i2c3 {
+	fsl,pins = <
+		MX6QDL_PAD_GPIO_5__I2C3_SCL		0x4001b8b1
+		MX6QDL_PAD_GPIO_6__I2C3_SDA		0x4001b8b1
+	>;
+};
+
+&usdhc2 {
+	status = "disabled";
+};

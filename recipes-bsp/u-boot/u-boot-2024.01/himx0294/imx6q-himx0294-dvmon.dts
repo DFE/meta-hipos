@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0 OR X11
+/*
+ * Copyright 2025 iris-GmbH infrared & intelligent sensors
+ * Copyright 2013 Boundary Devices, Inc.
+ * Copyright 2012 Freescale Semiconductor, Inc.
+ * Copyright 2011 Linaro Ltd.
+ */
+
+/dts-v1/;
+#include "imx6q-himx0294.dts"
+
+/* allow touchscreen reset via GPIO1_IO00 */
+&pinctrl_hog {
+	fsl,pins = <
+		MX6QDL_PAD_GPIO_0__GPIO1_IO00	0x1b0b0
+	>;
+};
