@@ -14,6 +14,18 @@
 	chosen {
 		stdout-path = &uart2;
 	};
+
+	// Use watchdog for system reset
+	// see commit be23b1331fb35b7d5a095ef2c0b522c1f241eee9
+	wdt-reboot {
+		compatible = "wdt-reboot";
+		wdt = <&wdog1>;
+		bootph-pre-ram;
+	};
+};
+
+&wdog1 {
+	/delete-property/ fsl,ext-reset-output;
 };
 
 &clks {
