@@ -1,0 +1,114 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+//
+// Copyright (C) 2016 Freescale Semiconductor, Inc.
+
+/dts-v1/;
+
+#include "imx6ull.dtsi"
+#include "imx6ul-14x14-evk.dtsi"
+
+/ {
+	model = "Freescale i.MX6 himx0432 Board";
+	compatible = "fsl,imx6ull-14x14-evk", "fsl,imx6ull";
+
+	chosen {
+		stdout-path = &uart2;
+	};
+
+	// Use watchdog for system reset
+	// see commit be23b1331fb35b7d5a095ef2c0b522c1f241eee9
+	wdt-reboot {
+		compatible = "wdt-reboot";
+		wdt = <&wdog1>;
+		bootph-pre-ram;
+	};
+};
+
+&wdog1 {
+	/delete-property/ fsl,ext-reset-output;
+};
+
+&clks {
+	assigned-clocks = <&clks IMX6UL_CLK_PLL3_PFD2>;
+	assigned-clock-rates = <320000000>;
+};
+
+&iomuxc {
+	pinctrl-0 = <&pinctrl_hog0>;
+
+	pinctrl_hog0: hog0grp {
+		fsl,pins = <
+			MX6UL_PAD_CSI_DATA01__GPIO4_IO22        0x1b0b0 /* /REV2 DETECT */
+		>;
+	};
+};
+
+&pinctrl_i2c1 {
+	fsl,pins = <
+		MX6UL_PAD_GPIO1_IO02__I2C1_SCL 0x4001b8b0
+		MX6UL_PAD_GPIO1_IO03__I2C1_SDA 0x4001b8b0
+	>;
+};
+
+&uart2 {
+	/delete-property/ uart-has-rtscts;
+};
+
+&pinctrl_uart2 {
+	fsl,pins = <
+		MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
+		MX6UL_PAD_UART2_RX_DATA__UART2_DCE_RX	0x1b0b1
+	>;
+};
+
+&fec1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_enet1>;
+	phy-mode = "rmii";
+	status = "okay";
+
+	/delete-property/ phy-handle;
+	/delete-property/ phy-supply;
+
+	fixed-link {
+		speed = <100>;
+		full-duplex;
+		pause;
+	};
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy0: ethernet-phy@2 {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <2>;
+		};
+
+		ethphy1: ethernet-phy@1 {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <1>;
+		};
+	};
+};
+
+&fec2 {
+	status = "disabled";
+	/delete-node/ mdio;
+};
+
+&pinctrl_enet1 {
+	fsl,pins = <
+		MX6UL_PAD_ENET1_RX_EN__ENET1_RX_EN	0x1b0b0
+		MX6UL_PAD_ENET1_RX_ER__ENET1_RX_ER	0x1b0b0
+		MX6UL_PAD_ENET1_RX_DATA0__ENET1_RDATA00	0x1b0b0
+		MX6UL_PAD_ENET1_RX_DATA1__ENET1_RDATA01	0x1b0b0
+		MX6UL_PAD_ENET1_TX_EN__ENET1_TX_EN	0x1b0b0
+		MX6UL_PAD_ENET1_TX_DATA0__ENET1_TDATA00	0x1b0b0
+		MX6UL_PAD_ENET1_TX_DATA1__ENET1_TDATA01	0x1b0b0
+		MX6UL_PAD_ENET1_TX_CLK__ENET1_REF_CLK1	0x4001b031
+		MX6UL_PAD_ENET2_TX_DATA0__GPIO2_IO11 0x1b0b0
+		MX6UL_PAD_GPIO1_IO07__ENET1_MDC		0x1b0b0
+		MX6UL_PAD_GPIO1_IO06__ENET1_MDIO	0x1b0b0
+	>;
+};

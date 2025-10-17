@@ -16,6 +16,8 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/io.h>
 #include <common.h>
+#include <dm/uclass.h>
+#include <env.h>
 #include <i2c.h>
 #include <fsl_esdhc.h>
 #include <linux/sizes.h>
@@ -24,38 +26,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define UART_PAD_CTRL  (PAD_CTL_PKE | PAD_CTL_PUE |		\
-	PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED |		\
-	PAD_CTL_DSE_40ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
-
-#define I2C_PAD_CTRL    (PAD_CTL_PKE | PAD_CTL_PUE |            \
-	PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED |               \
-	PAD_CTL_DSE_40ohm | PAD_CTL_HYS |                       \
-	PAD_CTL_ODE)
-
-#define PC MUX_PAD_CTRL(I2C_PAD_CTRL)
-
-#define ENET_PAD_CTRL  (PAD_CTL_PUS_100K_UP | PAD_CTL_PUE |     \
-        PAD_CTL_SPEED_HIGH   |                                  \
-        PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST)
-
-#define ENET_CLK_PAD_CTRL  (PAD_CTL_DSE_40ohm   | PAD_CTL_SRE_FAST)
-
-
-/* I2C1 for PMIC */
-static struct i2c_pads_info i2c_pad_info1 = {
-	.scl = {
-		.i2c_mode =  MX6_PAD_GPIO1_IO02__I2C1_SCL | PC,
-		.gpio_mode = MX6_PAD_GPIO1_IO02__GPIO1_IO02 | PC,
-		.gp = IMX_GPIO_NR(1, 2),
-	},
-	.sda = {
-		.i2c_mode =  MX6_PAD_GPIO1_IO03__I2C1_SDA | PC,
-		.gpio_mode = MX6_PAD_GPIO1_IO03__GPIO1_IO03 | PC,
-		.gp = IMX_GPIO_NR(1, 3),
-	},
-};
-
 int dram_init(void)
 {
 	gd->ram_size = imx_ddr_size();
@@ -63,42 +33,7 @@ int dram_init(void)
 	return 0;
 }
 
-static iomux_v3_cfg_t const uart1_pads[] = {
-	MX6_PAD_UART1_TX_DATA__UART1_DCE_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
-	MX6_PAD_UART1_RX_DATA__UART1_DCE_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
-	MX6_PAD_UART2_TX_DATA__UART2_DCE_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
-	MX6_PAD_UART2_RX_DATA__UART2_DCE_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
-};
-
 #ifdef CONFIG_FEC_MXC
-static iomux_v3_cfg_t const fec1_pads[] = {
-	MX6_PAD_ENET1_TX_DATA0__ENET1_TDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_TX_DATA1__ENET1_TDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_TX_EN__ENET1_TX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_TX_CLK__ENET1_REF_CLK1 | MUX_PAD_CTRL(ENET_CLK_PAD_CTRL),
-	MX6_PAD_ENET1_RX_DATA0__ENET1_RDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_RX_DATA1__ENET1_RDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_RX_ER__ENET1_RX_ER | MUX_PAD_CTRL(ENET_PAD_CTRL),
-	MX6_PAD_ENET1_RX_EN__ENET1_RX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),
-};
-
-static void setup_iomux_fec(int fec_id)
-{
-	if (fec_id == 0)
-		imx_iomux_v3_setup_multiple_pads(fec1_pads,
-						 ARRAY_SIZE(fec1_pads));
-	else
-		printf("setup_iomux_fec: %d not supported\n", fec_id);
-}
-
-int board_eth_init(struct bd_info *bis)
-{
-	setup_iomux_fec(CONFIG_FEC_ENET_DEV);
-
-	return fecmxc_initialize_multi(bis, CONFIG_FEC_ENET_DEV,
-				       CONFIG_FEC_MXC_PHYADDR, IMX_FEC_BASE);
-}
-
 static int setup_fec(int fec_id)
 {
 	struct iomuxc *const iomuxc_regs = (struct iomuxc *)IOMUXC_BASE_ADDR;
@@ -128,13 +63,7 @@ static int setup_fec(int fec_id)
 
 	return 0;
 }
-
 #endif
-
-static void setup_iomux_uart(void)
-{
-	imx_iomux_v3_setup_multiple_pads(uart1_pads, ARRAY_SIZE(uart1_pads));
-}
 
 int board_mmc_get_env_dev(int devno)
 {
@@ -148,8 +77,23 @@ int mmc_map_to_kernel_blk(int devno)
 
 int board_early_init_f(void)
 {
-	setup_iomux_uart();
+	return 0;
+}
 
+static struct udevice* get_i2c_device(int bus, int addr)
+{
+	struct udevice *idev, *ibus;
+	int ret;
+
+	ret = uclass_get_device_by_seq(UCLASS_I2C, bus, &ibus);
+	if (ret)
+		return 0;
+
+	for (int i = 0; i < 5; ++i) {
+		ret = dm_i2c_probe(ibus, addr, 0, &idev);
+		if (0 == ret)
+			return idev;
+	}
 	return 0;
 }
 
@@ -158,17 +102,17 @@ int board_init(void)
 	/* Address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
-	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
-	i2c_set_bus_num(0);
-	if(0 == i2c_probe(0x8)) {
+	struct udevice *pmic;
+	pmic = get_i2c_device(0, 0x08);
+
+	if (pmic) {
 		u8 tmp = 0x48;
 		/* Reset KSZ8795CLX */
 		gpio_request(IMX_GPIO_NR(2, 11), "switch_rst");
 		gpio_direction_output(IMX_GPIO_NR(2, 11) , 0);
-
-		i2c_write(0x8, 0x66, 1, &tmp, 1);
+		dm_i2c_write(pmic, 0x66, &tmp, 1);
 		tmp = 0x1f;
-		i2c_write(0x8, 0x6d, 1, &tmp, 1);
+		dm_i2c_write(pmic, 0x6d, &tmp, 1);
 
 		mdelay(15);
 		gpio_set_value(IMX_GPIO_NR(2, 11), 1);

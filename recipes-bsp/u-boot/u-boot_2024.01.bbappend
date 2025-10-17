@@ -2,9 +2,11 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/u-boot-${PV}:${THISDIR}/u-boot:${THISDIR}
 
 SRC_URI:append:himx0294 = " \
 	file://0001-himx0294-Add-Kconfig.patch \
-	file://0001-himx-impec-revision-detection-pin.patch \
-        file://0001-Activate-only-sdhc-3-and-4-HYP-31820.patch \
+	file://0001-himx0432-Add-Kconfig.patch \
 	file://himx0294.c \
+	file://himx0294.h \
+	file://himx0432.c \
+	file://himx0432.h \
 	file://Makefile \
 	file://Kconfig \
 	file://nitrogen6q.cfg.template \
@@ -19,14 +21,13 @@ SRC_URI:append:himx0294 = " \
 	file://himx0294_ivap_defconfig \
 	file://himx0294_ivqp_defconfig \
 	file://himx0294_dvmon_defconfig \
-	file://himx0294.h \
-	file://0001-himx0432-Add-Kconfig.patch \
 	file://himx0294_impec_defconfig \
-	file://himx0432.c \
 	file://Makefile_himx0432 \
 	file://Kconfig_himx0432 \
-	file://himx0432.h \
 	file://imximage-1GiB.cfg.template \
+	file://imx6q-himx0294.dts \
+	file://imx6q-himx0294-dvmon.dts \
+	file://imx6ull-himx0432.dts \
 "
 
 do_configure:prepend() {
@@ -57,5 +58,9 @@ do_configure:prepend() {
         cp ${WORKDIR}/himx0432.c ${S}/board/freescale/himx0432/
         cp ${WORKDIR}/imximage-1GiB.cfg.template ${S}/board/freescale/himx0432/imximage-1GiB.cfg
         cp ${WORKDIR}/himx0432.h ${S}/include/configs/
+
+        cp ${WORKDIR}/imx6q-himx0294.dts ${S}/arch/arm/dts/
+        cp ${WORKDIR}/imx6q-himx0294-dvmon.dts ${S}/arch/arm/dts/
+        cp ${WORKDIR}/imx6ull-himx0432.dts ${S}/arch/arm/dts/
 }
 
