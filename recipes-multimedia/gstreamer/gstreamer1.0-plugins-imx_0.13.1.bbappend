@@ -11,8 +11,13 @@ SRC_URI:append = " \
 	file://0001-cropping-added-to-video-sink-plugins-HYP-15795.patch \
 	file://0002-adding-gstperf.patch \
 	file://0003-perf-parameter-print-label.patch \
+	file://waf \
 "
 
 # This is a workaround until waf is fixed in oe-core
 EXTRA_OECONF:append = " --libdir=${libdir}"
 
+do_configure:prepend() {
+    # Update Waf build script to Python3-compatible version
+    cp ${WORKDIR}/waf ${S}/
+}
