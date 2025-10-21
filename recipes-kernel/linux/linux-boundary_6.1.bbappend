@@ -62,6 +62,7 @@ SRC_URI:append:himx0294 = " \
 	file://config-security-patch \
 	file://0001-tsl2772.c-Allow-tsl2771-and-tsl2772-HYP-33226.patch \
 	file://0001-brcmfmac-Load-blob-file-HYP-31820.patch \
+        file://0001-wifi-cfg80211-Add-my-certificate.patch \
 "
 
 #	file://rafi-touchscreen-support.patch 
