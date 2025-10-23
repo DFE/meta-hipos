@@ -25,6 +25,10 @@ IMAGE_VERSION 2
  */
 BOOT_FROM	sd
 
+#ifdef CONFIG_IMX_HAB
+CSF CONFIG_CSF_SIZE
+#endif
+
 /*
  * Device Configuration Data (DCD)
  *
