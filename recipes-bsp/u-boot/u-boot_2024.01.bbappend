@@ -64,3 +64,73 @@ do_configure:prepend() {
         cp ${WORKDIR}/imx6ull-himx0432.dts ${S}/arch/arm/dts/
 }
 
+## HABv4 Secure Boot ##
+# loosely based on:
+# https://github.com/iris-GmbH/meta-iris-base/blob/develop/dynamic/freescale-layer/recipes-bsp/imx-mkimage/imx-boot_%25.bbappend
+
+inherit hab-compatibility-check
+
+SRC_URI:append:himx0294 = " \
+    file://${HAB_DIR}/csf.cfg \
+"
+
+DEPENDS:append = " \
+    cst-native \
+    cst-signer-native \
+"
+
+SIGN_DIR="${B}/sign"
+
+do_compile:append() {
+    mkdir -p "${SIGN_DIR}"
+    for config in ${UBOOT_MACHINE}; do
+        i=$(expr $i + 1);
+        for type in ${UBOOT_SIGNED}; do
+            j=$(expr $j + 1);
+            if [ $j -eq $i ]
+            then
+                sign_boot_image_config $config $type
+            fi
+        done
+        unset j
+    done
+    unset i
+}
+
+sign_boot_image_config() {
+    config=$1
+    type=$2
+
+    BOOT_IMAGE="${UBOOT_BINARYNAME}-${type}"
+    bbnote "Signing boot image ${BOOT_IMAGE}"
+
+    # Generate signed image using cst_signer
+    cd "${SIGN_DIR}"
+    cp "${B}/${config}/${UBOOT_BINARY}" "${SIGN_DIR}/${BOOT_IMAGE}"
+    CST_EXE_PATH=cst CST_PATH=${HAB_DIR} cst_signer -d -i ${SIGN_DIR}/${BOOT_IMAGE} -c ${HAB_DIR}/csf.cfg
+    if [ ! -e "${SIGN_DIR}/signed-${BOOT_IMAGE}" ]; then
+        bbfatal "Image signing failed"
+    fi
+    check_csf_compatibility ${SIGN_DIR}/signed-${BOOT_IMAGE}
+    mv ${SIGN_DIR}/signed-${BOOT_IMAGE} ${SIGN_DIR}/${BOOT_IMAGE}.signed
+}
+
+do_install:append() {
+    for signed in ${SIGN_DIR}/*.signed;
+    do
+        install -D -m 644 ${signed} ${D}/boot/
+    done
+}
+
+do_deploy:append() {
+    for signed in ${SIGN_DIR}/*.signed;
+    do
+        BOOT_IMAGE=$(basename "$signed" | sed -e 's/.signed//')
+        type=$(echo "$BOOT_IMAGE" | sed -e "s/${UBOOT_BINARYNAME}-//")
+        DEPLOY_NAME="${BOOT_IMAGE}-${PV}-${PR}.${UBOOT_SUFFIX}.signed"
+        install -D -m 644 ${signed} ${DEPLOYDIR}/${DEPLOY_NAME}
+        cd ${DEPLOYDIR}
+        ln -sf ${DEPLOY_NAME} ${UBOOT_SYMLINK}-${type}.signed
+        ln -sf ${DEPLOY_NAME} ${UBOOT_BINARY}-${type}.signed
+    done
+}
