@@ -106,7 +106,7 @@
 #define HIMX_DEFAULT_LINUX_DEV "2"
 #endif
 
-#define CONFIG_EXTRA_ENV_SETTINGS \
+#define CFG_EXTRA_ENV_SETTINGS \
 	"boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
 		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
 	"console=ttymxc1\0" \
