@@ -28,6 +28,7 @@ SRC_URI:append:himx0294 = " \
 	file://imx6q-himx0294.dts \
 	file://imx6q-himx0294-dvmon.dts \
 	file://imx6ull-himx0432.dts \
+    file://0002-crypto-fsl_hash-fix-flush-dcache-alignment-in-caam_h.patch \
 "
 
 do_configure:prepend() {
