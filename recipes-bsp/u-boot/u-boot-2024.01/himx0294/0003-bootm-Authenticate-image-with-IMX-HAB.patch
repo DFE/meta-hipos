@@ -1,0 +1,33 @@
+From 13b84e4a473c4facf91b3508dc3a1f88964a1242 Mon Sep 17 00:00:00 2001
+From: kas User <kas@example.com>
+Date: Fri, 9 Jan 2026 14:12:37 +0100
+Subject: [PATCH] bootm: Authenticate image with IMX HAB
+
+Upstream-Status: Inappropriate [product specific]
+---
+ boot/bootm.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/boot/bootm.c b/boot/bootm.c
+index cb61485c226..c7888d8a399 100644
+--- a/boot/bootm.c
++++ b/boot/bootm.c
+@@ -778,6 +778,15 @@ int do_bootm_states(struct cmd_tbl *cmdtp, int flag, int argc,
+ 
+ 	images->state |= states;
+ 
++	if (IS_ENABLED(CONFIG_IMX_HAB) && states & BOOTM_STATE_START) {
++		/* validate artifact before processing it further */
++		ulong img_addr = bootm_data_addr(argc, argv);
++		if (authenticate_image(img_addr, fit_get_size((void *)img_addr))) {
++			printf("authenticate_image() FAILED\n");
++		} else {
++			printf("authenticate_image() SUCCESS\n");
++		}
++	}
+ 	/*
+ 	 * Work through the states and see how far we get. We stop on
+ 	 * any error.
+-- 
+2.39.5
+
