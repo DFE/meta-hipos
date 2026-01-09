@@ -31,6 +31,10 @@ SRC_URI:append:himx0294 = " \
     file://0002-crypto-fsl_hash-fix-flush-dcache-alignment-in-caam_h.patch \
 "
 
+SRC_URI:append:himx0294:hipos-cyber-security = " \
+    file://0003-bootm-Authenticate-image-with-IMX-HAB.patch \
+"
+
 do_configure:prepend() {
 	mkdir -p ${S}/board/freescale/himx0294
 	cp ${WORKDIR}/himx0294.c ${S}/board/freescale/himx0294/
