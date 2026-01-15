@@ -1,0 +1,66 @@
+From ef0e979e14332e37421eb3ebe5b88c2409a8803a Mon Sep 17 00:00:00 2001
+From: Benjamin Lemouzy <blemouzy@centralp.fr>
+Date: Fri, 21 Feb 2025 08:05:01 +0100
+Subject: [PATCH] crypto: fsl_hash: fix flush dcache alignment in caam_hash()
+
+Loading a FIT kernel image with hash hardware acceleration enabled
+(CONFIG_SHA_HW_ACCEL=y) displays the following CACHE warning:
+
+    [...]
+    Trying 'kernel-1' kernel subimage
+    [...]
+    Verifying Hash Integrity ... sha256CACHE: Misaligned operation at
+range [16000128, 1673fae8]
+    [...]
+    Trying 'ramdisk-1' ramdisk subimage
+    [...]
+    Verifying Hash Integrity ... sha256CACHE: Misaligned operation at
+range [1676d6d4, 1737a5d4]
+    [...]
+    Trying 'fdt-imx6q-xxx.dtb' fdt subimage
+    [...]
+    Verifying Hash Integrity ... sha256CACHE: Misaligned operation at
+range [1673fbdc, 1674b0dc]
+    [...]
+
+This patch fixes it.
+
+Tested on:
+- i.MX 6 custom board
+- LS1021A custom board
+
+Upstream-Status: Backport
+
+Signed-off-by: Benjamin Lemouzy <blemouzy@centralp.fr>
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
+---
+ drivers/crypto/fsl/fsl_hash.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/crypto/fsl/fsl_hash.c b/drivers/crypto/fsl/fsl_hash.c
+index 79b32e2627c..b721c866095 100644
+--- a/drivers/crypto/fsl/fsl_hash.c
++++ b/drivers/crypto/fsl/fsl_hash.c
+@@ -183,6 +183,7 @@ int caam_hash(const unsigned char *pbuf, unsigned int buf_len,
+ {
+ 	int ret = 0;
+ 	uint32_t *desc;
++	unsigned long pbuf_aligned;
+ 	unsigned int size;
+ 
+ 	desc = malloc_cache_aligned(sizeof(int) * MAX_CAAM_DESCSIZE);
+@@ -191,8 +192,9 @@ int caam_hash(const unsigned char *pbuf, unsigned int buf_len,
+ 		return -ENOMEM;
+ 	}
+ 
+-	size = ALIGN(buf_len, ARCH_DMA_MINALIGN);
+-	flush_dcache_range((unsigned long)pbuf, (unsigned long)pbuf + size);
++	pbuf_aligned = ALIGN_DOWN((unsigned long)pbuf, ARCH_DMA_MINALIGN);
++	size = ALIGN(buf_len + ((unsigned long)pbuf - pbuf_aligned), ARCH_DMA_MINALIGN);
++	flush_dcache_range(pbuf_aligned, pbuf_aligned + size);
+ 
+ 	inline_cnstr_jobdesc_hash(desc, pbuf, buf_len, pout,
+ 				  driver_hash[algo].alg_type,
+-- 
+2.52.0
+

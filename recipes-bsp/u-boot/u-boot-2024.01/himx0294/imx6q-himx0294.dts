@@ -87,3 +87,9 @@
 &usdhc2 {
 	status = "disabled";
 };
+
+// NXP CAAM Hash Hang workaround
+// see: https://lists.denx.de/pipermail/u-boot/2022-July/489039.html
+&sec_jr0 {
+	status = "disabled";
+};
