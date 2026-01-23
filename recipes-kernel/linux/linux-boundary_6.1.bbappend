@@ -59,7 +59,6 @@ SRC_URI:append:himx0294 = " \
 	file://0001-spi-imx-Restore-driver-version-HYP-24810.patch \
 	file://0001-fec_main-Add-dma_rmb-HYP-25259.patch \
 	file://0001-Add-parameter-to-module-brcmfmac-HYP-29550.patch \
-	file://config-security-patch \
 	file://0001-tsl2772.c-Allow-tsl2771-and-tsl2772-HYP-33226.patch \
 	file://0001-brcmfmac-Load-blob-file-HYP-31820.patch \
         file://0001-wifi-cfg80211-Add-my-certificate.patch \
