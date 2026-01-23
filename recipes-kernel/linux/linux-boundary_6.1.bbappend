@@ -92,10 +92,6 @@ do_configure:prepend:himx0294() {
         cp ${WORKDIR}/imx6qp-himx0294-dvrec.dts ${S}/arch/arm/boot/dts/imx6qp-himx0294-dvrec.dts
         cp ${WORKDIR}/imx6ull-himx0294-impec.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec.dts
         cp ${WORKDIR}/imx6ull-himx0294-impec-2.dts ${S}/arch/arm/boot/dts/imx6ull-himx0294-impec-2.dts
-
-	if ${@bb.utils.contains('CYSEC_BUILD', '1', 'true', 'false', d)}; then
-		patch --verbose -p1 -d ${B} < ${WORKDIR}/config-security-patch
-	fi
 }
 
 do_configure:prepend:nitrogen6x() {
