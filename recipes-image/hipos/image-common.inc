@@ -32,6 +32,11 @@ IMAGE_INSTALL:remove = "connman connman-angstrom-settings connman-plugin-loopbac
 # Use following wic option to not change /etc/fstab.
 WIC_CREATE_EXTRA_ARGS:append = " --no-fstab-update"
 
+# Create a signed roothash and a gzipped verity image when 'verity' is in IMAGE_FSTYPES
+VERITY_IMAGE_INHERIT ?= ""
+VERITY_IMAGE_INHERIT:himx0294 = "signed-verity-image"
+inherit ${VERITY_IMAGE_INHERIT}
+
 IMAGE_INSTALL += "          \
   distro-feed-configs       \
   kernel-modules            \
