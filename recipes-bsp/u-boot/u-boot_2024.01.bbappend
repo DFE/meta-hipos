@@ -30,6 +30,7 @@ SRC_URI:append:himx0294 = " \
 	file://imx6ull-himx0432.dts \
     file://0002-crypto-fsl_hash-fix-flush-dcache-alignment-in-caam_h.patch \
     file://0003-bootm-Authenticate-image-with-IMX-HAB.patch \
+    file://0004-hab.h-Make-hab_rvt_report_status-publicly-available.patch \
 "
 
 do_configure:prepend() {
