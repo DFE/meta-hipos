@@ -89,6 +89,13 @@
    variable is set and u-boot and kernel use the same variable. HYP-12761 */
 #define CONFIG_BOOTCOMMAND	"setenv bootcmd run x_bootA; saveenv; boot"
 
+/* Limit env loading to a minimum */
+#define CFG_ENV_FLAGS_LIST_STATIC \
+	"upgrade_available:dw," \
+	"bootcount:dw," \
+	"ustate:dw," \
+	"firmware:dw"
+
 #if defined(CONFIG_BOARD_IS_HIMX_IMOC)
 #define HIMX_DEFAULT_FDT_HIGH "fdt_high=4f539000\0"
 #define HIMX_DEFAULT_LINUX_DEV "2"
@@ -110,23 +117,31 @@
 	"boot_usb=usb start; setenv boottype usb; setenv bootdev 0; " \
 		"setenv bootpart 2; setenv bootroot /dev/sda2; run do_boot\0" \
 	"console=ttymxc1\0" \
+	"fit_addr=0x28000000\0" \
+	"fit_file=fitImage.signed\0" \
+	"initrd_high=0x80000000\0" \
 	"kernel_addr=0x12000000\0" \
 	"kernel_file=/boot/uImage\0" \
 	"fdt_addr=0x22000000\0" \
 	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
 	HIMX_DEFAULT_FDT_HIGH \
 	"${kernel_addr} ${ramdisk_addr} ${fdt_addr}\0" \
-	"do_boot=run load_kernel; run load_fdt; run setbootargs; " \
+	"do_fitboot=run load_fitimage; run setbootargs; bootm ${fit_addr}#${fit_conf}\0" \
+	"do_legacyboot=run load_kernel; run load_fdt; run setbootargs; " \
 		"bootm ${kernel_addr} - ${fdt_addr}\0" \
 	"load_fdt=ext4load ${boottype} ${bootdev}:${bootpart} ${fdt_addr} ${fdt_file}\0" \
 	"load_kernel=ext4load ${boottype} ${bootdev}:${bootpart} ${kernel_addr} ${kernel_file}\0" \
-	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
+	"load_fitimage=ext4load ${boottype} ${bootdev}:${bootpart} ${fit_addr} ${fit_file}\0" \
+	"setbootargs=setenv bootargs console=ttymxc1,115200 " \
 		"root=${bootroot} rootwait " \
-		"mxc_hdmi.only_cea=0\0" \
-	"x_bootA=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; " \
-		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p1; run do_boot\0" \
-	"x_bootB=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; " \
-		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p2; run do_boot\0"
+		"mxc_hdmi.only_cea=0 " \
+		"firmwareslot=${firmwareslot}\0" \
+	"setup_part_a=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; setenv firmwareslot a; " \
+		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p1;\0" \
+	"setup_part_b=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; setenv firmwareslot b; " \
+		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p2;\0" \
+	"x_bootA=run setup_part_a; run do_fitboot\0" \
+	"x_bootB=run setup_part_b; run do_fitboot\0"
 
 /* Miscellaneous configurable options */
 #undef CONFIG_SYS_PROMPT

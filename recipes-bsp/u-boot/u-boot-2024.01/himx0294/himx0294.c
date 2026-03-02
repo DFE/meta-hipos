@@ -22,6 +22,7 @@
 #include <asm/mach-imx/spi.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/video.h>
+#include <asm/mach-imx/hab.h>
 #include <fsl_esdhc_imx.h>
 #include <micrel.h>
 #include <miiphy.h>
@@ -483,6 +484,107 @@ static int has_i2c_device(int bus, int addr)
 	return 0;
 }
 
+static int cached_hab_state = -1;
+
+int get_hab_state(void)
+{
+	/*
+		checks if this device is allowed to run insecure code paths
+		that skip security measures or can boot unsigned binaries
+		Returns:
+		- 0 only if all criteria match the open/unsecure state
+		- 1 only if all criteria match the closed/secure state
+		- -1 in all other cases
+	*/
+
+	int secure_boot_enabled = 0;
+	enum hab_config config = 0;
+	enum hab_state state = 0;
+	enum hab_status hab_return = 0;
+
+	secure_boot_enabled = imx_hab_is_enabled();
+	hab_return = hab_rvt_report_status(&config, &state);
+
+	if (!secure_boot_enabled
+		&& hab_return == HAB_SUCCESS
+		&& config == HAB_CFG_OPEN
+		&& state == HAB_STATE_NONSECURE) {
+		return 0;
+	} else if (secure_boot_enabled
+		// TODO: validate these checks - maybe use HAB_STATE_TRUSTED??
+		&& hab_return == HAB_SUCCESS
+		&& config == HAB_CFG_CLOSED
+		&& state == HAB_STATE_SECURE) {
+		return 1;
+	}
+
+	return -1;
+}
+
+void board_generate_fit_conf(void)
+{
+	char * fdt_file;
+	char * fdt_file_basename;
+	char fit_conf[32] = "conf-";
+
+	/* Use basename of fdt_file as fit_conf */
+	fdt_file = env_get("fdt_file");
+	fdt_file_basename = strrchr(fdt_file, '/');
+	if (fdt_file_basename) {
+		strncpy(fit_conf + strlen(fit_conf), fdt_file_basename + 1,
+			sizeof(fit_conf) - strlen(fit_conf) - 1);
+		env_set("fit_conf", fit_conf);
+	} else {
+		env_set("fit_conf", fdt_file);
+	}
+}
+
+void board_generate_bootcmd(void)
+{
+	int firmware_env = env_get_ulong("firmware", 10, 0);
+	char firmware;
+	char altfirmware;
+	char bootcmd[64];
+	char altbootcmd[64];
+	int upgrade_available = env_get_ulong("upgrade_available", 10, 0);
+	int ustate = env_get_ulong("ustate", 10, 0);
+
+	if ((upgrade_available == 1) && (ustate == 1)) {
+		if (firmware_env == 1) {
+			firmware = 'a';
+			altfirmware = 'b';
+			firmware_env = 0;
+		} else {
+			firmware = 'b';
+			altfirmware = 'a';
+			firmware_env = 1;
+		}
+		env_set_ulong("firmware", firmware_env);
+		ustate = 2;
+		env_set_ulong("ustate", ustate);
+		env_save();
+	} else {
+		if (firmware_env == 1) {
+			firmware = 'b';
+			altfirmware = 'a';
+		} else {
+			firmware = 'a';
+			altfirmware = 'b';
+		}
+	}
+
+	snprintf(bootcmd, sizeof(bootcmd), "run setup_part_%c; run do_fitboot; reset;", firmware);
+	if (upgrade_available && cached_hab_state == 0) {
+		/* on insecure boards, we allow legacy_boot on update */
+		snprintf(altbootcmd, sizeof(altbootcmd), "run setup_part_%c; run do_fitboot; run do_legacyboot; reset;", altfirmware);
+	} else {
+		snprintf(altbootcmd, sizeof(altbootcmd), "run setup_part_%c; run do_fitboot; reset;", altfirmware);
+	}
+
+	env_set("bootcmd", bootcmd);
+	env_set("altbootcmd", altbootcmd);
+}
+
 int board_late_init(void)
 {
 #if defined(CONFIG_BOARD_IS_HIMX_IVAP)
@@ -511,6 +613,13 @@ int board_late_init(void)
 		}
 	}
 #endif
+
+	cached_hab_state = get_hab_state();
+
+	board_generate_fit_conf();
+
+	board_generate_bootcmd();
+
 	return 0;
 }
 
