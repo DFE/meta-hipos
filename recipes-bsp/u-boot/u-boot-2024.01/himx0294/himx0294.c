@@ -23,6 +23,8 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/video.h>
 #include <asm/mach-imx/hab.h>
+#include <fdt_support.h>
+#include <linux/libfdt.h>
 #include <fsl_esdhc_imx.h>
 #include <micrel.h>
 #include <miiphy.h>
@@ -619,6 +621,29 @@ int board_late_init(void)
 	board_generate_fit_conf();
 
 	board_generate_bootcmd();
+
+	return 0;
+}
+
+int ft_board_setup(void *blob, struct bd_info *bd)
+{
+	int off;
+	const char *s;
+
+	switch (get_hab_state()) {
+		case 0: s = "insecure"; break;
+		case 1: s = "secure"; break;
+		default: s = "unknown"; break;
+	}
+
+	off = fdt_path_offset(blob, "/chosen");
+	if (off < 0)
+		off = fdt_add_subnode(blob, 0, "chosen");
+	if (off < 0)
+		return 0;
+
+	/* NUL-terminated string property */
+	fdt_setprop_string(blob, off, "iris,hab-state", s);
 
 	return 0;
 }
