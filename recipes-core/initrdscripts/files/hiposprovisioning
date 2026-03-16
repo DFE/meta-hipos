@@ -1,0 +1,164 @@
+#!/bin/sh
+
+_FILE_FITIMAGE="fitImage.signed"
+_FILE_ROOTFS_GZ="rootfs.ext4.verity.gz"
+_FILE_ROOTFS_HASHDEVICE="rootfs.ext4.hashdevice"
+_FILE_ROOTFS_ROOTHASH="rootfs.ext4.roothash"
+_FILE_ROOTFS_ROOTHASH_SIGNATURE="rootfs.ext4.roothash.signature"
+
+_LVM_LABEL="hydralvm"
+
+_MNT_KEYSTORE="/mnt/keystore"
+_MNT_USERDATA="/mnt/hydra"
+_MNT_DATASTORE="/mnt/datastore"
+_MNT_PROVISIONING="/mnt/provisioning"
+
+_ROOTHASH_PUBKEY="/etc/iris/signing/roothash-public-key.pem"
+
+fail() {
+    echo "$(date): ${*}"
+    # TODO - reboot here?
+    # exit 1 will cause kernel to panic as we're PID 1
+    exit 1
+}
+
+write_fitimage() {
+    partition="$1"
+    fitimage="$2"
+
+    mount -t ext4 -o rw "${partition}" /tmp/boot
+    cp "${fitimage}" /tmp/boot
+    umount /tmp/boot
+}
+
+format_lvm_volume() {
+    label="$1"
+    volume_dev="/dev/mapper/${_LVM_LABEL}-${label}"
+    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
+    decrypt_dev="/dev/mapper/${decrypt_label}"
+
+    dmsetup -v create "${decrypt_label}" \
+        --table "0 $(blockdev --getsz "$volume_dev") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $volume_dev 0 1 sector_size:4096"
+    mkfs.ext4 "${decrypt_dev}" ; sync ; sleep 1
+
+    if [ "$#" -eq 2 ]
+    then
+        mount -t ext4 "${decrypt_dev}" "$2"
+    else
+        dmsetup remove --retry "${decrypt_label}"
+    fi
+}
+
+write_verity_artifacts() {
+    label="$1"
+
+    cp "/tmp/provisioning/${_FILE_ROOTFS_HASHDEVICE}" "${_MNT_KEYSTORE}/verity/${label}.hashdevice"
+    cp "/tmp/provisioning/${_FILE_ROOTFS_ROOTHASH}" "${_MNT_KEYSTORE}/verity/${label}.roothash"
+    cp "/tmp/provisioning/${_FILE_ROOTFS_ROOTHASH_SIGNATURE}" "${_MNT_KEYSTORE}/verity/${label}.roothash.signature"
+}
+
+write_rootfs() {
+    label="$1"
+    gz_file="$2"
+
+    volume_dev="/dev/mapper/${_LVM_LABEL}-${label}"
+    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
+    decrypt_dev="/dev/mapper/${decrypt_label}"
+
+    dmsetup -v create "${decrypt_label}" \
+        --table "0 $(blockdev --getsz "$volume_dev") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $volume_dev 0 1 sector_size:4096"
+    zcat "${gz_file}" > "${decrypt_dev}" ; sync ; sleep 1
+
+    if [ "$#" -eq 3 ]
+    then
+        verity_label="verity-${_LVM_LABEL}-${label}"
+        verity_dev="/dev/mapper/${verity_label}"
+
+        verity_roothash="${_MNT_KEYSTORE}/verity/${label}.roothash"
+        verity_signature="${_MNT_KEYSTORE}/verity/${label}.roothash.signature"
+        verity_hashdevice="${_MNT_KEYSTORE}/verity/${label}.hashdevice"
+
+        if ! /usr/bin/openssl dgst -sha256 -verify "${_ROOTHASH_PUBKEY}" -signature "${verity_signature}" "${verity_roothash}"
+        then
+            fail "Root hash signature invalid"
+        fi
+
+        veritysetup open --root-hash-file="${verity_roothash}" "${decrypt_dev}" "${verity_label}" "${verity_hashdevice}"
+        mount -t ext4 -o ro "${verity_dev}" "$3"
+    else
+        dmsetup remove --retry "${decrypt_label}"
+    fi
+}
+
+hiposprovisioning_enabled() {
+    return 0
+}
+
+hiposprovisioning_run() {
+    DEV="/dev/mmcblk2"
+
+    mount -t tmpfs tmp /tmp
+    mkdir /tmp/mnt /tmp/provisioning /tmp/boot
+    mkdir -p "${_MNT_KEYSTORE}" "${_MNT_DATASTORE}" "${_MNT_PROVISIONING}"
+
+    # Copy all artifacts from p4 into tmpfs
+    mount -t ext4 -o ro "${DEV}p4" /tmp/mnt
+    cp -avx /tmp/mnt/. /tmp/provisioning
+    umount /tmp/mnt
+
+    # Put signed fitimage into boot_a and boot_b
+    write_fitimage "${DEV}p1" "/tmp/provisioning/${_FILE_FITIMAGE}"
+    write_fitimage "${DEV}p2" "/tmp/provisioning/${_FILE_FITIMAGE}"
+
+    # Extend p4, create LVM
+    parted -s "${DEV}" resizepart 4 100%
+    partprobe "${DEV}"
+
+    pvcreate -ff -y "${DEV}p4"
+    vgcreate "${_LVM_LABEL}" "${DEV}p4"
+
+    #TODO: Get rootfs size dynamically!
+    lvcreate -y -n "rootfs_a" -L 720MB "${_LVM_LABEL}"
+    lvcreate -y -n "rootfs_b" -L 720MB "${_LVM_LABEL}"
+    lvcreate -y -n "userdata_a" -L 512MB "${_LVM_LABEL}"
+    lvcreate -y -n "userdata_b" -L 512MB "${_LVM_LABEL}"
+    lvcreate -y -n "keystore" -L 128MB "${_LVM_LABEL}"
+    lvcreate -y -n "provisioning" -L 128MB "${_LVM_LABEL}"
+    lvcreate -y -n "datastore" -L 128MB "${_LVM_LABEL}"
+
+    vgchange -a y
+    vgmknodes
+
+    keystore_dev="/dev/mapper/${_LVM_LABEL}-keystore"
+
+    # Format keystore volume
+    mkfs.ext4 "${keystore_dev}"
+    mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+    mkdir "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
+
+    # Create CAAM key for encryption
+    caam-keygen create "${_MNT_KEYSTORE}/caam/volumeKey" ccm -s 32
+    keyctl padd logon dmcrypt: @us < "${_MNT_KEYSTORE}/caam/volumeKey"
+    rm "${_MNT_KEYSTORE}/caam/volumeKey"
+
+    # Create encrypted volumes and mount them
+    # Note that $_MNT_PROVISIONING is mounted rw for provisioning
+    format_lvm_volume "datastore" "${_MNT_DATASTORE}"
+    format_lvm_volume "provisioning" "${_MNT_PROVISIONING}"
+    format_lvm_volume "userdata_a" "${_MNT_USERDATA}"
+    format_lvm_volume "userdata_b"
+
+    # Copy rootfs artifacts to keystore
+    write_verity_artifacts "rootfs_a"
+    write_verity_artifacts "rootfs_b"
+
+    # Write rootfs
+    write_rootfs "rootfs_a" "/tmp/provisioning/${_FILE_ROOTFS_GZ}" "${ROOTFS_DIR}"
+    write_rootfs "rootfs_b" "/tmp/provisioning/${_FILE_ROOTFS_GZ}"
+
+    # Move other mounts
+    mount --move "${_MNT_USERDATA}" "${ROOTFS_DIR}${_MNT_USERDATA}"
+    mount --move "${_MNT_KEYSTORE}" "${ROOTFS_DIR}${_MNT_KEYSTORE}"
+    mount --move "${_MNT_DATASTORE}" "${ROOTFS_DIR}${_MNT_DATASTORE}"
+    mount --move "${_MNT_PROVISIONING}" "${ROOTFS_DIR}${_MNT_PROVISIONING}"
+}
