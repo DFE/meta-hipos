@@ -82,7 +82,7 @@
 		regulator-name = "USB_VBUS";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
-		gpio = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+		gpio = <&gpio1 8 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-always-on;
 	};
@@ -544,6 +544,11 @@
 			};
 		};
 	};
+
+        usb5744_i2c: hub@2d {
+                compatible = "microchip,usb5744";
+                reg = <0x2d>;
+        };
 };
 
 &i2c2 {
@@ -952,6 +957,33 @@
 	vbus-supply = <&reg_usb_vbus>;
 	dr_mode = "host";
 	status = "okay";
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        /* USB2 Hub */
+        hub_2_0: hub@1 {
+                compatible = "usb424,2744";
+                reg = <1>;
+
+                i2c-bus = <&usb5744_i2c>;
+                peer-hub = <&hub_3_0>;
+
+                reset-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
+                power-on-delay-us = <2000>;
+        };
+
+        /* USB3 Hub */
+        hub_3_0: hub@2 {
+                compatible = "usb424,5744";
+                reg = <2>;
+
+                i2c-bus = <&usb5744_i2c>;
+                peer-hub = <&hub_2_0>;
+
+                reset-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
+                power-on-delay-us = <2000>;
+        };
 };
 
 &uart3 {
@@ -1003,23 +1035,6 @@
 	status = "okay";
 };
 
-&gpio1 {
-
-    usb_hub_reset {
-        gpio-hog;
-        gpios = <13 GPIO_ACTIVE_LOW>;
-        output-high;
-        line-name = "usb-hub-reset";
-    };
-
-    usb_hub_vbus {
-        gpio-hog;
-        gpios = <8 GPIO_ACTIVE_HIGH>;
-        output-high;
-        line-name = "usb-hub-vbusdet";
-    };
-};
-
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
@@ -1035,7 +1050,6 @@
 			 * default Reference Clock Frequency
 			 */
 			MX8MP_IOMUXC_SD1_DATA7__GPIO2_IO09		0x1c4
-			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08		0x19
 			MX8MP_IOMUXC_GPIO1_IO13__GPIO1_IO13		0x19
 		>;
 	};
@@ -1187,11 +1201,13 @@
 		>;
 	};
 
+#if 0
 	pinctrl_mipi_dsi_en: mipi_dsi_en {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08	0x16
 		>;
 	};
+#endif
 
 	pinctrl_pcie0: pcie0grp {
 		fsl,pins = <
@@ -1308,7 +1324,7 @@
 
 	pinctrl_usb1_vbus: usb1grp {
 		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14		0x10
+			MX8MP_IOMUXC_GPIO1_IO08__GPIO1_IO08		0x10
 		>;
 	};
 

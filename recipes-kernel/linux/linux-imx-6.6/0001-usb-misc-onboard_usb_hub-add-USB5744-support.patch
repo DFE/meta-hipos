@@ -1,0 +1,264 @@
+From e5c8cabd79ed3ed8102917713f12d4909a1025a4 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Fri, 20 Mar 2026 12:58:33 +0100
+Subject: [PATCH] usb: misc: onboard_usb_hub: add USB5744 support HYP-33833
+
+Add support for the Microchip USB5744 hub when operating in SMBus
+mode. The hub remains in configuration state after reset and
+requires an explicit attach command to enumerate.
+
+Implement the required SMBus initialization sequence, including
+setting RuntimeFlags2 and issuing the USB attach command (0xAA56),
+triggered via DT using the 'i2c-bus' property.
+
+This is a backport for v6.6 integrating the functionality into
+onboard_usb_hub.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ drivers/usb/misc/onboard_usb_hub.c | 164 +++++++++++++++++++++++++++++
+ drivers/usb/misc/onboard_usb_hub.h |   3 +
+ 2 files changed, 167 insertions(+)
+
+diff --git a/drivers/usb/misc/onboard_usb_hub.c b/drivers/usb/misc/onboard_usb_hub.c
+index d72130eda57d..ae692c95b08d 100644
+--- a/drivers/usb/misc/onboard_usb_hub.c
++++ b/drivers/usb/misc/onboard_usb_hub.c
+@@ -8,6 +8,7 @@
+ #include <linux/device.h>
+ #include <linux/export.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/i2c.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/list.h>
+@@ -27,6 +28,18 @@
+ 
+ #include "onboard_usb_hub.h"
+ 
++/* USB5744 register offset and mask */
++#define USB5744_CMD_ATTACH			0xAA
++#define USB5744_CMD_ATTACH_LSB			0x56
++#define USB5744_CMD_CREG_ACCESS			0x99
++#define USB5744_CMD_CREG_ACCESS_LSB		0x37
++#define USB5744_CREG_MEM_ADDR			0x00
++#define USB5744_CREG_MEM_RD_ADDR		0x04
++#define USB5744_CREG_WRITE			0x00
++#define USB5744_CREG_READ			0x01
++#define USB5744_CREG_RUNTIMEFLAGS2		0x411D
++#define USB5744_CREG_BYPASS_UDC_SUSPEND		BIT(3)
++
+ /*
+  * Use generic names, as the actual names might differ between hubs. If a new
+  * hub requires more than the currently supported supplies, add a new one here.
+@@ -74,6 +87,7 @@ static int onboard_hub_power_on(struct onboard_hub *hub)
+ 
+ 	fsleep(hub->pdata->reset_us);
+ 	gpiod_set_value_cansleep(hub->reset_gpio, 0);
++	fsleep(hub->pdata->power_on_delay_us);
+ 
+ 	hub->is_powered_on = true;
+ 
+@@ -238,11 +252,126 @@ static void onboard_hub_attach_usb_driver(struct work_struct *work)
+ 		pr_err("Failed to attach USB driver: %d\n", err);
+ }
+ 
++#if IS_ENABLED(CONFIG_I2C)
++static int onboard_hub_5744_i2c_read_byte(struct i2c_client *client,
++					  u16 addr, u8 *data)
++{
++	struct i2c_msg msg[2];
++	u8 rd_buf[2];
++	int ret;
++	u8 wr_buf[7] = {
++		0, USB5744_CREG_MEM_ADDR, 4,
++		USB5744_CREG_READ, 1,
++		(addr >> 8) & 0xff,
++		addr & 0xff,
++	};
++
++	msg[0].addr = client->addr;
++	msg[0].flags = 0;
++	msg[0].len = sizeof(wr_buf);
++	msg[0].buf = wr_buf;
++
++	ret = i2c_transfer(client->adapter, msg, 1);
++	if (ret < 0)
++		return ret;
++
++	wr_buf[0] = USB5744_CMD_CREG_ACCESS;
++	wr_buf[1] = USB5744_CMD_CREG_ACCESS_LSB;
++	wr_buf[2] = 0;
++	msg[0].len = 3;
++
++	ret = i2c_transfer(client->adapter, msg, 1);
++	if (ret < 0)
++		return ret;
++
++	wr_buf[0] = 0;
++	wr_buf[1] = USB5744_CREG_MEM_RD_ADDR;
++	msg[0].len = 2;
++
++	msg[1].addr = client->addr;
++	msg[1].flags = I2C_M_RD;
++	msg[1].len = sizeof(rd_buf);
++	msg[1].buf = rd_buf;
++
++	ret = i2c_transfer(client->adapter, msg, 2);
++	if (ret < 0)
++		return ret;
++
++	*data = rd_buf[1];
++	return 0;
++}
++
++static int onboard_hub_5744_i2c_write_byte(struct i2c_client *client,
++					   u16 addr, u8 data)
++{
++	struct i2c_msg msg;
++	int ret;
++	u8 wr_buf[8] = {
++		0, USB5744_CREG_MEM_ADDR, 5,
++		USB5744_CREG_WRITE, 1,
++		(addr >> 8) & 0xff,
++		addr & 0xff, data,
++	};
++
++	msg.addr = client->addr;
++	msg.flags = 0;
++	msg.len = sizeof(wr_buf);
++	msg.buf = wr_buf;
++
++	ret = i2c_transfer(client->adapter, &msg, 1);
++	if (ret < 0)
++		return ret;
++
++	wr_buf[0] = USB5744_CMD_CREG_ACCESS;
++	wr_buf[1] = USB5744_CMD_CREG_ACCESS_LSB;
++	wr_buf[2] = 0;
++	msg.len = 3;
++
++	ret = i2c_transfer(client->adapter, &msg, 1);
++	if (ret < 0)
++		return ret;
++
++	return 0;
++}
++
++static int onboard_hub_5744_i2c_init(struct i2c_client *client)
++{
++	struct device *dev = &client->dev;
++	u8 reg;
++	int ret;
++
++	ret = onboard_hub_5744_i2c_read_byte(client,
++					     USB5744_CREG_RUNTIMEFLAGS2,
++					     &reg);
++	if (ret)
++		return dev_err_probe(dev, ret,
++				     "CREG_RUNTIMEFLAGS2 read failed\n");
++
++	reg |= USB5744_CREG_BYPASS_UDC_SUSPEND;
++
++	ret = onboard_hub_5744_i2c_write_byte(client,
++					      USB5744_CREG_RUNTIMEFLAGS2,
++					      reg);
++	if (ret)
++		return dev_err_probe(dev, ret,
++				     "BYPASS_UDC_SUSPEND bit configuration failed\n");
++
++	ret = i2c_smbus_write_word_data(client, USB5744_CMD_ATTACH,
++					USB5744_CMD_ATTACH_LSB);
++	if (ret < 0)
++		return dev_err_probe(dev, ret,
++				     "USB Attach with SMBus command failed\n");
++
++	return 0;
++}
++#endif
++
+ static int onboard_hub_probe(struct platform_device *pdev)
+ {
+ 	const struct of_device_id *of_id;
+ 	struct device *dev = &pdev->dev;
+ 	struct onboard_hub *hub;
++	struct device_node *i2c_node;
+ 	unsigned int i;
+ 	int err;
+ 
+@@ -286,6 +415,37 @@ static int onboard_hub_probe(struct platform_device *pdev)
+ 	if (err)
+ 		return err;
+ 
++
++	i2c_node = of_parse_phandle(dev->of_node, "i2c-bus", 0);
++	if (i2c_node) {
++		struct i2c_client *client = NULL;
++
++#if IS_ENABLED(CONFIG_I2C)
++		client = of_find_i2c_device_by_node(i2c_node);
++#endif
++		of_node_put(i2c_node);
++
++		if (!client) {
++			err = -EPROBE_DEFER;
++			goto err_power_off;
++		}
++
++		if (of_device_is_compatible(dev->of_node, "usb424,2744") ||
++		    of_device_is_compatible(dev->of_node, "usb424,5744")) {
++#if IS_ENABLED(CONFIG_I2C)
++			err = onboard_hub_5744_i2c_init(client);
++			hub->always_powered_in_suspend = true;
++#else
++			err = -EOPNOTSUPP;
++#endif
++		}
++
++		put_device(&client->dev);
++
++		if (err < 0)
++			goto err_power_off;
++	}
++
+ 	/*
+ 	 * The USB driver might have been detached from the USB devices by
+ 	 * onboard_hub_remove() (e.g. through an 'unbind' by userspace),
+@@ -297,6 +457,10 @@ static int onboard_hub_probe(struct platform_device *pdev)
+ 	schedule_work(&attach_usb_driver_work);
+ 
+ 	return 0;
++
++err_power_off:
++	onboard_hub_power_off(hub);
++	return err;
+ }
+ 
+ static void onboard_hub_remove(struct platform_device *pdev)
+diff --git a/drivers/usb/misc/onboard_usb_hub.h b/drivers/usb/misc/onboard_usb_hub.h
+index 8af34e6d1aff..f9ed38001681 100644
+--- a/drivers/usb/misc/onboard_usb_hub.h
++++ b/drivers/usb/misc/onboard_usb_hub.h
+@@ -8,16 +8,19 @@
+ 
+ struct onboard_hub_pdata {
+ 	unsigned long reset_us;		/* reset pulse width in us */
++	unsigned long power_on_delay_us;	/* delay after reset deassert */
+ 	unsigned int num_supplies;	/* number of supplies */
+ };
+ 
+ static const struct onboard_hub_pdata microchip_usb424_data = {
+ 	.reset_us = 1,
++	.power_on_delay_us = 0,
+ 	.num_supplies = 1,
+ };
+ 
+ static const struct onboard_hub_pdata microchip_usb5744_data = {
+ 	.reset_us = 0,
++	.power_on_delay_us = 10000,
+ 	.num_supplies = 2,
+ };
+ 
+-- 
+2.50.1
+
