@@ -10,7 +10,7 @@
 #include "imx8mp.dtsi"
 
 / {
-	model = "NXP i.MX8MPlus repro board";
+	model = "iris-sensing,himx8-repro";
 	compatible = "fsl,imx8mp-evk", "fsl,imx8mp";
 
 	chosen {
