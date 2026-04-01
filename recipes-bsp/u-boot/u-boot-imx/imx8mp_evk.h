@@ -95,8 +95,10 @@
 	"fdt_addr=0x43000000\0"			\
 	"fdt_high=0xffffffffffffffff\0"		\
 	"fdtfile=/boot/" CONFIG_DEFAULT_FDT_FILE "\0" \
-	"switch_init=run switch_reset; mii device ethernet@30bf0000; mii write 0x15 1 0xc003; mii write 0x16 1 0xcfff\0" \
+	"switch_init=run switch_reset; run switch_ctrl; run switch_speed_port2\0" \
 	"switch_reset=gpio clear 97; sleep 0.1; gpio set 97; sleep 0.1\0" \
+	"switch_ctrl=mii device ethernet@30bf0000; mii write 0x15 1 0xc003; mii write 0x16 1 0xcfff\0" \
+	"switch_speed_port2=mii write 0x1c 0x19 0x0; mii write 0x1c 0x18 0x9449; sleep 0.1; mii write 0x1c 0x19 0x9140; mii write 0x1c 0x18 0x9440\0" \
 	"loadimage=ext4load ${boottype} ${bootdev}:${bootpart} ${loadaddr} ${image}\0" \
 	"loadfdt=ext4load ${boottype} ${bootdev}:${bootpart} ${fdt_addr_r} ${fdtfile}\0" \
 	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
