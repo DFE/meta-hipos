@@ -1,0 +1,25 @@
+From cef533fd2eac8884241516f8b3bd716873a4f6ad Mon Sep 17 00:00:00 2001
+From: Erik Schumacher <erik.schumacher@iris-sensing.com>
+Date: Wed, 18 Feb 2026 15:34:54 +0100
+Subject: [PATCH] hab.h: Make hab_rvt_report_status() publicly available
+
+Upstream-Status: Inappropriate [product specific]
+---
+ arch/arm/include/asm/mach-imx/hab.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/include/asm/mach-imx/hab.h b/arch/arm/include/asm/mach-imx/hab.h
+index 2abf28ea45b..b3ff0181ab0 100644
+--- a/arch/arm/include/asm/mach-imx/hab.h
++++ b/arch/arm/include/asm/mach-imx/hab.h
+@@ -232,6 +232,7 @@ typedef void hapi_clock_init_t(void);
+ 
+ /* ----------- end of HAB API updates ------------*/
+ 
++enum hab_status hab_rvt_report_status(enum hab_config *config, enum hab_state *state);
+ int imx_hab_authenticate_image(uint32_t ddr_start, uint32_t image_size,
+ 			       uint32_t ivt_offset);
+ bool imx_hab_is_enabled(void);
+-- 
+2.53.0
+

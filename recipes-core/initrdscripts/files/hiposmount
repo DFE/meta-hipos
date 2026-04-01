@@ -1,0 +1,95 @@
+#!/bin/sh
+
+_LVM_KEYSTORE="/dev/mapper/hydralvm-keystore"
+_LVM_DATASTORE="/dev/mapper/hydralvm-datastore"
+_LVM_PROVISIONING="/dev/mapper/hydralvm-provisioning"
+
+_LVM_ROOTFS="/dev/mapper/hydralvm-rootfs_"
+_LVM_USERDATA="/dev/mapper/hydralvm-userdata_"
+
+_MNT_KEYSTORE="/mnt/keystore"
+_MNT_USERDATA="/mnt/hydra"
+_MNT_DATASTORE="/mnt/datastore"
+_MNT_PROVISIONING="/mnt/provisioning"
+
+_LABEL_DECRYPT_DATASTORE="decrypted-hydralvm-datastore"
+_LABEL_DECRYPT_PROVISIONING="decrypted-hydralvm-provisioning"
+_LABEL_DECRYPT_ROOTFS="decrypted-hydralvm-rootfs_"
+_LABEL_DECRYPT_USERDATA="decrypted-hydralvm-userdata_"
+_LABEL_VERITY_ROOTFS="verity-rootfs_"
+
+_ROOTHASH_PUBKEY="/etc/iris/signing/roothash-public-key.pem"
+
+fail() {
+    echo "$(date): ${*}"
+    # TODO - reboot here?
+    # exit 1 will cause kernel to panic as we're PID 1
+    exit 1
+}
+
+hiposmount_enabled() {
+    return 0
+}
+
+hiposmount_run() {
+    firmwareslot="b"
+    # TODO - firmware slot information passing from U-Boot to Kernel
+    if [ "${bootparam_firmwareslot}" = "a" ]
+    then
+        firmwareslot="a"
+    fi
+
+    mount -t tmpfs tmp /tmp
+
+    lvm_rootfs="${_LVM_ROOTFS}${firmwareslot}"
+    label_decrypt_rootfs="${_LABEL_DECRYPT_ROOTFS}${firmwareslot}"
+    label_verity_rootfs="${_LABEL_VERITY_ROOTFS}${firmwareslot}"
+
+    lvm_userdata="${_LVM_USERDATA}${firmwareslot}"
+    label_decrypt_userdata="${_LABEL_DECRYPT_USERDATA}${firmwareslot}"
+
+    hash_device="${_MNT_KEYSTORE}/verity/rootfs_${firmwareslot}.hashdevice"
+    root_hash_file="${_MNT_KEYSTORE}/verity/rootfs_${firmwareslot}.roothash"
+    root_hash_signature="${_MNT_KEYSTORE}/verity/rootfs_${firmwareslot}.roothash.signature"
+
+    # mount keystore volume
+    mkdir -p "$_MNT_KEYSTORE"
+    mount -t ext4 -o ro "$_LVM_KEYSTORE" "$_MNT_KEYSTORE" || exit 1
+
+    # validate roothash signature against public signing key
+    if ! /usr/bin/openssl dgst -sha256 -verify "${_ROOTHASH_PUBKEY}" -signature "${root_hash_signature}" "${root_hash_file}"
+    then
+        fail "Root hash signature invalid"
+    fi
+
+    # unpack CAAM black key blob and add to kernel keyring
+    importKey=/tmp/blackkey
+    caam-keygen import "$_MNT_KEYSTORE/caam/volumeKey.bb" "$importKey"
+    keyctl padd logon dmcrypt: @us < "$importKey"
+    rm -f "$importKey"
+
+    # decrypt and verify
+    dmsetup -v create "$label_decrypt_rootfs" --table "0 $(blockdev --getsz $lvm_rootfs) crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $lvm_rootfs 0 1 sector_size:4096"
+    veritysetup open --root-hash-file="$root_hash_file" "/dev/mapper/$label_decrypt_rootfs" "$label_verity_rootfs" "$hash_device"
+
+    # mount dm-verity mapper as rootfs
+    if ! mount -t ext4 -o ro "/dev/mapper/$label_verity_rootfs" "$ROOTFS_DIR"
+    then
+        fail "Mounting root filesystem failed"
+    fi
+
+    # decrypt and mount userdata, datastore and provisioning volumes
+    dmsetup -v create "$label_decrypt_userdata" \
+        --table "0 $(blockdev --getsz $lvm_userdata) crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $lvm_userdata 0 1 sector_size:4096"
+    dmsetup -v create "$_LABEL_DECRYPT_DATASTORE" \
+        --table "0 $(blockdev --getsz $_LVM_DATASTORE) crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $_LVM_DATASTORE 0 1 sector_size:4096"
+    dmsetup -v create "$_LABEL_DECRYPT_PROVISIONING" \
+        --table "0 $(blockdev --getsz $_LVM_PROVISIONING) crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $_LVM_PROVISIONING 0 1 sector_size:4096"
+
+    mount -t ext4 "/dev/mapper/$label_decrypt_userdata" "$ROOTFS_DIR$_MNT_USERDATA"
+    mount -t ext4 "/dev/mapper/$_LABEL_DECRYPT_DATASTORE" "$ROOTFS_DIR$_MNT_DATASTORE"
+    mount -t ext4 -o ro "/dev/mapper/$_LABEL_DECRYPT_PROVISIONING" "$ROOTFS_DIR$_MNT_PROVISIONING"
+
+    # Move keystore mount into new
+    mount --move "$_MNT_KEYSTORE" "$ROOTFS_DIR$_MNT_KEYSTORE"
+}

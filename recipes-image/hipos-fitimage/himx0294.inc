@@ -1,11 +1,3 @@
-# SPDX-License-Identifier: MIT
-# Copyright (C) 2025 iris-GmbH infrared & intelligent sensors
-
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
-
-inherit fitimage hab-signed-fitimage
-
 FITLOADADDR ?= "0x28000000"
 
 FITIMAGE_IMAGES = "kernel fdt ramdisk"
@@ -29,7 +21,6 @@ FITIMAGE_IMAGE_fdt[file] = "\
     ${DEPLOY_DIR_IMAGE}/imx6qp-himx0294-dvrec.dtb   \
 "
 
-FITIMAGE_IMAGE_ramdisk ?= "hipos-initramfs-image"
 FITIMAGE_IMAGE_ramdisk[type] ?= "ramdisk"
 
 COMPATIBLE_MACHINE = "himx0294"
