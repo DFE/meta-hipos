@@ -161,4 +161,10 @@ hiposprovisioning_run() {
     mount --move "${_MNT_KEYSTORE}" "${ROOTFS_DIR}${_MNT_KEYSTORE}"
     mount --move "${_MNT_DATASTORE}" "${ROOTFS_DIR}${_MNT_DATASTORE}"
     mount --move "${_MNT_PROVISIONING}" "${ROOTFS_DIR}${_MNT_PROVISIONING}"
+
+    # HACKY: Workaround for eth1 setup
+    cp "${ROOTFS_DIR}/etc/network/interfaces" /tmp/interfaces
+    echo "iface eth1 inet dhcp" >> /tmp/interfaces
+    echo "allow-hotplug eth1" >> /tmp/interfaces
+    mount --bind /tmp/interfaces "${ROOTFS_DIR}/etc/network/interfaces"
 }
