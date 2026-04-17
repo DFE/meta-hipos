@@ -183,9 +183,9 @@
 		};
 	};
 
-	lvds_backlight: lvds_backlight {
+	front_backlight: front_backlight {
 		compatible = "pwm-backlight";
-		pwms = <&pwm2 0 100000 0>;
+		pwms = <&pwm4 0 100000 0>;
 		status = "okay";
 
 		brightness-levels = < 0  1  2  3  4  5  6  7  8  9
@@ -268,10 +268,31 @@
 	cs-gpios = <&gpio5 13 GPIO_ACTIVE_LOW>;
 	status = "okay";
 
-	spidev1: spi@0 {
+	display@0 {
 		reg = <0>;
-		compatible = "rohm,dh2228fv";
-		spi-max-frequency = <500000>;
+		compatible = "rspro,rs80160-st7735s";
+		spi-max-frequency = <4000000>;
+
+		dc-gpios = <&gpio3 21 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio3 22 GPIO_ACTIVE_HIGH>;
+		write-only;
+
+		backlight = <&front_backlight>;
+
+		width-mm = <22>;
+		height-mm = <11>;
+
+		panel-timing {
+			hactive = <160>;
+			vactive = <80>;
+			hback-porch = <0>;
+			vback-porch = <0>;
+			clock-frequency = <0>;
+			hfront-porch = <0>;
+			hsync-len = <0>;
+			vfront-porch = <0>;
+			vsync-len = <0>;
+		};
 	};
 };
 
@@ -700,24 +721,6 @@
 	status = "okay";
 };
 
-&pwm1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pwm1>;
-	status = "okay";
-};
-
-&pwm2 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pwm2>;
-	status = "okay";
-};
-
-&pwm4 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_pwm4>;
-	status = "okay";
-};
-
 &sai2 {
 	#sound-dai-cells = <0>;
 	pinctrl-names = "default";
@@ -936,6 +939,8 @@
 			MX8MP_IOMUXC_NAND_CE0_B__GPIO3_IO01		0x1c4 /* #GPS_SHDN */
 			MX8MP_IOMUXC_NAND_DQS__GPIO3_IO14		0x1c4 /* #GPS_IRQ */
 			MX8MP_IOMUXC_ECSPI1_MOSI__GPIO5_IO07		0x1c4 /* LNA_EN */
+			MX8MP_IOMUXC_SAI5_RXD0__GPIO3_IO21		0x116 /* TFT_RS */
+			MX8MP_IOMUXC_SAI5_RXD1__GPIO3_IO22		0x116 /* #TFT_RST */
 		>;
 	};
 
@@ -1104,24 +1109,6 @@
 	pinctrl_pca6416_int: pca6416_int_grp {
 		fsl,pins = <
 			MX8MP_IOMUXC_GPIO1_IO12__GPIO1_IO12	0x146 /* Input pull-up. */
-		>;
-	};
-
-	pinctrl_pwm1: pwm1grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO01__PWM1_OUT	0x116
-		>;
-	};
-
-	pinctrl_pwm2: pwm2grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_GPIO1_IO11__PWM2_OUT	0x116
-		>;
-	};
-
-	pinctrl_pwm4: pwm4grp {
-		fsl,pins = <
-			MX8MP_IOMUXC_SAI5_RXFS__PWM4_OUT	0x116
 		>;
 	};
 
