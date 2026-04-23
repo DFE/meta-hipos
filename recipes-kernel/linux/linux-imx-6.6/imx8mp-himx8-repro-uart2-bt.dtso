@@ -1,0 +1,37 @@
+/dts-v1/;
+/plugin/;
+
+#include "imx8mp-pinfunc.h"
+
+/ {
+    fragment@0 {
+        target-path = "/chosen";
+        __overlay__ {
+            stdout-path = "";
+        };
+    };
+
+    fragment@1 {
+        target = <&iomuxc>;
+        __overlay__ {
+            pinctrl_uart2_bt: uart2btgrp {
+                fsl,pins = <
+                    MX8MP_IOMUXC_SAI3_TXFS__UART2_DCE_RX    0x140
+                    MX8MP_IOMUXC_SAI3_TXC__UART2_DCE_TX     0x140
+                    MX8MP_IOMUXC_SAI3_RXC__UART2_DCE_CTS    0x140
+                    MX8MP_IOMUXC_SAI3_RXD__UART2_DCE_RTS    0x140
+                >;
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&uart2>;
+        __overlay__ {
+            pinctrl-0 = <&pinctrl_uart2_bt>;
+            fsl,uart-has-rtscts;
+            status = "okay";
+        };
+    };
+};
+
