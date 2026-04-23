@@ -89,7 +89,7 @@
 	CFG_MFG_ENV_SETTINGS \
 	BOOTENV \
 	"kernel_addr_r=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
-	"do_boot=run switch_init; run loadimage; run loadfdt; run setbootargs; booti ${loadaddr} - ${fdt_addr}\0" \
+	"do_boot=run switch_init; run loadfdt; run load_bt_overlay; run loadimage; run setbootargs; booti ${loadaddr} - ${fdt_addr}\0" \
 	"image=/boot/Image\0" \
 	"fdt_addr_r=0x43000000\0"			\
 	"fdt_addr=0x43000000\0"			\
@@ -99,10 +99,17 @@
 	"switch_reset=gpio clear 97; sleep 0.1; gpio set 97; sleep 0.1\0" \
 	"switch_ctrl=mii device ethernet@30bf0000; mii write 0x15 1 0xc003; mii write 0x16 1 0xcfff\0" \
 	"switch_speed_port2=mii write 0x1c 0x19 0x0; mii write 0x1c 0x18 0x9449; sleep 0.1; mii write 0x1c 0x19 0x9140; mii write 0x1c 0x18 0x9440\0" \
+	"bt_enabled=0\0" \
+	"load_bt_overlay=if itest.s \"${bt_enabled}\" == \"1\"; then " \
+			"echo \"Loading BT Overlay...\"; " \
+			"ext4load ${boottype} ${bootdev}:${bootpart} ${loadaddr} /boot/imx8mp-himx8-repro-uart2-bt.dtbo && " \
+			"fdt addr ${fdt_addr_r} && " \
+			"fdt resize 8192 && " \
+			"fdt apply ${loadaddr}; " \
+			"fi\0" \
 	"loadimage=ext4load ${boottype} ${bootdev}:${bootpart} ${loadaddr} ${image}\0" \
 	"loadfdt=ext4load ${boottype} ${bootdev}:${bootpart} ${fdt_addr_r} ${fdtfile}\0" \
-	"setbootargs=setenv bootargs noinitrd console=ttymxc1,115200 " \
-		"root=${bootroot} rootwait\0" \
+	"setbootargs=setenv bootargs noinitrd root=${bootroot} rootwait\0" \
 	"x_bootA=setenv boottype mmc; setenv bootdev 2; setenv bootpart 1; " \
 		"setenv bootroot /dev/mmcblk2p1; run do_boot\0" \
 	"x_bootB=setenv boottype mmc; setenv bootdev 2; setenv bootpart 2; " \
