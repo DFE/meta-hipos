@@ -1,0 +1,175 @@
+From 62be96e201625b1dce32386afcdaccb4a5628ba5 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Wed, 27 May 2026 12:38:18 +0200
+Subject: [PATCH] fsl_sai.c: Keep SAI MCLK active after stream stop HYP-33833
+
+Add an explicit always-on MCLK mode for boards that need the SAI
+MCLK output to remain active while no PCM stream is running.
+
+When enabled, keep a balanced reference to mclk1, restore MCTL_MCLK_EN
+and TCSR.TERE after probe, runtime resume, and the normal Tx stop/reset
+sequence.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ sound/soc/fsl/fsl_sai.c | 74 +++++++++++++++++++++++++++++++++++++++++
+ sound/soc/fsl/fsl_sai.h |  2 ++
+ 2 files changed, 76 insertions(+)
+
+diff --git a/sound/soc/fsl/fsl_sai.c b/sound/soc/fsl/fsl_sai.c
+index dad3444b4c76..525d548ecb12 100644
+--- a/sound/soc/fsl/fsl_sai.c
++++ b/sound/soc/fsl/fsl_sai.c
+@@ -231,6 +231,56 @@ static int fsl_sai_set_mclk_rate(struct snd_soc_dai *dai, int clk_id, unsigned i
+ 	return ret;
+ }
+ 
++static bool fsl_sai_mclk_always_on(struct fsl_sai *sai)
++{
++	return sai->mclk_always_on && sai->mclk_direction_output &&
++	       sai->soc_data->mclk_with_tere;
++}
++
++static int fsl_sai_enable_mclk_always_on(struct device *dev)
++{
++	struct fsl_sai *sai = dev_get_drvdata(dev);
++	unsigned int ofs = sai->soc_data->reg_offset;
++	int ret;
++
++	if (!fsl_sai_mclk_always_on(sai))
++		return 0;
++
++	if (IS_ERR_OR_NULL(sai->mclk_clk[FSL_SAI_CLK_MAST1])) {
++		dev_err(dev, "mclk1 is required for always-on MCLK\n");
++		return -EINVAL;
++	}
++
++	if (!sai->mclk_always_on_enabled) {
++		ret = clk_prepare_enable(sai->mclk_clk[FSL_SAI_CLK_MAST1]);
++		if (ret) {
++			dev_err(dev, "failed to enable always-on mclk1: %d\n", ret);
++			return ret;
++		}
++
++		sai->mclk_always_on_enabled = true;
++	}
++
++	if (sai->soc_data->max_register >= FSL_SAI_MCTL)
++		regmap_update_bits(sai->regmap, FSL_SAI_MCTL,
++				   FSL_SAI_MCTL_MCLK_EN,
++				   FSL_SAI_MCTL_MCLK_EN);
++
++	regmap_update_bits(sai->regmap, FSL_SAI_TCSR(ofs),
++			   FSL_SAI_CSR_TERE, FSL_SAI_CSR_TERE);
++
++	return 0;
++}
++
++static void fsl_sai_disable_mclk_always_on(struct fsl_sai *sai)
++{
++	if (!sai->mclk_always_on_enabled)
++		return;
++
++	clk_disable_unprepare(sai->mclk_clk[FSL_SAI_CLK_MAST1]);
++	sai->mclk_always_on_enabled = false;
++}
++
+ static int fsl_sai_set_dai_sysclk(struct snd_soc_dai *cpu_dai,
+ 		int clk_id, unsigned int freq, int dir)
+ {
+@@ -779,6 +829,13 @@ static void fsl_sai_config_disable(struct fsl_sai *sai, int dir)
+ 		/* Clear SR bit to finish the reset */
+ 		regmap_write(sai->regmap, FSL_SAI_xCSR(tx, ofs), 0);
+ 	}
++
++	/*
++	 * On i.MX8MP the MCLK pad is gated by TCSR.TERE. Re-enable it
++	 * after the normal Tx stop/reset sequence for continuous MCLK.
++	 */
++	if (fsl_sai_mclk_always_on(sai) && tx)
++		fsl_sai_enable_mclk_always_on(&sai->pdev->dev);
+ }
+ 
+ static int fsl_sai_trigger(struct snd_pcm_substream *substream, int cmd,
+@@ -895,6 +952,7 @@ static int fsl_sai_dai_probe(struct snd_soc_dai *cpu_dai)
+ {
+ 	struct fsl_sai *sai = dev_get_drvdata(cpu_dai->dev);
+ 	unsigned int ofs = sai->soc_data->reg_offset;
++	int ret;
+ 
+ 	/* Software Reset for both Tx and Rx */
+ 	regmap_write(sai->regmap, FSL_SAI_TCSR(ofs), FSL_SAI_CSR_SR);
+@@ -913,6 +971,10 @@ static int fsl_sai_dai_probe(struct snd_soc_dai *cpu_dai)
+ 	snd_soc_dai_init_dma_data(cpu_dai, &sai->dma_params_tx,
+ 				&sai->dma_params_rx);
+ 
++	ret = fsl_sai_enable_mclk_always_on(cpu_dai->dev);
++	if (ret)
++		return ret;
++
+ 	return 0;
+ }
+ 
+@@ -1480,6 +1542,7 @@ static int fsl_sai_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	sai->mclk_direction_output = of_property_read_bool(np, "fsl,sai-mclk-direction-output");
++	sai->mclk_always_on = of_property_read_bool(np, "fsl,sai-mclk-always-on");
+ 
+ 	if (sai->mclk_direction_output &&
+ 	    of_device_is_compatible(np, "fsl,imx6ul-sai")) {
+@@ -1530,6 +1593,10 @@ static int fsl_sai_probe(struct platform_device *pdev)
+ 				   FSL_SAI_MCTL_MCLK_EN, FSL_SAI_MCTL_MCLK_EN);
+ 	}
+ 
++	ret = fsl_sai_enable_mclk_always_on(dev);
++	if (ret)
++		goto err_pm_get_sync;
++
+ 	ret = pm_runtime_put_sync(dev);
+ 	if (ret < 0 && ret != -ENOSYS)
+ 		goto err_pm_get_sync;
+@@ -1588,6 +1655,7 @@ static int fsl_sai_probe(struct platform_device *pdev)
+ 		sysfs_remove_group(&pdev->dev.kobj,
+ 				   fsl_sai_get_dev_attribute_group(sai->monitor_spdif));
+ err_pm_get_sync:
++	fsl_sai_disable_mclk_always_on(sai);
+ 	if (!pm_runtime_status_suspended(dev))
+ 		fsl_sai_runtime_suspend(dev);
+ err_pm_disable:
+@@ -1600,6 +1668,8 @@ static void fsl_sai_remove(struct platform_device *pdev)
+ {
+ 	struct fsl_sai *sai = dev_get_drvdata(&pdev->dev);
+ 
++	fsl_sai_disable_mclk_always_on(sai);
++
+ 	pm_runtime_disable(&pdev->dev);
+ 	if (!pm_runtime_status_suspended(&pdev->dev))
+ 		fsl_sai_runtime_suspend(&pdev->dev);
+@@ -1816,6 +1886,10 @@ static int fsl_sai_runtime_resume(struct device *dev)
+ 		regmap_update_bits(sai->regmap, FSL_SAI_TCSR(ofs),
+ 				   FSL_SAI_CSR_TERE, FSL_SAI_CSR_TERE);
+ 
++	ret = fsl_sai_enable_mclk_always_on(dev);
++	if (ret)
++		goto disable_rx_clk;
++
+ 	return 0;
+ 
+ disable_rx_clk:
+diff --git a/sound/soc/fsl/fsl_sai.h b/sound/soc/fsl/fsl_sai.h
+index c2a609e888b9..ed127de6c80c 100644
+--- a/sound/soc/fsl/fsl_sai.h
++++ b/sound/soc/fsl/fsl_sai.h
+@@ -297,6 +297,8 @@ struct fsl_sai {
+ 	struct fsl_sai_dl_cfg *dl_cfg;
+ 	unsigned int dl_cfg_cnt;
+ 	bool mclk_direction_output;
++	bool mclk_always_on;
++	bool mclk_always_on_enabled;
+ 	bool monitor_spdif;
+ 	bool monitor_spdif_start;
+ 
+-- 
+2.50.1
+
