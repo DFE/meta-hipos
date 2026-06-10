@@ -15,7 +15,7 @@ KBUILD_DEFCONFIG = ""
 
 # do not rename this variable because it will be processed by some
 # external tooling (see https://dresearchfe.jira.com/browse/HYP-14343)
-DRSRCBRANCH="master"
+DRSRCBRANCH="6.17"
 
 SRC_URI:append = " \
 	git://github.com/iris-GmbH/tw6869.git;protocol=https;destsuffix=git.tw6869;name=tw6869;branch=${DRSRCBRANCH} \
