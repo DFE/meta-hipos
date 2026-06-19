@@ -1,0 +1,80 @@
+From 9d9513485acf6b96940f08063573fd0764e9ed13 Mon Sep 17 00:00:00 2001
+From: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+Date: Fri, 19 Jun 2026 14:03:36 +0200
+Subject: [PATCH] brcmfmac: Load blob file HYP-33833
+
+'blob' file is also required in the USB version.
+
+Signed-off-by: Mario Schuknecht <mario.schuknecht@iris-sensing.com>
+---
+ .../broadcom/brcm80211/brcmfmac/usb.c         | 49 +++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
+index 2178675ae1a4..8c66d2f7a98d 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
+@@ -1154,11 +1154,60 @@ struct brcmf_usbdev *brcmf_usb_attach(struct brcmf_usbdev_info *devinfo,
+ 	return NULL;
+ }
+ 
++static
++int brcmf_usb_get_fwname(struct device *dev, const char *ext, u8 *fw_name)
++{
++        struct brcmf_bus *bus = dev_get_drvdata(dev);
++        struct brcmf_fw_request *fwreq;
++        struct brcmf_fw_name fwnames[] = {
++                { ext, fw_name },
++        };
++
++        fwreq = brcmf_fw_alloc_request(bus->chip, bus->chiprev,
++                                       brcmf_usb_fwnames,
++                                       ARRAY_SIZE(brcmf_usb_fwnames),
++                                       fwnames, ARRAY_SIZE(fwnames));
++        if (!fwreq)
++                return -ENOMEM;
++
++        kfree(fwreq);
++        return 0;
++}
++
+ static int brcmf_usb_get_blob(struct device *dev, const struct firmware **fw,
+ 			      enum brcmf_blob_type type)
+ {
++#if 0
+ 	/* No blobs for USB devices... */
+ 	return -ENOENT;
++#else
++	struct brcmf_bus *bus = dev_get_drvdata(dev);
++	u8 clm_name[BRCMF_FW_NAME_LEN];
++	s32 err;
++
++	switch (type) {
++	case BRCMF_BLOB_CLM:
++		break;
++	default:
++		return -ENOENT;
++	}
++
++	memset(clm_name, 0, sizeof(clm_name));
++	err = brcmf_usb_get_fwname(dev, ".clm_blob", clm_name);
++	if (err) {
++		brcmf_err("get CLM blob file name failed (%d)\n", err);
++		return err;
++	}
++
++	err = firmware_request_nowarn(fw, clm_name, bus->dev);
++	if (err) {
++		brcmf_info("no clm_blob available (err=%d), device may have limited channels available\n",
++				err);
++		return -1;
++	}
++
++	return 0;
++#endif
+ }
+ 
+ static const struct brcmf_bus_ops brcmf_usb_bus_ops = {
+-- 
+2.50.1
+
