@@ -15,8 +15,3 @@ IMAGE_INSTALL += "         \
     lighttpd-module-webdav \
 "
 
-# Marker file allowing scripts to distinguish secure builds from non-secure builds
-do_rootfs:append:hipos-cyber-security() {
-    install -d ${IMAGE_ROOTFS}${sysconfdir}
-    echo "SECURE_BUILD=true" > ${IMAGE_ROOTFS}${sysconfdir}/hipos-build-info
-}
