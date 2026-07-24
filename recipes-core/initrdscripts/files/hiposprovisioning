@@ -22,12 +22,20 @@ fail() {
     exit 1
 }
 
-write_fitimage() {
+copy_fitimage() {
     partition="$1"
     fitimage="$2"
 
     mount -t ext4 -o rw "${partition}" /tmp/boot
-    cp "${fitimage}" /tmp/boot
+    cp "${fitimage}" /tmp/boot/fitImage.signed.new
+    umount /tmp/boot
+}
+
+finalize_fitimage() {
+    partition="$1"
+
+    mount -t ext4 -o rw "${partition}" /tmp/boot
+    mv /tmp/boot/fitImage.signed.new /tmp/boot/fitImage.signed
     umount /tmp/boot
 }
 
@@ -39,7 +47,7 @@ format_lvm_volume() {
 
     dmsetup -v create "${decrypt_label}" \
         --table "0 $(blockdev --getsz "$volume_dev") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $volume_dev 0 1 sector_size:4096"
-    mkfs.ext4 "${decrypt_dev}" ; sync ; sleep 1
+    mkfs.ext4 -qF "${decrypt_dev}" ; sync ; sleep 1
 
     if [ "$#" -eq 2 ]
     then
@@ -95,46 +103,64 @@ hiposprovisioning_enabled() {
 }
 
 hiposprovisioning_run() {
-    DEV="/dev/mmcblk2"
+    DEV=${bootparam_root%p[0-9]*}
+    LVMDEV="${DEV}p4"
 
     mount -t tmpfs tmp /tmp
     mkdir /tmp/mnt /tmp/provisioning /tmp/boot
     mkdir -p "${_MNT_KEYSTORE}" "${_MNT_DATASTORE}" "${_MNT_PROVISIONING}"
 
-    # Copy all artifacts from p4 into tmpfs
-    mount -t ext4 -o ro "${DEV}p4" /tmp/mnt
-    cp -avx /tmp/mnt/. /tmp/provisioning
-    umount /tmp/mnt
-
-    # Put signed fitimage into boot_a and boot_b
-    write_fitimage "${DEV}p1" "/tmp/provisioning/${_FILE_FITIMAGE}"
-    write_fitimage "${DEV}p2" "/tmp/provisioning/${_FILE_FITIMAGE}"
-
-    # Extend p4, create LVM
-    parted -s "${DEV}" resizepart 4 100%
-    partprobe "${DEV}"
-
-    pvcreate -ff -y "${DEV}p4"
-    vgcreate "${_LVM_LABEL}" "${DEV}p4"
-
-    #TODO: Get rootfs size dynamically!
-    lvcreate -y -n "rootfs_a" -L 720MB "${_LVM_LABEL}"
-    lvcreate -y -n "rootfs_b" -L 720MB "${_LVM_LABEL}"
-    lvcreate -y -n "userdata_a" -L 512MB "${_LVM_LABEL}"
-    lvcreate -y -n "userdata_b" -L 512MB "${_LVM_LABEL}"
-    lvcreate -y -n "keystore" -L 128MB "${_LVM_LABEL}"
-    lvcreate -y -n "provisioning" -L 128MB "${_LVM_LABEL}"
-    lvcreate -y -n "datastore" -L 128MB "${_LVM_LABEL}"
-
-    vgchange -a y
-    vgmknodes
-
     keystore_dev="/dev/mapper/${_LVM_LABEL}-keystore"
+    tmp_provisioning_dev="/dev/mapper/${_LVM_LABEL}-tmp_provisioning"
 
-    # Format keystore volume
-    mkfs.ext4 "${keystore_dev}"
-    mount "${keystore_dev}" "${_MNT_KEYSTORE}"
-    mkdir "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
+    if vgs "hydralvm_provisioning" ;
+    then
+        # rename VG
+        vgrename -An --devices "${LVMDEV}" -y "hydralvm_provisioning" "${_LVM_LABEL}"
+        vgchange -a y --devices "${LVMDEV}"
+        vgmknodes --devices "${LVMDEV}"
+    fi
+
+    if [ -e "${tmp_provisioning_dev}" ]
+    then
+        # LVM is pre-populated, just mount artifact and keystore volume
+        mount -t ext4 -o ro "${tmp_provisioning_dev}" /tmp/provisioning
+        mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+    else
+        # Copy all artifacts from p4 into tmpfs
+        mount -t ext4 -o ro "${DEV}p4" /tmp/mnt
+        cp -avx /tmp/mnt/. /tmp/provisioning
+        umount /tmp/mnt
+
+        # Extend p4, create LVM
+        parted -s "${DEV}" resizepart 4 100%
+        partprobe "${DEV}"
+
+        pvcreate -ff -y "${LVMDEV}"
+        vgcreate --devices "${LVMDEV}" "${_LVM_LABEL}" "${LVMDEV}"
+
+        rootfs_bytes=$(tail -c 4 "/tmp/provisioning/${_FILE_ROOTFS_GZ}" | od -An -tu4 | xargs)
+        # no need for alignment as verity images are always a multiple of 512 in size
+        lvcreate -y --devices "${LVMDEV}" -n "rootfs_a" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "rootfs_b" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "userdata_a" -L 512MB "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "userdata_b" -L 512MB "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "keystore" -L 128MB "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "provisioning" -L 128MB "${_LVM_LABEL}"
+        lvcreate -y --devices "${LVMDEV}" -n "datastore" -L 128MB "${_LVM_LABEL}"
+
+        vgchange -a y --devices "${LVMDEV}"
+        vgmknodes --devices "${LVMDEV}"
+
+        # Format and mount keystore volume
+        mkfs.ext4 -qF "${keystore_dev}"
+        mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+        mkdir -p "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
+
+        # Copy rootfs artifacts to keystore
+        write_verity_artifacts "rootfs_a"
+        write_verity_artifacts "rootfs_b"
+    fi
 
     # Create CAAM key for encryption
     caam-keygen create "${_MNT_KEYSTORE}/caam/volumeKey" ccm -s 32
@@ -148,10 +174,6 @@ hiposprovisioning_run() {
     format_lvm_volume "userdata_a" "${_MNT_USERDATA}"
     format_lvm_volume "userdata_b"
 
-    # Copy rootfs artifacts to keystore
-    write_verity_artifacts "rootfs_a"
-    write_verity_artifacts "rootfs_b"
-
     # Write rootfs
     write_rootfs "rootfs_a" "/tmp/provisioning/${_FILE_ROOTFS_GZ}" "${ROOTFS_DIR}"
     write_rootfs "rootfs_b" "/tmp/provisioning/${_FILE_ROOTFS_GZ}"
@@ -161,4 +183,19 @@ hiposprovisioning_run() {
     mount --move "${_MNT_KEYSTORE}" "${ROOTFS_DIR}${_MNT_KEYSTORE}"
     mount --move "${_MNT_DATASTORE}" "${ROOTFS_DIR}${_MNT_DATASTORE}"
     mount --move "${_MNT_PROVISIONING}" "${ROOTFS_DIR}${_MNT_PROVISIONING}"
+
+    # Put signed fitimage into boot_a and boot_b
+    copy_fitimage "${DEV}p2" "/tmp/provisioning/${_FILE_FITIMAGE}"
+    copy_fitimage "${DEV}p1" "/tmp/provisioning/${_FILE_FITIMAGE}"
+
+    # Remove temporary LVM volume
+    if [ -e "${tmp_provisioning_dev}" ]
+    then
+        umount /tmp/provisioning
+        lvremove --devices "${DEV}" -An -y "${tmp_provisioning_dev}"
+    fi
+
+    # Switch to new fitimage in boot partitions
+    finalize_fitimage "${DEV}p2"
+    finalize_fitimage "${DEV}p1"
 }
