@@ -157,9 +157,8 @@ hiposprovisioning_run() {
         mount "${keystore_dev}" "${_MNT_KEYSTORE}"
         mkdir -p "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
 
-        # Copy rootfs artifacts to keystore
+        # Copy rootfs artifacts to keystore (skip rootfs_b)
         write_verity_artifacts "rootfs_a"
-        write_verity_artifacts "rootfs_b"
     fi
 
     # Create CAAM key for encryption
@@ -174,9 +173,8 @@ hiposprovisioning_run() {
     format_lvm_volume "userdata_a" "${_MNT_USERDATA}"
     format_lvm_volume "userdata_b"
 
-    # Write rootfs
+    # Write rootfs (skip rootfs_b - will be done as part of post-update procedures)
     write_rootfs "rootfs_a" "/tmp/provisioning/${_FILE_ROOTFS_GZ}" "${ROOTFS_DIR}"
-    write_rootfs "rootfs_b" "/tmp/provisioning/${_FILE_ROOTFS_GZ}"
 
     # Move other mounts
     mount --move "${_MNT_USERDATA}" "${ROOTFS_DIR}${_MNT_USERDATA}"

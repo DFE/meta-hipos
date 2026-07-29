@@ -107,14 +107,13 @@ lvcreate -y -n "tmp_provisioning" -L 1024MB "${vglabel}"
 vgchange -a y
 vgmknodes
 
-# prepare keystore volume
+# prepare keystore volume (skip rootfs_b artifacts)
 keystore_dev="/dev/mapper/${vglabel}-keystore"
 
 mkfs.ext4 -qF "${keystore_dev}"
 mount "${keystore_dev}" "${tmp_mnt}"
 mkdir "${tmp_mnt}/caam" "${tmp_mnt}/verity"
 copy_verity_artifacts "${tmp_mnt}" "rootfs_a"
-copy_verity_artifacts "${tmp_mnt}" "rootfs_b"
 umount "${tmp_mnt}"
 
 # prepare temporary artifact volume
