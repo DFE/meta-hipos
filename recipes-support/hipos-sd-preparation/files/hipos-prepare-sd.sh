@@ -86,6 +86,7 @@ sync
 # prepare provisioning fitimage
 mount "${dev}p1" "${tmp_mnt}"
 cp "${a_fitimage_provisioning}" "${tmp_mnt}/fitImage.signed"
+cp "${a_fitimage}" "${tmp_mnt}/fitImage.signed.deploy"
 umount "${tmp_mnt}"
 
 # prepare LVM
@@ -102,13 +103,16 @@ lvcreate -y -n "keystore" -L 128MB "${vglabel}"
 lvcreate -y -n "provisioning" -L 128MB "${vglabel}"
 lvcreate -y -n "datastore" -L 128MB "${vglabel}"
 
-lvcreate -y -n "tmp_provisioning" -L 1024MB "${vglabel}"
+lvcreate -y -n "pvsn_rootfs" -L "${rootfs_bytes}B" "${vglabel}"
+lvcreate -y -n "pvsn_userdata" -L 512MB "${vglabel}"
+lvcreate -y -n "pvsn_provisioning" -L 128MB "${vglabel}"
+lvcreate -y -n "pvsn_datastore" -L 128MB "${vglabel}"
 
 vgchange -a y
 vgmknodes
 
 # prepare keystore volume (skip rootfs_b artifacts)
-keystore_dev="/dev/mapper/${vglabel}-keystore"
+keystore_dev="/dev/${vglabel}/keystore"
 
 mkfs.ext4 -qF "${keystore_dev}"
 mount "${keystore_dev}" "${tmp_mnt}"
@@ -116,11 +120,18 @@ mkdir "${tmp_mnt}/caam" "${tmp_mnt}/verity"
 copy_verity_artifacts "${tmp_mnt}" "rootfs_a"
 umount "${tmp_mnt}"
 
-# prepare temporary artifact volume
-artifact_dev="/dev/mapper/${vglabel}-tmp_provisioning"
-mkfs.ext4 -qF "${artifact_dev}"
-mount "${artifact_dev}" "${tmp_mnt}"
-cp "${a_fitimage}" "${tmp_mnt}"
-cp "${a_rootfs_gz}" "${tmp_mnt}"
-umount "${tmp_mnt}"
+# write un-encrypted rootfs_a
+zcat "${a_rootfs_gz}" > "/dev/${vglabel}/pvsn_rootfs"
+
+# prepare ext4 volumes
+mkfs.ext4 -qF "/dev/${vglabel}/pvsn_userdata"
+mkfs.ext4 -qF "/dev/${vglabel}/pvsn_provisioning"
+mkfs.ext4 -qF "/dev/${vglabel}/pvsn_datastore"
+
+# Deactivate and rename volume group (see https://bugzilla.redhat.com/show_bug.cgi?id=2086765 on renaming)
+vgchange --devices "${dev}p4" -an "${vglabel}"
+vgcfgbackup --devices "${dev}p4" --file /tmp/hipos-lvm.txt "${vglabel}"
+sed -iE "s/\(^\)${vglabel}\(\s*{\)/\1${vglabel_system}\2/" /tmp/hipos-lvm.txt
+vgcfgrestore --devices "${dev}p4" --file /tmp/hipos-lvm.txt -y "${vglabel_system}"
+
 sync
