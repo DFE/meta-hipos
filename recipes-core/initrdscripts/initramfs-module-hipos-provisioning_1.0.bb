@@ -21,12 +21,25 @@ SRC_URI = "file://hiposprovisioning"
 
 S = "${WORKDIR}"
 
+INJECTED_ROOTPASSWORD ?= "*"
+
+do_compile() {
+    echo "INJECTED_ROOTPASSWORD='${INJECTED_ROOTPASSWORD}'" > hipos_provisioning_common.sh
+}
+
 do_install() {
     install -d ${D}/init.d
     install -m 0755 ${WORKDIR}/hiposprovisioning ${D}/init.d/70-hiposprovisioning
+
+    install -d ${D}${datadir}
+    install -m 0755 ${WORKDIR}/hipos_provisioning_common.sh ${D}${datadir}/hipos_provisioning_common.sh
+
 }
 
-FILES:${PN} = "/init.d/70-hiposprovisioning"
+FILES:${PN} = "\
+    /init.d/70-hiposprovisioning \
+    /usr/share/hipos_provisioning_common.sh \
+"
 
 # Conflict with mount script, they won't work together
 RCONFLICTS:${PN} = "initramfs-module-hipos-mount"

@@ -134,6 +134,8 @@ hiposprovisioning_run() {
     LVMDEV="${bootparam_root}"
     DEV=${LVMDEV%p[0-9]*}
 
+    . /usr/share/hipos_provisioning_common.sh
+
     keystore_dev="/dev/mapper/${_LVM_LABEL}-keystore"
 
     mount -t tmpfs tmp /tmp
@@ -153,6 +155,12 @@ hiposprovisioning_run() {
     mount "/dev/mapper/${_LVM_LABEL}-pvsn_userdata" "${_MNT_USERDATA}"
     mount "/dev/mapper/${_LVM_LABEL}-pvsn_provisioning" "${_MNT_PROVISIONING}"
     mount "/dev/mapper/${_LVM_LABEL}-pvsn_datastore" "${_MNT_DATASTORE}"
+
+    # modify runtime for production need
+    # - inject root password
+    cp "${ROOTFS_DIR}/etc/shadow" /tmp/etc_shadow
+    sed -e "s%^root:[^:]*:%root:${INJECTED_ROOTPASSWORD}:%" -i /tmp/etc_shadow
+    mount --bind /tmp/etc_shadow "${ROOTFS_DIR}/etc/shadow"
 
     # move mounts
     mount --move "${_MNT_USERDATA}" "${ROOTFS_DIR}${_MNT_USERDATA}"
