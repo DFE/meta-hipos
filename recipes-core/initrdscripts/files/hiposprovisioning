@@ -27,7 +27,7 @@ copy_fitimage() {
     fitimage="$2"
 
     mount -t ext4 -o rw "${partition}" /tmp/boot
-    cp "${fitimage}" /tmp/boot/fitImage.signed.new
+    cp "${fitimage}" /tmp/boot/fitImage.signed.deploy
     umount /tmp/boot
 }
 
@@ -35,26 +35,8 @@ finalize_fitimage() {
     partition="$1"
 
     mount -t ext4 -o rw "${partition}" /tmp/boot
-    mv /tmp/boot/fitImage.signed.new /tmp/boot/fitImage.signed
+    mv /tmp/boot/fitImage.signed.deploy /tmp/boot/fitImage.signed
     umount /tmp/boot
-}
-
-format_lvm_volume() {
-    label="$1"
-    volume_dev="/dev/mapper/${_LVM_LABEL}-${label}"
-    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
-    decrypt_dev="/dev/mapper/${decrypt_label}"
-
-    dmsetup -v create "${decrypt_label}" \
-        --table "0 $(blockdev --getsz "$volume_dev") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $volume_dev 0 1 sector_size:4096"
-    mkfs.ext4 -qF "${decrypt_dev}" ; sync ; sleep 1
-
-    if [ "$#" -eq 2 ]
-    then
-        mount -t ext4 "${decrypt_dev}" "$2"
-    else
-        dmsetup remove --retry "${decrypt_label}"
-    fi
 }
 
 write_verity_artifacts() {
@@ -65,37 +47,83 @@ write_verity_artifacts() {
     cp "/tmp/provisioning/${_FILE_ROOTFS_ROOTHASH_SIGNATURE}" "${_MNT_KEYSTORE}/verity/${label}.roothash.signature"
 }
 
-write_rootfs() {
-    label="$1"
-    gz_file="$2"
+prepare_sdcard() {
+    # Create the same state as sd-preparation with artifacts from ..p4
+    # Copy all artifacts from p4 into tmpfs
+    mount -t ext4 -o ro "${DEV}p4" /tmp/mnt
+    cp -avx /tmp/mnt/. /tmp/provisioning
+    umount /tmp/mnt
 
-    volume_dev="/dev/mapper/${_LVM_LABEL}-${label}"
-    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
-    decrypt_dev="/dev/mapper/${decrypt_label}"
+    # Extend p4, create LVM
+    parted -s "${DEV}" resizepart 4 100%
+    partprobe "${DEV}"
 
-    dmsetup -v create "${decrypt_label}" \
-        --table "0 $(blockdev --getsz "$volume_dev") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 $volume_dev 0 1 sector_size:4096"
-    zcat "${gz_file}" > "${decrypt_dev}" ; sync ; sleep 1
+    pvcreate -ff -y "${LVMDEV}"
+    vgcreate --devices "${LVMDEV}" "${_LVM_LABEL}" "${LVMDEV}"
 
-    if [ "$#" -eq 3 ]
+    rootfs_bytes=$(tail -c 4 "/tmp/provisioning/${_FILE_ROOTFS_GZ}" | od -An -tu4 | xargs)
+    # no need for alignment as verity images are always a multiple of 512 in size
+    lvcreate -y --devices "${LVMDEV}" -n "rootfs_a" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "rootfs_b" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "userdata_a" -L 512MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "userdata_b" -L 512MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "keystore" -L 128MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "provisioning" -L 128MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "datastore" -L 128MB "${_LVM_LABEL}"
+
+    lvcreate -y --devices "${LVMDEV}" -n "pvsn_rootfs" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "pvsn_userdata" -L 512MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "pvsn_provisioning" -L 128MB "${_LVM_LABEL}"
+    lvcreate -y --devices "${LVMDEV}" -n "pvsn_datastore" -L 128MB "${_LVM_LABEL}"
+
+    vgchange -a y --devices "${LVMDEV}"
+    vgmknodes --devices "${LVMDEV}"
+
+    # Format and mount keystore volume
+    mkfs.ext4 -qF "${keystore_dev}"
+    mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+    mkdir -p "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
+
+    # Copy rootfs artifacts to keystore (skip rootfs_b)
+    write_verity_artifacts "rootfs_a"
+
+    umount "${_MNT_KEYSTORE}"
+
+    # write un-encrypted rootfs_a
+    zcat "/tmp/provisioning/${_FILE_ROOTFS_GZ}" > "/dev/mapper/${_LVM_LABEL}-pvsn_rootfs"
+    sync
+
+    # prepare ext4 volumes
+    mkfs.ext4 -qF "/dev/mapper/${_LVM_LABEL}-pvsn_userdata"
+    mkfs.ext4 -qF "/dev/mapper/${_LVM_LABEL}-pvsn_provisioning"
+    mkfs.ext4 -qF "/dev/mapper/${_LVM_LABEL}-pvsn_datastore"
+
+    # Put signed fitimage into boot_a and boot_b
+    copy_fitimage "${DEV}p2" "/tmp/provisioning/${_FILE_FITIMAGE}"
+    copy_fitimage "${DEV}p1" "/tmp/provisioning/${_FILE_FITIMAGE}"
+}
+
+verify_mount_rootfs() {
+    label="$1" # LVM volume name
+    verity="$2" # "rootfs_a" or "rootfs_b" hashes
+    target="$3" # mount target
+
+    volume="/dev/mapper/${_LVM_LABEL}-${label}"
+
+    verity_label="verity-${_LVM_LABEL}-${verity}"
+    verity_dev="/dev/mapper/${verity_label}"
+
+    verity_roothash="${_MNT_KEYSTORE}/verity/${verity}.roothash"
+    verity_signature="${_MNT_KEYSTORE}/verity/${verity}.roothash.signature"
+    verity_hashdevice="${_MNT_KEYSTORE}/verity/${verity}.hashdevice"
+
+    if ! /usr/bin/openssl dgst -sha256 -verify "${_ROOTHASH_PUBKEY}" -signature "${verity_signature}" "${verity_roothash}"
     then
-        verity_label="verity-${_LVM_LABEL}-${label}"
-        verity_dev="/dev/mapper/${verity_label}"
-
-        verity_roothash="${_MNT_KEYSTORE}/verity/${label}.roothash"
-        verity_signature="${_MNT_KEYSTORE}/verity/${label}.roothash.signature"
-        verity_hashdevice="${_MNT_KEYSTORE}/verity/${label}.hashdevice"
-
-        if ! /usr/bin/openssl dgst -sha256 -verify "${_ROOTHASH_PUBKEY}" -signature "${verity_signature}" "${verity_roothash}"
-        then
-            fail "Root hash signature invalid"
-        fi
-
-        veritysetup open --root-hash-file="${verity_roothash}" "${decrypt_dev}" "${verity_label}" "${verity_hashdevice}"
-        mount -t ext4 -o ro "${verity_dev}" "$3"
-    else
-        dmsetup remove --retry "${decrypt_label}"
+        fail "Root hash signature invalid"
     fi
+
+    veritysetup open --root-hash-file="${verity_roothash}" "${volume}" "${verity_label}" "${verity_hashdevice}"
+    mount -t ext4 -o ro "${verity_dev}" "${target}"
 }
 
 hiposprovisioning_enabled() {
@@ -103,97 +131,32 @@ hiposprovisioning_enabled() {
 }
 
 hiposprovisioning_run() {
-    DEV=${bootparam_root%p[0-9]*}
-    LVMDEV="${DEV}p4"
+    LVMDEV="${bootparam_root}"
+    DEV=${LVMDEV%p[0-9]*}
+
+    keystore_dev="/dev/mapper/${_LVM_LABEL}-keystore"
 
     mount -t tmpfs tmp /tmp
     mkdir /tmp/mnt /tmp/provisioning /tmp/boot
     mkdir -p "${_MNT_KEYSTORE}" "${_MNT_DATASTORE}" "${_MNT_PROVISIONING}"
 
-    keystore_dev="/dev/mapper/${_LVM_LABEL}-keystore"
-    tmp_provisioning_dev="/dev/mapper/${_LVM_LABEL}-tmp_provisioning"
-
-    if vgs "hydralvm_provisioning" ;
+    if ! vgs --devices "${LVMDEV}" "${_LVM_LABEL}" ;
     then
-        # rename VG
-        vgrename -An --devices "${LVMDEV}" -y "hydralvm_provisioning" "${_LVM_LABEL}"
-        vgchange -a y --devices "${LVMDEV}"
-        vgmknodes --devices "${LVMDEV}"
+        # this will run when sd-img was used - create the same setup as sd-preparation
+        prepare_sdcard
     fi
 
-    if [ -e "${tmp_provisioning_dev}" ]
-    then
-        # LVM is pre-populated, just mount artifact and keystore volume
-        mount -t ext4 -o ro "${tmp_provisioning_dev}" /tmp/provisioning
-        mount "${keystore_dev}" "${_MNT_KEYSTORE}"
-    else
-        # Copy all artifacts from p4 into tmpfs
-        mount -t ext4 -o ro "${DEV}p4" /tmp/mnt
-        cp -avx /tmp/mnt/. /tmp/provisioning
-        umount /tmp/mnt
+    # Mount prep-volumes
+    mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+    verify_mount_rootfs "pvsn_rootfs" "rootfs_a" "${ROOTFS_DIR}"
 
-        # Extend p4, create LVM
-        parted -s "${DEV}" resizepart 4 100%
-        partprobe "${DEV}"
+    mount "/dev/mapper/${_LVM_LABEL}-pvsn_userdata" "${_MNT_USERDATA}"
+    mount "/dev/mapper/${_LVM_LABEL}-pvsn_provisioning" "${_MNT_PROVISIONING}"
+    mount "/dev/mapper/${_LVM_LABEL}-pvsn_datastore" "${_MNT_DATASTORE}"
 
-        pvcreate -ff -y "${LVMDEV}"
-        vgcreate --devices "${LVMDEV}" "${_LVM_LABEL}" "${LVMDEV}"
-
-        rootfs_bytes=$(tail -c 4 "/tmp/provisioning/${_FILE_ROOTFS_GZ}" | od -An -tu4 | xargs)
-        # no need for alignment as verity images are always a multiple of 512 in size
-        lvcreate -y --devices "${LVMDEV}" -n "rootfs_a" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "rootfs_b" -L "${rootfs_bytes}B" "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "userdata_a" -L 512MB "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "userdata_b" -L 512MB "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "keystore" -L 128MB "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "provisioning" -L 128MB "${_LVM_LABEL}"
-        lvcreate -y --devices "${LVMDEV}" -n "datastore" -L 128MB "${_LVM_LABEL}"
-
-        vgchange -a y --devices "${LVMDEV}"
-        vgmknodes --devices "${LVMDEV}"
-
-        # Format and mount keystore volume
-        mkfs.ext4 -qF "${keystore_dev}"
-        mount "${keystore_dev}" "${_MNT_KEYSTORE}"
-        mkdir -p "${_MNT_KEYSTORE}/caam" "${_MNT_KEYSTORE}/verity"
-
-        # Copy rootfs artifacts to keystore (skip rootfs_b)
-        write_verity_artifacts "rootfs_a"
-    fi
-
-    # Create CAAM key for encryption
-    caam-keygen create "${_MNT_KEYSTORE}/caam/volumeKey" ccm -s 32
-    keyctl padd logon dmcrypt: @us < "${_MNT_KEYSTORE}/caam/volumeKey"
-    rm "${_MNT_KEYSTORE}/caam/volumeKey"
-
-    # Create encrypted volumes and mount them
-    # Note that $_MNT_PROVISIONING is mounted rw for provisioning
-    format_lvm_volume "datastore" "${_MNT_DATASTORE}"
-    format_lvm_volume "provisioning" "${_MNT_PROVISIONING}"
-    format_lvm_volume "userdata_a" "${_MNT_USERDATA}"
-    format_lvm_volume "userdata_b"
-
-    # Write rootfs (skip rootfs_b - will be done as part of post-update procedures)
-    write_rootfs "rootfs_a" "/tmp/provisioning/${_FILE_ROOTFS_GZ}" "${ROOTFS_DIR}"
-
-    # Move other mounts
+    # move mounts
     mount --move "${_MNT_USERDATA}" "${ROOTFS_DIR}${_MNT_USERDATA}"
     mount --move "${_MNT_KEYSTORE}" "${ROOTFS_DIR}${_MNT_KEYSTORE}"
     mount --move "${_MNT_DATASTORE}" "${ROOTFS_DIR}${_MNT_DATASTORE}"
     mount --move "${_MNT_PROVISIONING}" "${ROOTFS_DIR}${_MNT_PROVISIONING}"
-
-    # Put signed fitimage into boot_a and boot_b
-    copy_fitimage "${DEV}p2" "/tmp/provisioning/${_FILE_FITIMAGE}"
-    copy_fitimage "${DEV}p1" "/tmp/provisioning/${_FILE_FITIMAGE}"
-
-    # Remove temporary LVM volume
-    if [ -e "${tmp_provisioning_dev}" ]
-    then
-        umount /tmp/provisioning
-        lvremove --devices "${DEV}" -An -y "${tmp_provisioning_dev}"
-    fi
-
-    # Switch to new fitimage in boot partitions
-    finalize_fitimage "${DEV}p2"
-    finalize_fitimage "${DEV}p1"
 }
