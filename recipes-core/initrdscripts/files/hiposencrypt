@@ -1,0 +1,101 @@
+#!/bin/sh
+
+_PVSN_ROOTFS="pvsn_rootfs"
+_PVSN_USERDATA="pvsn_userdata"
+_PVSN_PROVISIONING="pvsn_provisioning"
+_PVSN_DATASTORE="pvsn_datastore"
+
+_MNT_KEYSTORE="/tmp/keystore"
+
+_LVM_LABEL="hydralvm"
+
+fail() {
+    echo "$(date): ${*}"
+    # exit 1 will cause kernel to panic as we're PID 1
+    exit 1
+}
+
+encrypt_and_populate() {
+    label="$1"
+    source="$2"
+
+    target_dev="/dev/${_LVM_LABEL}/${label}"
+    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
+    decrypt_dev="/dev/mapper/${decrypt_label}"
+    source_dev="/dev/${_LVM_LABEL}/${source}"
+
+    dmsetup -v create "${decrypt_label}" \
+        --table "0 $(blockdev --getsz "${target_dev}") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 ${target_dev} 0 1 sector_size:4096"
+
+    mkfs.ext4 -qF "${decrypt_dev}"
+
+    mkdir -p "/tmp/${label}" && mount "${decrypt_dev}" "/tmp/${label}"
+    mkdir -p "/tmp/${source}" && mount -o ro "${source_dev}" "/tmp/${source}"
+
+    cp -a "/tmp/${source}/." "/tmp/${label}/"
+    umount "/tmp/${label}" "/tmp/${source}"
+
+    sleep 1; dmsetup remove "${decrypt_label}"
+}
+
+encrypt_and_clone() {
+    label="$1"
+    source="$2"
+
+    target_dev="/dev/${_LVM_LABEL}/${label}"
+    decrypt_label="decrypted-${_LVM_LABEL}-${label}"
+    decrypt_dev="/dev/mapper/${decrypt_label}"
+    source_dev="/dev/${_LVM_LABEL}/${source}"
+
+    dmsetup -v create "${decrypt_label}" \
+        --table "0 $(blockdev --getsz "${target_dev}") crypt capi:tk(cbc(aes))-eboiv :64:logon:dmcrypt: 0 ${target_dev} 0 1 sector_size:4096"
+
+    # simple block-level clone:
+    dd "if=${source_dev}" "of=${decrypt_dev}" bs=4k conv=fsync status=progress
+    # note that ext4 filesystems have a UUID which is now duplicated. Remove the source blockdev before mounting the new device!
+
+    sleep 1; dmsetup remove "${decrypt_label}"
+}
+
+hiposencrypt_enabled() {
+    LVMDEV="${bootparam_root}"
+    DEV=${LVMDEV%p[0-9]*}
+
+    if lvs --devices "${LVMDEV}" "/dev/${_LVM_LABEL}/${_PVSN_ROOTFS}" ;
+    then
+        return 0
+    fi
+    return 1
+}
+
+hiposencrypt_run() {
+    LVMDEV="${bootparam_root}"
+
+    keystore_dev="/dev/${_LVM_LABEL}/keystore"
+    mkdir -p "${_MNT_KEYSTORE}" && mount "${keystore_dev}" "${_MNT_KEYSTORE}"
+
+    # Create CAAM key for encryption
+    caam-keygen create "${_MNT_KEYSTORE}/caam/volumeKey" ccm -s 32
+    keyctl padd logon dmcrypt: @us < "${_MNT_KEYSTORE}/caam/volumeKey"
+    rm "${_MNT_KEYSTORE}/caam/volumeKey"
+
+    umount "${_MNT_KEYSTORE}"
+
+    # Populate provisioning and datastore volumes
+    encrypt_and_populate "provisioning" "${_PVSN_PROVISIONING}"
+    encrypt_and_populate "datastore" "${_PVSN_DATASTORE}"
+
+    # Populate both userdata volumes
+    encrypt_and_populate "userdata_a" "${_PVSN_USERDATA}"
+    encrypt_and_populate "userdata_b" "${_PVSN_USERDATA}"
+
+    # Clone rootfs volumes
+    encrypt_and_clone "rootfs_a" "${_PVSN_ROOTFS}"
+
+    # Remove all preparation volumes
+    lvremove --devices "${LVMDEV}" -An -y \
+        "${_LVM_LABEL}/${_PVSN_ROOTFS}" \
+        "${_LVM_LABEL}/${_PVSN_USERDATA}" \
+        "${_LVM_LABEL}/${_PVSN_PROVISIONING}" \
+        "${_LVM_LABEL}/${_PVSN_DATASTORE}"
+}
