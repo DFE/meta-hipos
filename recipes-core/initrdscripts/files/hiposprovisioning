@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Copyright (C) 2026 iris-GmbH infrared & intelligent sensors
+#
+# SPDX-License-Identifier: MIT
 
 _FILE_FITIMAGE="fitImage.signed"
 _FILE_ROOTFS_GZ="rootfs.ext4.verity.gz"

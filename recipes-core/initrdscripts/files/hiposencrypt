@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Copyright (C) 2026 iris-GmbH infrared & intelligent sensors
+#
+# SPDX-License-Identifier: MIT
 
 _PVSN_ROOTFS="pvsn_rootfs"
 _PVSN_USERDATA="pvsn_userdata"
