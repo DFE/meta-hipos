@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Copyright (C) 2026 iris-GmbH infrared & intelligent sensors
+#
+# SPDX-License-Identifier: MIT
 
 _LVM_KEYSTORE="/dev/mapper/hydralvm-keystore"
 _LVM_DATASTORE="/dev/mapper/hydralvm-datastore"

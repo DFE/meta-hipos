@@ -132,14 +132,13 @@
 	"load_fdt=ext4load ${boottype} ${bootdev}:${bootpart} ${fdt_addr} ${fdt_file}\0" \
 	"load_kernel=ext4load ${boottype} ${bootdev}:${bootpart} ${kernel_addr} ${kernel_file}\0" \
 	"load_fitimage=ext4load ${boottype} ${bootdev}:${bootpart} ${fit_addr} ${fit_file}\0" \
+	"bootroot=/dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p4\0" \
 	"setbootargs=setenv bootargs console=ttymxc1,115200 " \
 		"root=${bootroot} rootwait " \
 		"mxc_hdmi.only_cea=0 " \
 		"firmwareslot=${firmwareslot}\0" \
-	"setup_part_a=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; setenv firmwareslot a; " \
-		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p1;\0" \
-	"setup_part_b=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; setenv firmwareslot b; " \
-		"setenv bootroot /dev/mmcblk" HIMX_DEFAULT_LINUX_DEV "p2;\0" \
+	"setup_part_a=setenv boottype mmc; setenv bootdev 0; setenv bootpart 1; setenv firmwareslot a;\0" \
+	"setup_part_b=setenv boottype mmc; setenv bootdev 0; setenv bootpart 2; setenv firmwareslot b;\0" \
 	"x_bootA=run setup_part_a; run do_fitboot\0" \
 	"x_bootB=run setup_part_b; run do_fitboot\0"
 
