@@ -10,6 +10,24 @@ then
     exit 1
 fi
 
+devpart() {
+    dev="$1"
+    n="$2"
+    lsblk -nrpo NAME,PARTN "$dev" | awk -v n="$n" '$2 == n {print $1}'
+}
+
+wait_and_umount() {
+    dev="$1"
+    name=$(basename "${dev}")
+    udevadm settle
+    while systemctl list-jobs --no-legend | grep -qE \
+        "(run-media-${name}p?[0-9]+\.mount|hip-autorun@${name}p?[0-9]+\.service)"
+    do
+        sleep 0.5
+    done
+    lsblk -nrpo NAME,MOUNTPOINT "${dev}" | awk 'NF > 1 {print $2}' | xargs -r umount
+}
+
 dev="$1"
 product="$2"
 artifacts="./artifacts"
@@ -56,20 +74,28 @@ copy_verity_artifacts() {
 }
 
 # remove old fragments of provisioning LVs
-lvremove -y --devices "${dev}p4" "${vglabel_system}"
-vgremove -y --devices "${dev}p4" "${vglabel_system}"
+lvmdev=$(devpart "${dev}" 4)
+if [ ! -z "$lvmdev" ]; then
+    lvremove -y --devices "${lvmdev}" "${vglabel_system}"
+    vgremove -y --devices "${lvmdev}" "${vglabel_system}"
+fi
 
 # remove old fragments of provisioning LVs
 vgchange -a n "${vglabel}"
 lvremove -y "${vglabel}"
 vgremove -y "${vglabel}"
 
-pvremove "${dev}p4"
+if [ ! -z "$lvmdev" ]; then
+    pvremove "${lvmdev}"
+fi
 
 # Clean up any LVM remains
 rm -rf -- "/dev/${vglabel}"
 dmsetup ls --target linear 2>/dev/null | awk "\$1 ~ /^${vglabel}-/ {print \$1}" | xargs -r -n1 dmsetup remove
 udevadm settle
+
+# Unmount all partitions on device
+wait_and_umount "${dev}"
 
 parted --script "${dev}" \
     mklabel msdos \
@@ -79,24 +105,31 @@ parted --script "${dev}" \
     mkpart primary 268 396 \
     mkpart primary 396 100%
 
-mkfs.ext4 -qF "${dev}p1"
-mkfs.ext4 -qF "${dev}p2"
-mkfs.ext4 -qF "${dev}p3"
+# Unmount all partitions on device if they got auto-mounted
+wait_and_umount "${dev}"
+
+mkfs.ext4 -qF "$(devpart "${dev}" 1)"
+mkfs.ext4 -qF "$(devpart "${dev}" 2)"
+mkfs.ext4 -qF "$(devpart "${dev}" 3)"
+
+# prepare LVM
+lvmdev=$(devpart "${dev}" 4)
+pvcreate -ff -y "${lvmdev}"
+vgcreate -ff "${vglabel}" "${lvmdev}"
 
 # prepare bootloader
 dd if="${a_uboot}" of="${dev}" bs=1024 seek=1
 sync
 
+wait_and_umount "${dev}"
+
 # prepare provisioning fitimage
-mount "${dev}p1" "${tmp_mnt}"
+mount "$(devpart "${dev}" 1)" "${tmp_mnt}"
 cp "${a_fitimage_provisioning}" "${tmp_mnt}/fitImage.signed"
 cp "${a_fitimage}" "${tmp_mnt}/fitImage.signed.deploy"
 umount "${tmp_mnt}"
 
-# prepare LVM
-pvcreate -ff -y "${dev}p4"
-vgcreate -ff "${vglabel}" "${dev}p4"
-
+# Create logical volumes
 rootfs_bytes=$(tail -c 4 "${a_rootfs_gz}" | od -An -tu4 | xargs)
 # no need for alignment as verity images are always a multiple of 512 in size
 lvcreate -y -n "rootfs_a" -L "${rootfs_bytes}B" "${vglabel}"
@@ -133,9 +166,9 @@ mkfs.ext4 -qF "/dev/${vglabel}/pvsn_provisioning"
 mkfs.ext4 -qF "/dev/${vglabel}/pvsn_datastore"
 
 # Deactivate and rename volume group (see https://bugzilla.redhat.com/show_bug.cgi?id=2086765 on renaming)
-vgchange --devices "${dev}p4" -an "${vglabel}"
-vgcfgbackup --devices "${dev}p4" --file /tmp/hipos-lvm.txt "${vglabel}"
+vgchange --devices "${lvmdev}" -an "${vglabel}"
+vgcfgbackup --devices "${lvmdev}" --file /tmp/hipos-lvm.txt "${vglabel}"
 sed -iE "s/\(^\)${vglabel}\(\s*{\)/\1${vglabel_system}\2/" /tmp/hipos-lvm.txt
-vgcfgrestore --devices "${dev}p4" --file /tmp/hipos-lvm.txt -y "${vglabel_system}"
+vgcfgrestore --devices "${lvmdev}" --file /tmp/hipos-lvm.txt -y "${vglabel_system}"
 
 sync
