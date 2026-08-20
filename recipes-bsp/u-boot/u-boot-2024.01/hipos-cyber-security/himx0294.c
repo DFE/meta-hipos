@@ -513,10 +513,9 @@ int get_hab_state(void)
 		&& state == HAB_STATE_NONSECURE) {
 		return 0;
 	} else if (secure_boot_enabled
-		// TODO: validate these checks - maybe use HAB_STATE_TRUSTED??
 		&& hab_return == HAB_SUCCESS
 		&& config == HAB_CFG_CLOSED
-		&& state == HAB_STATE_SECURE) {
+		&& state == HAB_STATE_TRUSTED) {
 		return 1;
 	}
 
