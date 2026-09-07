@@ -14,7 +14,7 @@ SRC_URI:append:himx8 = " \
 	file://imx8mp-himx8-repro.dts \
 	file://imx8mp-himx8-repro-uart2-bt.dtso \
 	file://0001-usb-misc-onboard_usb_hub-add-USB5744-support.patch \
-	file://0001-st7735r-Add-rspro-TFT-module-HYP-33833.patch \
+	file://0001-st7735r-Add-LianXun-TFT-module-HYP-33833.patch \
 	file://0001-fsl_sai_Keep-SAI-MCLK-active-after-stream-stop.patch \
 	file://0001-brcmfmac-Load-blob-file-HYP-31820.patch \
 "
